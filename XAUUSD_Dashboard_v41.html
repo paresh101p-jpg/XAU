@@ -867,34 +867,53 @@ function updateMarketTimer() {
 // ── FETCH ──
 async function apiFetch(url){try{const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);const r=await fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));return await r.json();}catch(e){return null;}}
 async function fetchDayOpen(){
-  // T12 daily candle se aaj ka actual open lo
+  // Helper: apply open price if valid (within 5% of current price to avoid stale/wrong data)
+  function applyOpen(op){
+    if(!op||op<100) return false;
+    // Sanity check: open should be within 5% of current price (if we have it)
+    if(S.price>0 && Math.abs(op-S.price)/S.price > 0.05) return false;
+    S.openPrice = op;
+    if(S.price>0){
+      S.change    = S.price - op;
+      S.changePct = (S.change / op) * 100;
+    }
+    updatePriceDisplay();
+    return true;
+  }
+
+  // SOURCE 1: goldprice.org — has open field, reliable
   try{
-    const d = await apiFetch(`${T12}/time_series?symbol=XAU/USD&interval=1day&outputsize=2&apikey=${T12K}`);
-    if(d?.values?.length>0&&!d.code&&!d.message){
-      // values[0] = today's candle, values[1] = yesterday
-      const todayOpen = +d.values[0].open;
-      if(todayOpen>100){
-        S.openPrice = todayOpen; // Always override with real day open
-        if(S.price>0){
-          S.change    = S.price - todayOpen;
-          S.changePct = (S.change / todayOpen) * 100;
-        }
-        updatePriceDisplay();
-        return;
-      }
+    const d = await apiFetch('https://data-asg.goldprice.org/dbXRates/USD');
+    const op = +d?.items?.[0]?.xauOpen;
+    if(applyOpen(op)) return;
+  }catch(e){}
+
+  // SOURCE 2: Yahoo Finance — GC=F day open
+  try{
+    const d = await apiFetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d');
+    const meta = d?.chart?.result?.[0]?.meta;
+    const op = +(meta?.chartPreviousClose || meta?.regularMarketOpen);
+    // Use regularMarketOpen for today's open
+    const todayOpen = +meta?.regularMarketOpen;
+    if(applyOpen(todayOpen)) return;
+    if(applyOpen(op)) return;
+  }catch(e){}
+
+  // SOURCE 3: T12 quote endpoint
+  try{
+    const d = await apiFetch(`${T12}/quote?symbol=XAU/USD&apikey=${T12K}`);
+    if(!d?.code&&!d?.message){
+      const op = +d?.open;
+      if(applyOpen(op)) return;
     }
   }catch(e){}
 
-  // Fallback: T12 quote endpoint
+  // SOURCE 4: T12 daily time_series
   try{
-    const d = await apiFetch(`${T12}/quote?symbol=XAU/USD&apikey=${T12K}`);
-    if(d?.open&&!d.code&&!d.message&&+d.open>100){
-      S.openPrice = +d.open;
-      if(S.price>0){
-        S.change    = S.price - S.openPrice;
-        S.changePct = (S.change / S.openPrice) * 100;
-      }
-      updatePriceDisplay();
+    const d = await apiFetch(`${T12}/time_series?symbol=XAU/USD&interval=1day&outputsize=2&apikey=${T12K}`);
+    if(d?.values?.length>0&&!d.code&&!d.message){
+      const op = +d.values[0].open;
+      if(applyOpen(op)) return;
     }
   }catch(e){}
 }
