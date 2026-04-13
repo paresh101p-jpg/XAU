@@ -867,41 +867,35 @@ function updateMarketTimer() {
 // ── FETCH ──
 async function apiFetch(url){try{const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8000);const r=await fetch(url,{signal:ctrl.signal}).finally(()=>clearTimeout(tid));return await r.json();}catch(e){return null;}}
 async function fetchDayOpen(){
-  function setOpen(op){
-    if(!op || op < 100) return false;
-    S.openPrice = op;
-    // price baad mein aayega — change tab recalculate hoga in fetchQuote
-    if(S.price > 0){
-      S.change    = S.price - op;
-      S.changePct = (S.change / op) * 100;
-      updatePriceDisplay();
-    }
-    console.log('[DayOpen] Set openPrice =', op);
-    return true;
-  }
-
-  // SOURCE 1: T12 quote — today session open
-  try{
-    const d = await apiFetch(`${T12}/quote?symbol=XAU/USD&apikey=${T12K}`);
-    if(d && !d.code && !d.message && +d.open > 100){ if(setOpen(+d.open)) return; }
-  }catch(e){}
-
-  // SOURCE 2: T12 daily time_series
+  // T12 daily candle se aaj ka actual open lo
   try{
     const d = await apiFetch(`${T12}/time_series?symbol=XAU/USD&interval=1day&outputsize=2&apikey=${T12K}`);
-    if(d?.values?.length>0 && !d.code && !d.message){ if(setOpen(+d.values[0].open)) return; }
+    if(d?.values?.length>0&&!d.code&&!d.message){
+      // values[0] = today's candle, values[1] = yesterday
+      const todayOpen = +d.values[0].open;
+      if(todayOpen>100){
+        S.openPrice = todayOpen; // Always override with real day open
+        if(S.price>0){
+          S.change    = S.price - todayOpen;
+          S.changePct = (S.change / todayOpen) * 100;
+        }
+        updatePriceDisplay();
+        return;
+      }
+    }
   }catch(e){}
 
-  // SOURCE 3: goldprice.org
+  // Fallback: T12 quote endpoint
   try{
-    const d = await apiFetch('https://data-asg.goldprice.org/dbXRates/USD');
-    if(setOpen(+d?.items?.[0]?.xauOpen)) return;
-  }catch(e){}
-
-  // SOURCE 4: Yahoo Finance
-  try{
-    const d = await apiFetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d');
-    if(setOpen(+d?.chart?.result?.[0]?.meta?.regularMarketOpen)) return;
+    const d = await apiFetch(`${T12}/quote?symbol=XAU/USD&apikey=${T12K}`);
+    if(d?.open&&!d.code&&!d.message&&+d.open>100){
+      S.openPrice = +d.open;
+      if(S.price>0){
+        S.change    = S.price - S.openPrice;
+        S.changePct = (S.change / S.openPrice) * 100;
+      }
+      updatePriceDisplay();
+    }
   }catch(e){}
 }
 
@@ -980,7 +974,7 @@ async function fetchDXY(){
       // frankfurter.app — fully CORS-open, no key needed
       const ctrl = new AbortController();
       const tid = setTimeout(()=>ctrl.abort(), TO);
-      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR,JPY,GBP,CAD,SEK,CHF', {signal:ctrl.signal});
+      const r = await fetch('https://corsproxy.io/?url=https://api.frankfurter.app/latest?from=USD&to=EUR,JPY,GBP,CAD,SEK,CHF', {signal:ctrl.signal});
       clearTimeout(tid);
       if(r.ok){
         const d = await r.json();
@@ -1015,7 +1009,7 @@ async function fetchDXY(){
             const ctrl2 = new AbortController();
             const tid2 = setTimeout(()=>ctrl2.abort(), TO);
             const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-            const r2 = await fetch(`https://api.frankfurter.app/${yesterday}?from=USD&to=EUR,JPY,GBP,CAD,SEK,CHF`, {signal:ctrl2.signal});
+            const r2 = await fetch(`https://corsproxy.io/?url=https://api.frankfurter.app/${yesterday}?from=USD&to=EUR,JPY,GBP,CAD,SEK,CHF`, {signal:ctrl2.signal});
             clearTimeout(tid2);
             let prevDxy = dxy;
             if(r2.ok){
@@ -1045,7 +1039,7 @@ async function fetchDXY(){
   if(!S.yieldPrice){
     try{
       // Uses open FRED observation endpoint (no API key for basic access)
-      const fredUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&sort_order=desc&limit=2&file_type=json&api_key=fd41fb80a57b06d4f5627f1a1c65c8e0';
+      const fredUrl = 'https://corsproxy.io/?url=https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&sort_order=desc&limit=2&file_type=json&api_key=fd41fb80a57b06d4f5627f1a1c65c8e0';
       const d = await jFetch(fredUrl, TO);
       const obs = d?.observations;
       if(obs?.length >= 1){
@@ -2256,9 +2250,9 @@ async function fetchFreePrice(){
     updatePriceDisplay();
     return true;
   };
-  try{const r=await fetch('https://data-asg.goldprice.org/dbXRates/USD',{signal:AbortSignal.timeout(4000)});if(r.ok){const d=await r.json();if(applyP(+d?.items?.[0]?.xauPrice)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
-  try{const r=await fetch('https://metals.live/api/v1/latest',{signal:AbortSignal.timeout(4000)});if(r.ok){const d=await r.json();if(applyP(+d?.[0]?.gold)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
-  try{const r=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1m&range=1d',{signal:AbortSignal.timeout(5000)});if(r.ok){const d=await r.json();if(applyP(+d?.chart?.result?.[0]?.meta?.regularMarketPrice)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
+  try{const r=await fetch('https://corsproxy.io/?url=https://data-asg.goldprice.org/dbXRates/USD',{signal:AbortSignal.timeout(4000)});if(r.ok){const d=await r.json();if(applyP(+d?.items?.[0]?.xauPrice)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
+  try{const r=await fetch('https://corsproxy.io/?url=https://metals.live/api/v1/latest',{signal:AbortSignal.timeout(4000)});if(r.ok){const d=await r.json();if(applyP(+d?.[0]?.gold)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
+  try{const r=await fetch('https://corsproxy.io/?url=https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1m&range=1d',{signal:AbortSignal.timeout(5000)});if(r.ok){const d=await r.json();if(applyP(+d?.chart?.result?.[0]?.meta?.regularMarketPrice)){if(dot&&_wsLastTick===0)dot.style.background='#FFB800';return;}}}catch(e){}
 }
 
 async function livePricePoll(){
