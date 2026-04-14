@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gold & Silver Bees Tracker</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 
 body {
   font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
@@ -13,6 +13,7 @@ body {
   color: #fff;
   min-height: 100vh;
   padding-bottom: 52px;
+  font-weight: bold;
 }
 
 .top-header {
@@ -26,7 +27,7 @@ body {
   gap: 8px;
 }
 
-.app-title { font-size: 1rem; letter-spacing: 0.5px; }
+.app-title { font-size: 1rem; letter-spacing: 0.5px; font-weight: bold; }
 .app-title .g { color: #FFD700; }
 .app-title .s { color: #C0D8E8; }
 
@@ -35,7 +36,7 @@ body {
 .market-status {
   display: flex; align-items: center; gap: 7px;
   background: #222; border-radius: 30px; padding: 5px 14px;
-  font-size: 0.75rem;
+  font-size: 0.75rem; font-weight: bold;
 }
 
 .mkt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -43,10 +44,10 @@ body {
 .mkt-dot.closed { background: #ef4444; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
 
-.mkt-label.open   { color: #22c55e; }
-.mkt-label.closed { color: #ef4444; }
-.mkt-time { color: #444; font-size: 0.65rem; }
-.last-upd { font-size: 0.65rem; color: #444; }
+.mkt-label.open   { color: #22c55e; font-weight: bold; }
+.mkt-label.closed { color: #ef4444; font-weight: bold; }
+.mkt-time { color: #bbb; font-size: 0.68rem; font-weight: bold; }
+.last-upd { font-size: 0.68rem; color: #bbb; font-weight: bold; }
 
 /* Settings */
 .settings-row {
@@ -55,12 +56,12 @@ body {
   background: #161616; border-bottom: 1px solid #222; flex-wrap: wrap;
 }
 
-.cfg { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #777; }
+.cfg { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #ddd; font-weight: bold; }
 .cfg input {
   width: 54px; background: #222; border: 1px solid #2e2e2e;
   border-radius: 6px; color: #fff;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.75rem; padding: 5px 7px; text-align: center; outline: none;
+  font-size: 0.75rem; padding: 5px 7px; text-align: center; outline: none; font-weight: bold;
 }
 .cfg input:focus { border-color: #FFD700; }
 
@@ -94,8 +95,8 @@ body {
 /* ETF Head */
 .etf-head { display: flex; align-items: center; gap: 10px; }
 .etf-icon { font-size: 1.8rem; }
-.etf-name .en { font-size: 1rem; }
-.etf-name .es { font-size: 0.62rem; color: #555; letter-spacing: 1px; margin-top: 1px; }
+.etf-name .en { font-size: 1rem; font-weight: bold; }
+.etf-name .es { font-size: 0.65rem; color: #aaa; letter-spacing: 1px; margin-top: 1px; font-weight: bold; }
 .gold-col .en   { color: #FFD700; }
 .silver-col .en { color: #C0D8E8; }
 
@@ -105,21 +106,21 @@ body {
   border-radius: 12px; padding: 14px; text-align: center;
 }
 
-.price-big { font-size: 1.85rem; line-height: 1; }
+.price-big { font-size: 1.85rem; line-height: 1; font-weight: bold; }
 .gold-col   .price-big { color: #FFD700; }
 .silver-col .price-big { color: #C0D8E8; }
-.price-loading { color: #333; font-size: 1.3rem; }
+.price-loading { color: #888; font-size: 1.3rem; font-weight: bold; }
 
 .chg-pill {
   display: inline-flex; align-items: center; gap: 5px;
   border-radius: 20px; padding: 4px 12px;
-  font-size: 0.8rem; margin-top: 8px;
+  font-size: 0.8rem; margin-top: 8px; font-weight: bold;
 }
 .chg-pill.up   { background: rgba(34,197,94,0.12); color: #22c55e; }
 .chg-pill.down { background: rgba(239,68,68,0.12);  color: #ef4444; }
-.chg-pill.flat { background: rgba(255,255,255,0.04); color: #666; }
+.chg-pill.flat { background: rgba(255,255,255,0.07); color: #aaa; }
 
-.prev-label { font-size: 0.6rem; color: #3a3a3a; margin-top: 5px; letter-spacing: 1px; }
+.prev-label { font-size: 0.65rem; color: #bbb; margin-top: 5px; letter-spacing: 1px; font-weight: bold; }
 
 /* Info Grid */
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -128,8 +129,8 @@ body {
   background: #1a1a1a; border: 1px solid #232323;
   border-radius: 9px; padding: 9px 11px;
 }
-.ibox .il { font-size: 0.58rem; color: #484848; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; }
-.ibox .iv { font-size: 0.85rem; color: #ccc; }
+.ibox .il { font-size: 0.62rem; color: #ccc; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; }
+.ibox .iv { font-size: 0.85rem; color: #fff; font-weight: bold; }
 
 .iv.profit { color: #22c55e; }
 .iv.loss   { color: #ef4444; }
@@ -151,11 +152,11 @@ body {
 @keyframes gG { to { box-shadow: 0 0 18px rgba(34,197,94,0.5); } }
 @keyframes gR { to { box-shadow: 0 0 18px rgba(239,68,68,0.5); } }
 
-.tbox .tl { font-size: 0.57rem; color: #484848; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
-.tbox .tv { font-size: 0.88rem; }
+.tbox .tl { font-size: 0.62rem; color: #ddd; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; font-weight: bold; }
+.tbox .tv { font-size: 0.88rem; font-weight: bold; }
 .tbox.buy-b  .tv { color: #22c55e; }
 .tbox.sell-b .tv { color: #ef4444; }
-.tbox .ts { font-size: 0.57rem; color: #3a3a3a; margin-top: 2px; }
+.tbox .ts { font-size: 0.62rem; color: #bbb; margin-top: 2px; font-weight: bold; }
 
 /* Trade Buttons */
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -163,7 +164,7 @@ body {
 .btn-buy, .btn-sell {
   border: none; border-radius: 9px; padding: 10px;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.8rem; cursor: pointer; transition: 0.15s;
+  font-size: 0.8rem; cursor: pointer; transition: 0.15s; font-weight: bold;
 }
 .btn-buy  { background: #22c55e; color: #000; }
 .btn-sell { background: #ef4444; color: #fff; }
@@ -171,21 +172,21 @@ body {
 .btn-sell:hover { background: #f87171; }
 
 /* Holdings */
-.sec-label { font-size: 0.57rem; color: #383838; letter-spacing: 2px; text-transform: uppercase; }
+.sec-label { font-size: 0.62rem; color: #ddd; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
 
 .h-list { display: flex; flex-direction: column; gap: 5px; }
 
 .h-row {
-  background: #191919; border: 1px solid #222; border-radius: 8px;
+  background: #191919; border: 1px solid #2a2a2a; border-radius: 8px;
   padding: 8px 11px; display: flex; justify-content: space-between;
-  align-items: center; font-size: 0.72rem;
+  align-items: center; font-size: 0.72rem; font-weight: bold;
 }
-.h-row .hl { color: #999; }
-.h-row .hl b { color: #ccc; }
+.h-row .hl { color: #ddd; font-weight: bold; }
+.h-row .hl b { color: #fff; }
 .h-row .hr { text-align: right; }
-.h-row .hr .hp { font-size: 0.78rem; }
+.h-row .hr .hp { font-size: 0.78rem; font-weight: bold; }
 
-.no-h { color: #383838; font-size: 0.72rem; text-align: center; padding: 12px; }
+.no-h { color: #aaa; font-size: 0.72rem; text-align: center; padding: 12px; font-weight: bold; }
 
 /* Log Bar */
 .log-bar {
@@ -197,11 +198,11 @@ body {
 .log-bar::-webkit-scrollbar { height: 0; }
 
 .lchip {
-  flex-shrink: 0; font-size: 0.62rem; border-radius: 5px; padding: 3px 9px; white-space: nowrap;
+  flex-shrink: 0; font-size: 0.62rem; border-radius: 5px; padding: 3px 9px; white-space: nowrap; font-weight: bold;
 }
 .lchip.buy  { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.18); }
 .lchip.sell { background: rgba(239,68,68,0.1);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.18); }
-.log-empty-txt { font-size: 0.62rem; color: #2a2a2a; }
+.log-empty-txt { font-size: 0.62rem; color: #aaa; font-weight: bold; }
 
 /* Modal */
 .overlay {
@@ -223,65 +224,166 @@ body {
 
 .mtop { text-align: center; margin-bottom: 16px; }
 .mtop .mic  { font-size: 1.9rem; }
-.mtop h3    { font-size: 1.1rem; margin-top: 6px; }
+.mtop h3    { font-size: 1.1rem; margin-top: 6px; font-weight: bold; }
 .mtop h3.bh { color: #22c55e; }
 .mtop h3.sh { color: #ef4444; }
-.mtop p     { font-size: 0.68rem; color: #484848; margin-top: 3px; }
+.mtop p     { font-size: 0.72rem; color: #ccc; margin-top: 3px; font-weight: bold; }
 
 .mrows {
   background: #111; border-radius: 9px; padding: 12px;
   margin-bottom: 14px; display: flex; flex-direction: column; gap: 9px;
 }
-.mr { display: flex; justify-content: space-between; font-size: 0.76rem; }
-.mr .mk { color: #484848; }
-.mr .mv { color: #ccc; }
+.mr { display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: bold; }
+.mr .mk { color: #ccc; font-weight: bold; }
+.mr .mv { color: #fff; font-weight: bold; }
 .mr .mv.profit { color: #22c55e; }
 .mr .mv.loss   { color: #ef4444; }
 
 .munits { margin-bottom: 14px; }
 .munits label {
-  display: block; font-size: 0.6rem; color: #484848;
-  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px;
+  display: block; font-size: 0.65rem; color: #ccc;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;
 }
 .munits input {
   width: 100%; background: #111; border: 1px solid #2e2e2e;
   border-radius: 8px; color: #fff;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.95rem; padding: 9px 12px; outline: none; text-align: center;
+  font-size: 0.95rem; padding: 9px 12px; outline: none; text-align: center; font-weight: bold;
 }
 .munits input:focus { border-color: #FFD700; }
 
 .mbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
 .mcnl {
-  background: #222; color: #666; border: 1px solid #2e2e2e;
+  background: #222; color: #ddd; border: 1px solid #2e2e2e;
   border-radius: 9px; padding: 10px;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.8rem; cursor: pointer;
+  font-size: 0.8rem; cursor: pointer; font-weight: bold;
 }
 .mcfb {
   background: #22c55e; color: #000; border: none;
   border-radius: 9px; padding: 10px;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.8rem; cursor: pointer;
+  font-size: 0.8rem; cursor: pointer; font-weight: bold;
 }
 .mcfs {
   background: #ef4444; color: #fff; border: none;
   border-radius: 9px; padding: 10px;
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-  font-size: 0.8rem; cursor: pointer;
+  font-size: 0.8rem; cursor: pointer; font-weight: bold;
 }
 
 /* Toast */
 .toast {
   position: fixed; bottom: 44px; left: 50%;
   transform: translateX(-50%) translateY(70px);
-  background: #1c1c1c; border: 1px solid #333; color: #ddd;
-  font-size: 0.73rem; padding: 9px 18px; border-radius: 9px;
+  background: #1c1c1c; border: 1px solid #444; color: #fff;
+  font-size: 0.75rem; padding: 9px 18px; border-radius: 9px;
   z-index: 300; transition: transform 0.28s ease;
-  white-space: nowrap; max-width: 92vw; text-align: center;
+  white-space: nowrap; max-width: 92vw; text-align: center; font-weight: bold;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Capital Planner */
+.cap-panel {
+  background: #141414;
+  border-bottom: 1px solid #222;
+  padding: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  max-height: 0;
+}
+.cap-panel.open { max-height: 600px; }
+
+.cap-toggle {
+  width: 100%; background: #181818; border: none; border-bottom: 1px solid #222;
+  color: #FFD700; font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+  font-size: 0.78rem; font-weight: bold; padding: 8px 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  letter-spacing: 0.5px;
+}
+.cap-toggle:hover { background: #1e1e1e; }
+.cap-toggle .ct-arrow { transition: transform 0.3s; font-style: normal; }
+.cap-toggle.open .ct-arrow { transform: rotate(180deg); }
+
+.cap-inner { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Row 1: Total + Parts */
+.cap-row1 {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.cap-inp-group {
+  display: flex; align-items: center; gap: 7px; flex: 1; min-width: 160px;
+}
+.cap-inp-group label { font-size: 0.7rem; color: #ccc; white-space: nowrap; }
+.cap-inp-group input {
+  flex: 1; background: #1e1e1e; border: 1px solid #2e2e2e;
+  border-radius: 8px; color: #fff;
+  font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+  font-size: 0.82rem; padding: 7px 10px; outline: none; text-align: center; font-weight: bold;
+  min-width: 80px;
+}
+.cap-inp-group input:focus { border-color: #FFD700; }
+.btn-calc {
+  background: linear-gradient(135deg, #FFD700, #ffb300);
+  color: #111; border: none; border-radius: 8px;
+  padding: 7px 18px; font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+  font-size: 0.78rem; cursor: pointer; font-weight: bold; white-space: nowrap;
+}
+.btn-calc:hover { background: linear-gradient(135deg, #ffe44d, #FFD700); }
+
+/* Part cards */
+.cap-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.cap-card {
+  border-radius: 12px; padding: 13px 14px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.cap-card.gc { background: linear-gradient(135deg, #1f1800, #191400); border: 1px solid rgba(255,215,0,0.22); }
+.cap-card.sc { background: linear-gradient(135deg, #0c1620, #0a1018); border: 1px solid rgba(192,216,232,0.2); }
+
+.cap-card-title {
+  font-size: 0.75rem; display: flex; align-items: center; gap: 6px;
+}
+.cap-card.gc .cap-card-title { color: #FFD700; }
+.cap-card.sc .cap-card-title { color: #C0D8E8; }
+
+.cap-allot {
+  background: rgba(255,255,255,0.04); border-radius: 7px; padding: 7px 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cap-allot .cal { font-size: 0.6rem; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+.cap-allot .cav { font-size: 0.95rem; color: #fff; }
+.cap-card.gc .cav { color: #FFD700; }
+.cap-card.sc .cav { color: #C0D8E8; }
+
+.cap-dca-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.cap-dca-row label { font-size: 0.65rem; color: #aaa; white-space: nowrap; }
+.cap-dca-row input {
+  width: 60px; background: #1a1a1a; border: 1px solid #2e2e2e;
+  border-radius: 7px; color: #fff;
+  font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+  font-size: 0.78rem; padding: 5px 7px; outline: none; text-align: center; font-weight: bold;
+}
+.cap-card.gc .cap-dca-row input:focus { border-color: #FFD700; }
+.cap-card.sc .cap-dca-row input:focus { border-color: #C0D8E8; }
+
+.cap-result {
+  background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.cap-result-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
+.cap-result-row .crk { color: #888; }
+.cap-result-row .crv { color: #fff; }
+.cap-result-row .crv.hi { font-size: 0.85rem; }
+.cap-card.gc .crv.hi { color: #FFD700; }
+.cap-card.sc .crv.hi { color: #C0D8E8; }
+.cap-result-row .crv.green { color: #22c55e; }
+.cap-result-row .crv.dim { color: #666; font-size: 0.62rem; }
+
+.cap-note { font-size: 0.62rem; color: #555; text-align: center; letter-spacing: 0.3px; }
 
 /* Mobile */
 @media (max-width: 580px) {
@@ -289,6 +391,7 @@ body {
   .gold-col { border-right: none; border-bottom: 1px solid #222; }
   .price-big { font-size: 1.5rem; }
   .top-header { padding: 10px 14px; }
+  .cap-cards { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -314,6 +417,73 @@ body {
   <div class="cfg"><span>Units</span><input id="c-units" type="number" value="10" min="1" step="1"></div>
   <div class="cfg"><span>Refresh(s)</span><input id="c-ref" type="number" value="60" min="15" max="600" step="15"></div>
   <button class="btn-apply" onclick="applySettings()">↺ Apply</button>
+</div>
+
+<!-- CAPITAL PLANNER TOGGLE -->
+<button class="cap-toggle" id="capToggle" onclick="toggleCap()">
+  💰 Capital Planner &nbsp;<span class="ct-arrow">▼</span>
+</button>
+
+<!-- CAPITAL PLANNER PANEL -->
+<div class="cap-panel" id="capPanel">
+  <div class="cap-inner">
+
+    <!-- Row 1: Total amount + parts -->
+    <div class="cap-row1">
+      <div class="cap-inp-group">
+        <label>💵 Total ₹</label>
+        <input type="number" id="cp-total" value="500000" min="1000" step="1000" oninput="calcCapital()">
+      </div>
+      <div class="cap-inp-group">
+        <label>✂️ Parts</label>
+        <input type="number" id="cp-parts" value="2" min="1" max="10" step="1" oninput="calcCapital()">
+      </div>
+    </div>
+
+    <!-- Cards: Gold + Silver -->
+    <div class="cap-cards">
+
+      <!-- GOLD card -->
+      <div class="cap-card gc">
+        <div class="cap-card-title">🥇 Gold BeES</div>
+        <div class="cap-allot">
+          <div class="cal">Allocated</div>
+          <div class="cav" id="cp-gallot">₹ —</div>
+        </div>
+        <div class="cap-dca-row">
+          <label>🔁 DCA Orders</label>
+          <input type="number" id="cp-gord" value="20" min="1" max="200" step="1" oninput="calcCapital()">
+        </div>
+        <div class="cap-result" id="cp-gres">
+          <div class="cap-result-row"><span class="crk">Per Order</span><span class="crv">—</span></div>
+          <div class="cap-result-row"><span class="crk">ETF Units/Order</span><span class="crv hi">—</span></div>
+          <div class="cap-result-row"><span class="crk">Approx ₹ Used</span><span class="crv green">—</span></div>
+          <div class="cap-result-row"><span class="crk">Balance/Order</span><span class="crv dim">—</span></div>
+        </div>
+      </div>
+
+      <!-- SILVER card -->
+      <div class="cap-card sc">
+        <div class="cap-card-title">🥈 Silver BeES</div>
+        <div class="cap-allot">
+          <div class="cal">Allocated</div>
+          <div class="cav" id="cp-sallot">₹ —</div>
+        </div>
+        <div class="cap-dca-row">
+          <label>🔁 DCA Orders</label>
+          <input type="number" id="cp-sord" value="20" min="1" max="200" step="1" oninput="calcCapital()">
+        </div>
+        <div class="cap-result" id="cp-sres">
+          <div class="cap-result-row"><span class="crk">Per Order</span><span class="crv">—</span></div>
+          <div class="cap-result-row"><span class="crk">ETF Units/Order</span><span class="crv hi">—</span></div>
+          <div class="cap-result-row"><span class="crk">Approx ₹ Used</span><span class="crv green">—</span></div>
+          <div class="cap-result-row"><span class="crk">Balance/Order</span><span class="crv dim">—</span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="cap-note">⚡ Units = floor(Per Order ÷ Live ETF Price) · Update karne ke liye price load hona chahiye</div>
+  </div>
 </div>
 
 <!-- SPLIT LAYOUT -->
@@ -473,7 +643,7 @@ function mktCheck() {
   const ist = new Date(now.toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
   const d = ist.getDay(), h = ist.getHours(), m = ist.getMinutes();
   const mins = h*60+m;
-  const isOpen = d>=1 && d<=5 && mins>=555 && mins<=930; // 9:15=555, 15:30=930
+  const isOpen = d>=1 && d<=5 && mins>=555 && mins<=930;
   const dot   = document.getElementById('mktDot');
   const label = document.getElementById('mktLabel');
   dot.className   = 'mkt-dot '+(isOpen?'open':'closed');
@@ -579,6 +749,8 @@ function updateCard(k) {
   else { sg.textContent='⏳ WAIT'; sg.className='iv wait'; }
 
   renderHold(k,p);
+  // refresh capital planner if open
+  if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
 
 function renderHold(k,p) {
@@ -592,7 +764,7 @@ function renderHold(k,p) {
       <div class="hl">Lot ${i+1}: <b>${h.units}u @ ₹${h.price.toFixed(2)}</b></div>
       <div class="hr">
         <div class="hp ${pnl>=0?'profit':'loss'}">${pnl>=0?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
-        <div style="font-size:0.62rem;color:${pct>=0?'#22c55e':'#ef4444'}">${pct>=0?'+':''}${pct.toFixed(2)}%</div>
+        <div style="font-size:0.62rem;font-weight:bold;color:${pct>=0?'#22c55e':'#ef4444'}">${pct>=0?'+':''}${pct.toFixed(2)}%</div>
       </div>
     </div>`;
   }).join('');
@@ -722,6 +894,57 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+
+// ── CAPITAL PLANNER
+function toggleCap() {
+  const panel = document.getElementById('capPanel');
+  const btn   = document.getElementById('capToggle');
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  if (isOpen) calcCapital();
+}
+
+function fmt(n) {
+  return '₹ ' + n.toLocaleString('en-IN', {maximumFractionDigits: 2});
+}
+
+function calcCapital() {
+  const total = parseFloat(document.getElementById('cp-total').value) || 0;
+  const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
+  const gOrd  = parseInt(document.getElementById('cp-gord').value)    || 1;
+  const sOrd  = parseInt(document.getElementById('cp-sord').value)    || 1;
+
+  const perPart = total / parts;
+
+  document.getElementById('cp-gallot').textContent = fmt(perPart);
+  document.getElementById('cp-sallot').textContent = fmt(perPart);
+
+  renderCapCard('G', perPart, gOrd);
+  renderCapCard('S', perPart, sOrd);
+}
+
+function renderCapCard(k, allot, orders) {
+  const perOrder  = allot / orders;
+  const price     = st.price[k];
+  const resEl     = document.getElementById(`cp-${k==='G'?'g':'s'}res`);
+  const rows      = resEl.querySelectorAll('.cap-result-row .crv');
+
+  rows[0].textContent = fmt(perOrder);
+
+  if (price && price > 0) {
+    const units   = Math.floor(perOrder / price);
+    const used    = units * price;
+    const balance = perOrder - used;
+    rows[1].textContent = units + ' units';
+    rows[2].textContent = fmt(used);
+    rows[3].textContent = '₹ ' + balance.toFixed(2) + ' leftover';
+  } else {
+    rows[1].textContent = '— (price loading)';
+    rows[2].textContent = '—';
+    rows[3].textContent = '—';
+  }
 }
 
 document.getElementById('overlay').addEventListener('click',e=>{
