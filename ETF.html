@@ -1093,7 +1093,13 @@ function saveSt() {
       refBuy:st.refBuy, refSell:st.refSell,
       hold:st.hold, log:st.log,
       real:st.real, alerted:st.alerted,
-      cfg: { buy: cfg.buy, sell: cfg.sell }
+      cfg: { buy: cfg.buy, sell: cfg.sell },
+      cap: {
+        total: document.getElementById('cp-total').value,
+        parts: document.getElementById('cp-parts').value,
+        gord:  document.getElementById('cp-gord').value,
+        sord:  document.getElementById('cp-sord').value
+      }
     };
     localStorage.setItem(LS_KEY, JSON.stringify(data));
     // Flash save dot
@@ -1130,6 +1136,13 @@ function loadSt() {
       document.getElementById('c-buy').value  = cfg.buy;
       document.getElementById('c-sell').value = cfg.sell;
     }
+    // Restore capital planner
+    if (data.cap) {
+      if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
+      if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
+      if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
+      if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
+    }
     renderLog();
     showToast('💾 Data loaded from previous session!');
   } catch(e) {
@@ -1157,6 +1170,7 @@ function calcCapital() {
   const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
   const gOrd  = parseInt(document.getElementById('cp-gord').value)    || 1;
   const sOrd  = parseInt(document.getElementById('cp-sord').value)    || 1;
+  saveSt(); // auto-save on every change
   const pp    = total / parts;
   document.getElementById('cp-gallot').textContent = fmt(pp);
   document.getElementById('cp-sallot').textContent = fmt(pp);
