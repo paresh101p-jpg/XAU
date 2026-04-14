@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>⚜️ Gold &amp; Silver BeES (Cloud Sync)</title>
-<!-- Firebase SDKs -->
+<!-- Firebase SDKs (compat version) -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
@@ -467,19 +467,17 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================= FIREBASE CONFIG =======================
-// 🔴🔴🔴 YAHAN APNI FIREBASE CONFIG PASTE KARO 🔴🔴🔴
-// Firebase console se milne wali config yahan copy karo
+// ======================= FIREBASE CONFIG (TUMHARI) =======================
 const firebaseConfig = {
   apiKey: "AIzaSyAGODV4ktENpN7k_k5OjGt4Zcx_iLfREkE",
   authDomain: "gold-silver-tracke.firebaseapp.com",
+  databaseURL: "https://gold-silver-tracke-default-rtdb.firebaseio.com",   // maine add kiya
   projectId: "gold-silver-tracke",
   storageBucket: "gold-silver-tracke.firebasestorage.app",
   messagingSenderId: "741308063485",
   appId: "1:741308063485:web:0d42f26f428e8b036d6894",
   measurementId: "G-25WVBN0B0G"
 };
-// ================================================================
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -560,10 +558,9 @@ async function loadFromFirebase() {
   } catch(e) { console.warn("Firebase load error", e); showToast('⚠️ Cloud load failed, using local data'); }
 }
 
-// Override save function
 window.saveSt = function() { saveToFirebase(); };
 
-// ======================= ORIGINAL APP FUNCTIONS =======================
+// ======================= PRICE FETCH & UI FUNCTIONS =======================
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
