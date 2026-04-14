@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>⚜️ Gold &amp; Silver BeES (Cloud Sync)</title>
-<!-- Firebase SDKs (compat version) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111; color:#fff; min-height:100vh; padding-bottom:52px; }
@@ -467,11 +468,11 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================= FIREBASE CONFIG (TUMHARI) =======================
+// ======================= FIREBASE CONFIG =======================
 const firebaseConfig = {
   apiKey: "AIzaSyAGODV4ktENpN7k_k5OjGt4Zcx_iLfREkE",
   authDomain: "gold-silver-tracke.firebaseapp.com",
-  databaseURL: "https://gold-silver-tracke-default-rtdb.firebaseio.com",   // maine add kiya
+  databaseURL: "https://gold-silver-tracke-default-rtdb.firebaseio.com",   // correct URL
   projectId: "gold-silver-tracke",
   storageBucket: "gold-silver-tracke.firebasestorage.app",
   messagingSenderId: "741308063485",
@@ -482,6 +483,14 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+const auth = firebase.auth();
+
+// Anonymous login – so that security rules with auth != null work
+auth.signInAnonymously().catch((error) => {
+  console.error("Firebase anonymous login error:", error);
+  showToast("⚠️ Login failed! Data may not sync across devices.");
+});
+
 const DB_REF = 'etf_bees_user_data';
 
 // ======================= GLOBAL STATE =======================
@@ -504,6 +513,8 @@ let st  = {
 
 // ======================= FIREBASE SAVE/LOAD =======================
 async function saveToFirebase() {
+  // Only save if user is authenticated (optional, but safe)
+  if (!auth.currentUser) return;
   try {
     const dataToSave = {
       refBuy: st.refBuy,
@@ -527,6 +538,15 @@ async function saveToFirebase() {
 }
 
 async function loadFromFirebase() {
+  if (!auth.currentUser) {
+    // Wait for auth to be ready
+    await new Promise(resolve => {
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        if (user) resolve();
+        unsubscribe();
+      });
+    });
+  }
   try {
     const snapshot = await database.ref(DB_REF).get();
     if (snapshot.exists()) {
@@ -560,7 +580,7 @@ async function loadFromFirebase() {
 
 window.saveSt = function() { saveToFirebase(); };
 
-// ======================= PRICE FETCH & UI FUNCTIONS =======================
+// ======================= PRICE FETCH & UI FUNCTIONS (same as before) =======================
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -1160,15 +1180,24 @@ function mktCheck() {
 
 // Initialization
 window.onload = () => {
-  loadFromFirebase().then(() => {
-    setFetchStatus('loading', 'Connecting to price feed…');
-    fetchAll();
-    startLoop();
-    startTickLoop();
-    mktCheck();
-    setInterval(mktCheck, 30000);
-    if (Notification && Notification.permission === 'default')
-      setTimeout(() => Notification.requestPermission(), 2000);
+  // Wait for auth to be ready before loading data
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      await loadFromFirebase();
+      setFetchStatus('loading', 'Connecting to price feed…');
+      fetchAll();
+      startLoop();
+      startTickLoop();
+      mktCheck();
+      setInterval(mktCheck, 30000);
+      if (Notification && Notification.permission === 'default')
+        setTimeout(() => Notification.requestPermission(), 2000);
+    } else {
+      // Auth not ready yet, will trigger again
+      setTimeout(() => {
+        if (!auth.currentUser) showToast("⚠️ Firebase login failed. Data sync disabled.");
+      }, 5000);
+    }
   });
 };
 
