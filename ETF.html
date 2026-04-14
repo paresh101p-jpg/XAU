@@ -307,8 +307,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
     <div class="cap-row1">
       <div class="cap-ig"><label>💵 Total ₹</label><input type="number" id="cp-total" value="500000" min="1000" step="1000" oninput="calcCapital()"></div>
       <div class="cap-ig"><label>✂️ Parts</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
-      <div class="cap-ig"><label>📦 Units</label><input type="number" id="c-units" value="10" min="1" step="1"></div>
-      <div class="cap-ig"><label>⏱ Refresh(s)</label><input type="number" id="c-ref" value="60" min="15" max="600" step="15"></div>
     </div>
     <div class="cap-cards">
       <div class="cap-card gc">
@@ -680,10 +678,10 @@ function mktCheck() {
 }
 
 function applySettings() {
-  cfg.buy   = parseFloat(document.getElementById('c-buy').value)   || 2;
-  cfg.sell  = parseFloat(document.getElementById('c-sell').value)  || 2;
-  cfg.units = parseInt(document.getElementById('c-units').value)   || 10;
-  cfg.ref   = parseInt(document.getElementById('c-ref').value)     || 60;
+  cfg.buy   = parseFloat(document.getElementById('c-buy').value)  || 2;
+  cfg.sell  = parseFloat(document.getElementById('c-sell').value) || 2;
+  cfg.units = 10;
+  cfg.ref   = 60;
   document.getElementById('mUnits').value = cfg.units;
   st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
   st.workingProxy = null;
