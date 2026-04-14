@@ -470,6 +470,8 @@ const ETF = {
 };
 
 const LS_KEY = 'etf_bees_v1';
+const GITHUB_TOKEN = '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';
+const GIST_ID_KEY  = 'etf_bees_gist_id';
 
 let cfg = {buy:2,sell:2,units:10,ref:60};
 let st  = {
@@ -700,7 +702,7 @@ async function fetchAll() {
 }
 
 window.onload = () => {
-  loadSt();
+  await loadSt();
   setFetchStatus('loading', 'Connecting to price feed…');
   fetchAll();
   startLoop();
@@ -1053,7 +1055,7 @@ function renderLog() {
   ).join('');
 }
 
-function saveSt() {
+async function saveSt() {
   try {
     const data = {
       refBuy:st.refBuy, refSell:st.refSell,
@@ -1070,7 +1072,19 @@ function saveSt() {
     localStorage.setItem(LS_KEY, JSON.stringify(data));
     const dot = document.getElementById('saveDot');
     if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
-  } catch(e) { console.warn('localStorage save failed:', e); }
+    // GitHub Gist sync
+    if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YAHAN_NAYA_TOKEN_DAALO') {
+      const gistId = localStorage.getItem(GIST_ID_KEY);
+      const body = JSON.stringify({ description: 'ETF BeES Tracker Data', public: false, files: { 'etf_data.json': { content: JSON.stringify(data) } } });
+      if (gistId) {
+        await fetch(`https://api.github.com/gists/${gistId}`, { method:'PATCH', headers:{ 'Authorization':'token '+GITHUB_TOKEN, 'Content-Type':'application/json' }, body });
+      } else {
+        const res = await fetch('https://api.github.com/gists', { method:'POST', headers:{ 'Authorization':'token '+GITHUB_TOKEN, 'Content-Type':'application/json' }, body });
+        const json = await res.json();
+        if (json.id) localStorage.setItem(GIST_ID_KEY, json.id);
+      }
+    }
+  } catch(e) { console.warn('save failed:', e); }
 }
 
 function saveSettings() {
@@ -1081,32 +1095,60 @@ function saveSettings() {
   } catch(_) {}
 }
 
-function loadSt() {
+async function loadSt() {
   try {
+    // Pehle localStorage se load karo
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (data.refBuy)  st.refBuy  = data.refBuy;
-    if (data.refSell) st.refSell = data.refSell;
-    if (data.hold)    st.hold    = data.hold;
-    if (data.log)     st.log     = data.log;
-    if (data.real   !== undefined) st.real    = data.real;
-    if (data.alerted) st.alerted = data.alerted;
-    if (data.cfg) {
-      cfg.buy  = data.cfg.buy  || 2;
-      cfg.sell = data.cfg.sell || 2;
-      document.getElementById('c-buy').value  = cfg.buy;
-      document.getElementById('c-sell').value = cfg.sell;
+    if (raw) {
+      const data = JSON.parse(raw);
+      applyData(data);
+      showToast('💾 Local data loaded!');
     }
-    if (data.cap) {
-      if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
-      if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
-      if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
-      if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
+    // Phir GitHub Gist se sync karo
+    if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YAHAN_NAYA_TOKEN_DAALO') {
+      let gistId = localStorage.getItem(GIST_ID_KEY);
+      if (!gistId) {
+        // Purana gist dhundo
+        const res  = await fetch('https://api.github.com/gists', { headers:{ 'Authorization':'token '+GITHUB_TOKEN } });
+        const list = await res.json();
+        const found = list.find(g => g.files && g.files['etf_data.json']);
+        if (found) { gistId = found.id; localStorage.setItem(GIST_ID_KEY, gistId); }
+      }
+      if (gistId) {
+        const res  = await fetch(`https://api.github.com/gists/${gistId}`, { headers:{ 'Authorization':'token '+GITHUB_TOKEN } });
+        const json = await res.json();
+        const content = json?.files?.['etf_data.json']?.content;
+        if (content) {
+          const data = JSON.parse(content);
+          applyData(data);
+          localStorage.setItem(LS_KEY, content);
+          showToast('☁️ GitHub se data sync hua!');
+        }
+      }
     }
-    renderLog();
-    showToast('💾 Data loaded from previous session!');
-  } catch(e) { console.warn('localStorage load failed:', e); }
+  } catch(e) { console.warn('load failed:', e); }
+}
+
+function applyData(data) {
+  if (data.refBuy)  st.refBuy  = data.refBuy;
+  if (data.refSell) st.refSell = data.refSell;
+  if (data.hold)    st.hold    = data.hold;
+  if (data.log)     st.log     = data.log;
+  if (data.real !== undefined) st.real = data.real;
+  if (data.alerted) st.alerted = data.alerted;
+  if (data.cfg) {
+    cfg.buy  = data.cfg.buy  || 2;
+    cfg.sell = data.cfg.sell || 2;
+    document.getElementById('c-buy').value  = cfg.buy;
+    document.getElementById('c-sell').value = cfg.sell;
+  }
+  if (data.cap) {
+    if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
+    if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
+    if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
+    if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
+  }
+  renderLog();
 }
 
 function showToast(msg) {
