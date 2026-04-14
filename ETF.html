@@ -8,7 +8,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111; color:#fff; min-height:100vh; padding-bottom:52px; }
 
-/* TOP BAR */
 .top-header { background:#1a1a1a; border-bottom:1px solid #2a2a2a; padding:10px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 .app-title { font-size:0.95rem; }
 .app-title .g { color:#FFD700; }
@@ -24,7 +23,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .mkt-time { color:#bbb; font-size:0.63rem; }
 .last-upd { font-size:0.63rem; color:#bbb; }
 
-/* SETTINGS */
 .settings-row { display:flex; align-items:center; justify-content:center; gap:12px; padding:8px 18px; background:#161616; border-bottom:1px solid #222; flex-wrap:wrap; }
 .cfg { display:flex; align-items:center; gap:5px; font-size:0.72rem; color:#ddd; }
 .cfg input { width:52px; background:#222; border:1px solid #2e2e2e; border-radius:6px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.72rem; padding:5px 6px; text-align:center; outline:none; }
@@ -32,7 +30,14 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .btn-apply { background:#FFD700; color:#111; border:none; border-radius:7px; padding:6px 14px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.72rem; cursor:pointer; }
 .btn-apply:hover { background:#ffe84d; }
 
-/* CAPITAL PLANNER */
+/* FETCH STATUS */
+.fetch-status-bar { background:#0d1a0d; border-bottom:1px solid #1a2e1a; padding:4px 18px; display:flex; align-items:center; gap:8px; font-size:0.63rem; color:#22c55e; min-height:24px; }
+.fetch-status-bar.fail { background:#1a0d0d; border-color:#2e1a1a; color:#ef4444; }
+.fetch-status-bar.loading { background:#13130d; border-color:#2a2a1a; color:#f59e0b; }
+#fetchStatusDot { width:6px; height:6px; border-radius:50%; background:#22c55e; flex-shrink:0; }
+.fetch-status-bar.fail #fetchStatusDot { background:#ef4444; }
+.fetch-status-bar.loading #fetchStatusDot { background:#f59e0b; animation:blink 1s infinite; }
+
 .cap-toggle { width:100%; background:#181818; border:none; border-bottom:1px solid #1e1e1e; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.75rem; padding:7px 18px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
 .cap-toggle:hover { background:#1e1e1e; }
 .cap-toggle .cta { transition:transform 0.3s; }
@@ -70,7 +75,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .cap-rr .cv.dm { color:#666; font-size:0.6rem; }
 .cap-note { font-size:0.6rem; color:#555; text-align:center; }
 
-/* SPLIT */
 .split { display:grid; grid-template-columns:1fr 1fr; }
 .gold-col { background:linear-gradient(170deg,#1c1700 0%,#111 60%); border-right:1px solid #222; padding:16px 14px; display:flex; flex-direction:column; gap:12px; }
 .silver-col { background:linear-gradient(170deg,#0c1218 0%,#111 60%); padding:16px 14px; display:flex; flex-direction:column; gap:12px; }
@@ -81,7 +85,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .gold-col .en   { color:#FFD700; }
 .silver-col .en { color:#C0D8E8; }
 
-/* PRICE BLOCK */
 .price-block { background:#1c1c1c; border:1px solid #272727; border-radius:12px; padding:12px; text-align:center; position:relative; overflow:hidden; }
 .price-flash-up   { animation:flashG 0.5s ease; }
 .price-flash-down { animation:flashR 0.5s ease; }
@@ -101,7 +104,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .chg-pill.flat { background:rgba(255,255,255,0.07); color:#aaa; }
 .prev-label { font-size:0.62rem; color:#bbb; margin-top:4px; letter-spacing:1px; }
 
-/* INFO GRID */
 .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
 .ibox { background:#1a1a1a; border:1px solid #232323; border-radius:9px; padding:8px 10px; }
 .ibox .il { font-size:0.58rem; color:#ccc; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:3px; }
@@ -115,7 +117,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .sig-next.nb { color:#22c55e; }
 .sig-next.ns { color:#ef4444; }
 
-/* TARGETS */
 .tgt-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
 .tbox { border-radius:9px; padding:9px 10px; border:1px solid; transition:box-shadow 0.3s; }
 .tbox.buy-b  { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.2); }
@@ -130,7 +131,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .tbox.sell-b .tv { color:#ef4444; }
 .tbox .ts { font-size:0.58rem; color:#bbb; margin-top:2px; }
 
-/* TRADE BUTTONS */
 .trade-btns { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 .btn-buy,.btn-sell { border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; transition:0.15s; }
 .btn-buy  { background:#22c55e; color:#000; }
@@ -138,7 +138,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .btn-buy:hover  { background:#4ade80; }
 .btn-sell:hover { background:#f87171; }
 
-/* HOLDINGS */
 .sec-label { font-size:0.58rem; color:#ddd; letter-spacing:2px; text-transform:uppercase; }
 .h-list { display:flex; flex-direction:column; gap:7px; }
 .no-h { color:#aaa; font-size:0.7rem; text-align:center; padding:12px; }
@@ -163,7 +162,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .h-pnl-big.loss   { color:#ef4444; }
 .h-time-txt { font-size:0.58rem; color:#666; }
 
-/* LOG BAR */
 .log-bar { position:fixed; bottom:0; left:0; right:0; background:#131313; border-top:1px solid #1e1e1e; padding:5px 12px; display:flex; align-items:center; gap:6px; overflow-x:auto; z-index:50; height:36px; }
 .log-bar::-webkit-scrollbar { height:0; }
 .lchip { flex-shrink:0; font-size:0.6rem; border-radius:5px; padding:2px 8px; white-space:nowrap; }
@@ -171,7 +169,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .lchip.sell { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.18); }
 .log-empty-txt { font-size:0.6rem; color:#aaa; }
 
-/* TRADE MODAL */
 .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(7px); z-index:100; display:none; align-items:center; justify-content:center; padding:20px; }
 .overlay.show { display:flex; }
 .modal { background:#1a1a1a; border-radius:16px; padding:22px; max-width:340px; width:100%; animation:pop 0.2s ease; max-height:90vh; overflow-y:auto; }
@@ -190,7 +187,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .mr .mv { color:#fff; }
 .mr .mv.profit { color:#22c55e; }
 .mr .mv.loss   { color:#ef4444; }
-/* Buy price input */
 .m-buy-price { background:#111; border-radius:9px; padding:11px 12px; margin-bottom:12px; }
 .m-buy-price label { display:block; font-size:0.62rem; color:#FFD700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
 .m-buy-price input { width:100%; background:#1a1a1a; border:1px solid #FFD700; border-radius:8px; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:1rem; padding:8px 12px; outline:none; text-align:center; }
@@ -204,7 +200,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .mcfb { background:#22c55e; color:#000; border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
 .mcfs { background:#ef4444; color:#fff; border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
 
-/* ALERT POPUP */
 .alert-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(10px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
 .alert-overlay.show { display:flex; }
 .alert-box { border-radius:18px; padding:24px 22px; max-width:340px; width:100%; animation:popIn 0.25s ease; }
@@ -235,7 +230,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .alert-box.as .btn-alert-trade { background:#ef4444; color:#fff; }
 .btn-alert-dismiss { background:#222; color:#aaa; border:1px solid #333; border-radius:10px; padding:11px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.82rem; cursor:pointer; }
 
-/* TOAST */
 .toast { position:fixed; bottom:44px; left:50%; transform:translateX(-50%) translateY(70px); background:#1c1c1c; border:1px solid #444; color:#fff; font-size:0.72rem; padding:8px 17px; border-radius:9px; z-index:300; transition:transform 0.28s ease; white-space:nowrap; max-width:92vw; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
@@ -269,6 +263,12 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   <div class="cfg"><span>Units</span><input id="c-units" type="number" value="10" min="1" step="1"></div>
   <div class="cfg"><span>Refresh(s)</span><input id="c-ref" type="number" value="60" min="15" max="600" step="15"></div>
   <button class="btn-apply" onclick="applySettings()">↺ Apply</button>
+</div>
+
+<!-- FETCH STATUS BAR -->
+<div class="fetch-status-bar loading" id="fetchStatusBar">
+  <div id="fetchStatusDot"></div>
+  <span id="fetchStatusText">Fetching live prices...</span>
 </div>
 
 <!-- CAPITAL PLANNER -->
@@ -425,172 +425,286 @@ let st  = {
   hold:{G:[],S:[]}, log:[], real:0,
   pend:null, timer:null, tickTimer:null,
   alertPend:null,
-  alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}
+  alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}},
+  workingProxy:null, fetchFailCount:0
 };
+
+// ─── PROXY LIST (ordered by reliability) ───────────────────────────────────
+const PROX = [
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.org/?${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
+  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+];
+
+// ─── YAHOO URLS for a symbol ────────────────────────────────────────────────
+function yahooUrls(sym) {
+  return [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`,
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=2m&range=1d`,
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}`,
+    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}`,
+  ];
+}
+
+// ─── Parse Yahoo response ────────────────────────────────────────────────────
+function parseYahoo(j) {
+  // v8 chart response
+  const res = j?.chart?.result?.[0];
+  if (res) {
+    const price = res.meta?.regularMarketPrice || res.meta?.previousClose;
+    const prev  = res.meta?.chartPreviousClose  || res.meta?.previousClose || price;
+    if (price && price > 0) return {price, prev};
+  }
+  // v7 quote response
+  const q = j?.quoteResponse?.result?.[0];
+  if (q?.regularMarketPrice) {
+    return {
+      price: q.regularMarketPrice,
+      prev:  q.regularMarketPreviousClose || q.regularMarketPrice
+    };
+  }
+  return null;
+}
+
+// ─── Core fetch: try working proxy first, then rotate ────────────────────────
+async function tryFetch(k) {
+  const urls = yahooUrls(ETF[k].sym);
+
+  // If we have a known-working proxy, try it first with all urls
+  if (st.workingProxy !== null) {
+    const px = PROX[st.workingProxy];
+    for (const yu of urls) {
+      try {
+        const r = await fetch(px(yu), {signal: AbortSignal.timeout(8000)});
+        if (!r.ok) continue;
+        const raw = await r.json();
+        const j   = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const d   = parseYahoo(j);
+        if (d) return d;
+      } catch(_) {}
+    }
+    // Working proxy failed, reset and try all
+    st.workingProxy = null;
+  }
+
+  // Rotate through all proxies × all urls
+  for (let pi = 0; pi < PROX.length; pi++) {
+    for (const yu of urls) {
+      try {
+        const r = await fetch(PROX[pi](yu), {signal: AbortSignal.timeout(9000)});
+        if (!r.ok) continue;
+        const raw = await r.json();
+        const j   = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const d   = parseYahoo(j);
+        if (d) {
+          st.workingProxy = pi; // remember this working proxy
+          return d;
+        }
+      } catch(_) {}
+    }
+  }
+  return null;
+}
+
+// ─── Status bar helper ────────────────────────────────────────────────────────
+function setFetchStatus(state, msg) {
+  const bar = document.getElementById('fetchStatusBar');
+  bar.className = 'fetch-status-bar ' + state;
+  document.getElementById('fetchStatusText').textContent = msg;
+}
+
+// ─── Fetch one symbol (full) ─────────────────────────────────────────────────
+async function fetchOne(k) {
+  const d = await tryFetch(k);
+  if (!d) {
+    st.fetchFailCount++;
+    if (st.fetchFailCount >= 2) setFetchStatus('fail', 'Price fetch failed — retrying in ' + cfg.ref + 's');
+    return;
+  }
+  st.fetchFailCount = 0;
+  const old = st.price[k];
+  st.price[k] = d.price;
+  st.prev[k]  = d.prev;
+  if (!st.refBuy[k])  st.refBuy[k]  = d.price;
+  if (!st.refSell[k]) st.refSell[k] = d.price;
+  showTick(k, old, d.price);
+  updateCard(k);
+  alertCheck(k);
+  saveSt();
+  const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('lastUpd').textContent = 'Updated ' + t;
+  setFetchStatus('', '✓ Live · ' + ETF[k].name + ' ₹' + d.price.toFixed(2) + ' · ' + t);
+}
+
+// ─── Tick fetch (lightweight, every 15s) ────────────────────────────────────
+async function tickOne(k) {
+  const d = await tryFetch(k);
+  if (!d) return;
+  const old = st.price[k];
+  st.price[k] = d.price;
+  st.prev[k]  = d.prev;
+  if (d.price !== old) showTick(k, old, d.price);
+  updateCard(k);
+  alertCheck(k);
+  saveSt();
+  const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('lastUpd').textContent = '🔄 ' + t;
+  setFetchStatus('', '✓ Live · G:₹' + (st.price.G||0).toFixed(2) + ' · S:₹' + (st.price.S||0).toFixed(2) + ' · ' + t);
+}
+
+function showTick(k, oldP, newP) {
+  if (!oldP || oldP === newP) return;
+  const pb    = document.getElementById('pb-'   + k);
+  const badge = document.getElementById('tick-' + k);
+  if (newP > oldP) {
+    pb.className = 'price-block price-flash-up';
+    badge.className = 'tick-badge up'; badge.textContent = '▲ LIVE';
+  } else {
+    pb.className = 'price-block price-flash-down';
+    badge.className = 'tick-badge down'; badge.textContent = '▼ LIVE';
+  }
+  setTimeout(()=>pb.className='price-block', 600);
+}
+
+function startLoop() {
+  if (st.timer) clearInterval(st.timer);
+  st.timer = setInterval(fetchAll, cfg.ref * 1000);
+}
+
+function startTickLoop() {
+  if (st.tickTimer) clearInterval(st.tickTimer);
+  // Stagger G and S by 7s so they don't fire simultaneously
+  st.tickTimer = setInterval(() => {
+    tickOne('G');
+    setTimeout(() => tickOne('S'), 7000);
+  }, 15000);
+}
+
+async function fetchAll() {
+  setFetchStatus('loading', 'Fetching live prices…');
+  await fetchOne('G');
+  await fetchOne('S');
+}
 
 window.onload = () => {
   loadSt();
+  setFetchStatus('loading', 'Connecting to price feed…');
   fetchAll();
   startLoop();
   startTickLoop();
   mktCheck();
   setInterval(mktCheck, 30000);
-  if(Notification && Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000);
+  if (Notification && Notification.permission === 'default')
+    setTimeout(() => Notification.requestPermission(), 2000);
 };
 
-function mktCheck(){
-  const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
-  const d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes();
-  const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930;
-  document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed');
-  document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed');
-  document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED';
-  document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST';
+function mktCheck() {
+  const ist  = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const d    = ist.getDay();
+  const mins = ist.getHours() * 60 + ist.getMinutes();
+  const isOpen = d >= 1 && d <= 5 && mins >= 555 && mins <= 930;
+  document.getElementById('mktDot').className   = 'mkt-dot '   + (isOpen ? 'open' : 'closed');
+  document.getElementById('mktLabel').className = 'mkt-label ' + (isOpen ? 'open' : 'closed');
+  document.getElementById('mktLabel').textContent = isOpen ? 'Market OPEN' : 'Market CLOSED';
+  document.getElementById('mktTime').textContent  = ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' IST';
 }
 
-function applySettings(){
-  cfg.buy   = parseFloat(document.getElementById('c-buy').value)||2;
-  cfg.sell  = parseFloat(document.getElementById('c-sell').value)||2;
-  cfg.units = parseInt(document.getElementById('c-units').value)||10;
-  cfg.ref   = parseInt(document.getElementById('c-ref').value)||60;
-  document.getElementById('mUnits').value=cfg.units;
-  st.alerted={G:{buy:false,sell:false},S:{buy:false,sell:false}};
-  startLoop(); updateAll(); showToast('Settings applied!');
+function applySettings() {
+  cfg.buy   = parseFloat(document.getElementById('c-buy').value)   || 2;
+  cfg.sell  = parseFloat(document.getElementById('c-sell').value)  || 2;
+  cfg.units = parseInt(document.getElementById('c-units').value)   || 10;
+  cfg.ref   = parseInt(document.getElementById('c-ref').value)     || 60;
+  document.getElementById('mUnits').value = cfg.units;
+  st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
+  st.workingProxy = null; // reset proxy cache on settings change
+  startLoop();
+  updateAll();
+  showToast('Settings applied!');
 }
 
-const PROX=[
-  u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-  u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u=>`https://thingproxy.freeboard.io/fetch/${u}`
-];
+function updateCard(k) {
+  const p = st.price[k], pv = st.prev[k];
+  if (!p) return;
 
-async function tryFetch(k){
-  const yu=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ETF[k].sym)}?interval=1m&range=1d`;
-  for(const px of PROX){
-    try{
-      const r=await fetch(px(yu));
-      if(!r.ok) continue;
-      const j=await r.json();
-      const res=(j?.chart?.result?.[0]) || (j?.contents && JSON.parse(j.contents)?.chart?.result?.[0]);
-      if(!res) continue;
-      return {price:res.meta.regularMarketPrice||res.meta.previousClose, prev:res.meta.chartPreviousClose||res.meta.previousClose};
-    }catch(_){}
-  }
-  return null;
-}
+  document.getElementById('pr-' + k).textContent = '₹ ' + p.toFixed(2);
+  const chg = p - pv, pct = (chg / pv) * 100;
+  const pill = document.getElementById('pill-' + k);
+  pill.textContent = (chg > 0 ? '▲' : '▼') + ' ₹' + Math.abs(chg).toFixed(2) + '  (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)';
+  pill.className   = 'chg-pill ' + (chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat');
+  document.getElementById('prev-' + k).textContent = 'PREV CLOSE: ₹' + pv.toFixed(2);
 
-async function fetchOne(k){
-  const d=await tryFetch(k); if(!d) return;
-  const old=st.price[k];
-  st.price[k]=d.price; st.prev[k]=d.prev;
-  if(!st.refBuy[k])  st.refBuy[k]=d.price;
-  if(!st.refSell[k]) st.refSell[k]=d.price;
-  showTick(k,old,d.price);
-  updateCard(k); alertCheck(k); saveSt();
-  document.getElementById('lastUpd').textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
+  const hs  = st.hold[k];
+  const tu  = hs.reduce((s,h) => s + h.units, 0);
+  const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
+  const avg = tu > 0 ? tc / tu : 0;
+  const pnl = tu > 0 ? (p - avg) * tu : 0;
+  const pp  = avg > 0 ? (p - avg) / avg * 100 : 0;
 
-async function tickOne(k){
-  const d=await tryFetch(k); if(!d) return;
-  if(d.price!==st.price[k]){
-    const old=st.price[k];
-    st.price[k]=d.price;
-    showTick(k,old,d.price);
-    updateCard(k); alertCheck(k); saveSt();
-    document.getElementById('lastUpd').textContent='🔄 '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  }
-}
-
-function showTick(k,oldP,newP){
-  if(!oldP||oldP===newP) return;
-  const pb=document.getElementById('pb-'+k);
-  const badge=document.getElementById('tick-'+k);
-  if(newP>oldP){
-    pb.className='price-block price-flash-up';
-    badge.className='tick-badge up'; badge.textContent='▲ LIVE';
+  document.getElementById('u-'   + k).textContent = tu + ' units';
+  document.getElementById('avg-' + k).textContent = avg > 0 ? '₹ ' + avg.toFixed(2) : '—';
+  const pel = document.getElementById('pnl-' + k);
+  if (tu > 0) {
+    pel.textContent = (pnl >= 0 ? '+' : '') + ' ₹' + Math.abs(pnl).toFixed(2) + '  (' + (pp >= 0 ? '+' : '') + pp.toFixed(2) + '%)';
+    pel.className   = 'iv ' + (pnl >= 0 ? 'profit' : 'loss');
   } else {
-    pb.className='price-block price-flash-down';
-    badge.className='tick-badge down'; badge.textContent='▼ LIVE';
+    pel.textContent = '—'; pel.className = 'iv';
   }
-  setTimeout(()=>pb.className='price-block',600);
-}
 
-function startLoop(){ if(st.timer)clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
-function startTickLoop(){ if(st.tickTimer)clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{tickOne('G');tickOne('S');},10000); }
-async function fetchAll(){ await fetchOne('G'); await fetchOne('S'); }
+  const rb = st.refBuy[k]  || p;
+  const rs = st.refSell[k] || p;
+  const bt = rb * (1 - cfg.buy  / 100);
+  const sv = rs * (1 + cfg.sell / 100);
 
-function updateCard(k){
-  const p=st.price[k],pv=st.prev[k]; if(!p) return;
-  document.getElementById('pr-'+k).textContent='₹ '+p.toFixed(2);
-  const chg=p-pv,pct=(chg/pv)*100;
-  const pill=document.getElementById('pill-'+k);
-  pill.textContent=(chg>0?'▲':'▼')+' ₹'+Math.abs(chg).toFixed(2)+'  ('+(pct>=0?'+':'')+pct.toFixed(2)+'%)';
-  pill.className='chg-pill '+(chg>0?'up':chg<0?'down':'flat');
-  document.getElementById('prev-'+k).textContent='PREV CLOSE: ₹'+pv.toFixed(2);
+  document.getElementById('bt-'  + k).textContent = '₹ ' + bt.toFixed(2);
+  document.getElementById('st-'  + k).textContent = '₹ ' + sv.toFixed(2);
+  document.getElementById('bts-' + k).textContent = 'ref ₹' + rb.toFixed(2) + ' −' + cfg.buy  + '%';
+  document.getElementById('sts-' + k).textContent = 'ref ₹' + rs.toFixed(2) + ' +' + cfg.sell + '%';
+  document.getElementById('bb-'  + k).className   = 'tbox buy-b'  + (p <= bt ? ' alert-buy'  : '');
+  document.getElementById('sb-'  + k).className   = 'tbox sell-b' + (p >= sv && tu > 0 ? ' alert-sell' : '');
 
-  const hs=st.hold[k];
-  const tu=hs.reduce((s,h)=>s+h.units,0);
-  const tc=hs.reduce((s,h)=>s+(h.buyPrice||h.price)*h.units,0);
-  const avg=tu>0?tc/tu:0;
-  const pnl=tu>0?(p-avg)*tu:0;
-  const pp=avg>0?((p-avg)/avg*100):0;
+  const sg  = document.getElementById('sig-' + k);
+  const snx = document.getElementById('snx-' + k);
+  const nu  = cfg.units;
+  const needAmt = (nu * bt).toFixed(0);
+  const potP    = tu > 0 ? ((sv - avg) * tu).toFixed(2) : null;
 
-  document.getElementById('u-'+k).textContent=tu+' units';
-  document.getElementById('avg-'+k).textContent=avg>0?'₹ '+avg.toFixed(2):'—';
-  const pel=document.getElementById('pnl-'+k);
-  if(tu>0){ pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='iv '+(pnl>=0?'profit':'loss'); }
-  else { pel.textContent='—'; pel.className='iv'; }
-
-  const rb=st.refBuy[k]||p, rs=st.refSell[k]||p;
-  const bt=rb*(1-cfg.buy/100), sv=rs*(1+cfg.sell/100);
-  document.getElementById('bt-'+k).textContent='₹ '+bt.toFixed(2);
-  document.getElementById('st-'+k).textContent='₹ '+sv.toFixed(2);
-  document.getElementById('bts-'+k).textContent='ref ₹'+rb.toFixed(2)+' −'+cfg.buy+'%';
-  document.getElementById('sts-'+k).textContent='ref ₹'+rs.toFixed(2)+' +'+cfg.sell+'%';
-  document.getElementById('bb-'+k).className='tbox buy-b'+(p<=bt?' alert-buy':'');
-  document.getElementById('sb-'+k).className='tbox sell-b'+(p>=sv&&tu>0?' alert-sell':'');
-
-  // Signal + next action hint
-  const sg=document.getElementById('sig-'+k);
-  const snx=document.getElementById('snx-'+k);
-  const nu=cfg.units;
-  const needAmt=(nu*bt).toFixed(0);
-  const potP=tu>0?((sv-avg)*tu).toFixed(2):null;
-
-  if(p<=bt){
-    sg.textContent='🟢 BUY NOW'; sg.className='iv profit';
-    snx.textContent=nu+'u buy karo · ₹'+Number(needAmt).toLocaleString('en-IN')+' chahiye';
-    snx.className='sig-next nb';
-  } else if(p>=sv&&tu>0){
-    sg.textContent='🔴 SELL NOW'; sg.className='iv loss';
-    snx.textContent=tu+'u sell karo · Profit: +₹'+potP;
-    snx.className='sig-next ns';
+  if (p <= bt) {
+    sg.textContent = '🟢 BUY NOW'; sg.className = 'iv profit';
+    snx.textContent = nu + 'u buy karo · ₹' + Number(needAmt).toLocaleString('en-IN') + ' chahiye';
+    snx.className   = 'sig-next nb';
+  } else if (p >= sv && tu > 0) {
+    sg.textContent = '🔴 SELL NOW'; sg.className = 'iv loss';
+    snx.textContent = tu + 'u sell karo · Profit: +₹' + potP;
+    snx.className   = 'sig-next ns';
   } else {
-    sg.textContent='⏳ WAIT'; sg.className='iv wait';
-    if(tu>0){
-      const pp2=((sv-avg)*tu).toFixed(2);
-      snx.innerHTML='BUY ▼₹'+bt.toFixed(2)+' ('+nu+'u · ₹'+Number(needAmt).toLocaleString('en-IN')+')<br>SELL ▲₹'+sv.toFixed(2)+' (+₹'+pp2+')';
+    sg.textContent = '⏳ WAIT'; sg.className = 'iv wait';
+    if (tu > 0) {
+      const pp2 = ((sv - avg) * tu).toFixed(2);
+      snx.innerHTML  = 'BUY ▼₹' + bt.toFixed(2) + ' (' + nu + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ')<br>SELL ▲₹' + sv.toFixed(2) + ' (+₹' + pp2 + ')';
     } else {
-      snx.innerHTML='BUY ▼₹'+bt.toFixed(2)+' · '+nu+' units · ₹'+Number(needAmt).toLocaleString('en-IN');
+      snx.innerHTML  = 'BUY ▼₹' + bt.toFixed(2) + ' · ' + nu + ' units · ₹' + Number(needAmt).toLocaleString('en-IN');
     }
-    snx.className='sig-next';
+    snx.className = 'sig-next';
   }
 
-  renderHold(k,p);
-  if(document.getElementById('capPanel').classList.contains('open')) calcCapital();
+  renderHold(k, p);
+  if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
 
-function renderHold(k,p){
-  const el=document.getElementById('hl-'+k);
-  const hs=st.hold[k];
-  if(!hs.length){ el.innerHTML='<div class="no-h">No holdings yet</div>'; return; }
-  el.innerHTML=hs.map((h,i)=>{
-    const bp=h.buyPrice||h.price;
-    const pnl=p?(p-bp)*h.units:0;
-    const pct=((p-bp)/bp*100);
-    const isP=pnl>=0;
-    const curVal=(p*h.units).toFixed(2);
-    const invested=(bp*h.units).toFixed(2);
+function renderHold(k, p) {
+  const el = document.getElementById('hl-' + k);
+  const hs = st.hold[k];
+  if (!hs.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
+  el.innerHTML = hs.map((h, i) => {
+    const bp   = h.buyPrice || h.price;
+    const pnl  = p ? (p - bp) * h.units : 0;
+    const pct  = (p - bp) / bp * 100;
+    const isP  = pnl >= 0;
+    const curVal   = (p * h.units).toFixed(2);
+    const invested = (bp * h.units).toFixed(2);
     return `<div class="h-card ${isP?'pc':'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">📦 Lot ${i+1} &nbsp;·&nbsp; ${h.units} units</span>
@@ -610,200 +724,231 @@ function renderHold(k,p){
   }).join('');
 }
 
-function updateAll(){ ['G','S'].forEach(k=>updateCard(k)); }
+function updateAll() { ['G','S'].forEach(k => updateCard(k)); }
 
-function alertCheck(k){
-  const p=st.price[k]; if(!p) return;
-  const rb=st.refBuy[k]||p, rs=st.refSell[k]||p;
-  const bt=rb*(1-cfg.buy/100), sv=rs*(1+cfg.sell/100);
-  const tu=st.hold[k].reduce((s,h)=>s+h.units,0);
-  if(p<=bt && !st.alerted[k].buy){
-    st.alerted[k].buy=true; st.alerted[k].sell=false;
-    showAlertPopup(k,'buy',bt,sv,tu);
-  } else if(p>=sv&&tu>0&&!st.alerted[k].sell){
-    st.alerted[k].sell=true; st.alerted[k].buy=false;
-    showAlertPopup(k,'sell',bt,sv,tu);
-  } else if(p>bt&&p<sv){
-    st.alerted[k].buy=false; st.alerted[k].sell=false;
+function alertCheck(k) {
+  const p = st.price[k]; if (!p) return;
+  const rb = st.refBuy[k]  || p;
+  const rs = st.refSell[k] || p;
+  const bt = rb * (1 - cfg.buy  / 100);
+  const sv = rs * (1 + cfg.sell / 100);
+  const tu = st.hold[k].reduce((s,h) => s + h.units, 0);
+  if (p <= bt && !st.alerted[k].buy) {
+    st.alerted[k].buy  = true;
+    st.alerted[k].sell = false;
+    showAlertPopup(k, 'buy', bt, sv, tu);
+  } else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
+    st.alerted[k].sell = true;
+    st.alerted[k].buy  = false;
+    showAlertPopup(k, 'sell', bt, sv, tu);
+  } else if (p > bt && p < sv) {
+    st.alerted[k].buy  = false;
+    st.alerted[k].sell = false;
   }
 }
 
-function showAlertPopup(k,type,bt,sv,tu){
-  const isBuy=type==='buy';
-  const p=st.price[k];
-  const avg=tu>0?st.hold[k].reduce((s,h)=>s+(h.buyPrice||h.price)*h.units,0)/tu:0;
-  const units=isBuy?cfg.units:tu;
-  const amt=isBuy?(units*bt).toFixed(2):null;
-  const profit=!isBuy&&avg>0?((sv-avg)*tu).toFixed(2):null;
+function showAlertPopup(k, type, bt, sv, tu) {
+  const isBuy = type === 'buy';
+  const p     = st.price[k];
+  const avg   = tu > 0 ? st.hold[k].reduce((s,h) => s + (h.buyPrice||h.price)*h.units, 0) / tu : 0;
+  const units  = isBuy ? cfg.units : tu;
+  const amt    = isBuy ? (units * bt).toFixed(2) : null;
+  const profit = !isBuy && avg > 0 ? ((sv - avg) * tu).toFixed(2) : null;
 
-  // Browser notification
-  if(Notification&&Notification.permission==='granted'){
-    const title=`${ETF[k].icon} ${ETF[k].name} — ${isBuy?'BUY':'SELL'} Signal!`;
-    const body=isBuy?`Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${units}u · ₹${Number(amt).toLocaleString('en-IN')}`:
-                     `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · ${tu}u · Profit: +₹${profit}`;
-    new Notification(title,{body});
+  if (Notification && Notification.permission === 'granted') {
+    const title = `${ETF[k].icon} ${ETF[k].name} — ${isBuy?'BUY':'SELL'} Signal!`;
+    const body  = isBuy
+      ? `Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${units}u · ₹${Number(amt).toLocaleString('en-IN')}`
+      : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · ${tu}u · Profit: +₹${profit}`;
+    new Notification(title, {body});
   }
 
-  st.alertPend={k,type};
-  const box=document.getElementById('alertBox');
-  box.className='alert-box '+(isBuy?'ab':'as');
-  document.getElementById('apIcon').textContent=ETF[k].icon;
-  document.getElementById('apType').textContent=isBuy?'🟢 BUY SIGNAL':'🔴 SELL SIGNAL';
-  document.getElementById('apTitle').textContent=isBuy?'Buy Target Hit! 🎯':'Sell Target Hit! 💰';
+  st.alertPend = {k, type};
+  const box = document.getElementById('alertBox');
+  box.className = 'alert-box ' + (isBuy ? 'ab' : 'as');
+  document.getElementById('apIcon').textContent  = ETF[k].icon;
+  document.getElementById('apType').textContent  = isBuy ? '🟢 BUY SIGNAL' : '🔴 SELL SIGNAL';
+  document.getElementById('apTitle').textContent = isBuy ? 'Buy Target Hit! 🎯' : 'Sell Target Hit! 💰';
 
-  let rows=`
+  let rows = `
     <div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div>
     <div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div>
     <div class="alert-row"><span class="ark">${isBuy?'Buy':'Sell'} Target</span><span class="arv">₹ ${isBuy?bt.toFixed(2):sv.toFixed(2)}</span></div>
     <div class="alert-divider"></div>
     <div class="alert-row"><span class="ark">Units to ${isBuy?'Buy':'Sell'}</span><span class="arv big">${units} units</span></div>`;
-  if(isBuy){
-    rows+=`<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`;
+  if (isBuy) {
+    rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`;
   } else {
-    if(avg>0) rows+=`<div class="alert-row"><span class="ark">Avg Buy Price</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`;
-    if(profit) rows+=`<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`;
+    if (avg > 0)  rows += `<div class="alert-row"><span class="ark">Avg Buy Price</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`;
+    if (profit)   rows += `<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`;
   }
 
-  document.getElementById('alertRows').innerHTML=rows;
-  document.getElementById('alertTradeBtn').textContent=isBuy?'🛒 BUY Now':'💰 SELL Now';
+  document.getElementById('alertRows').innerHTML = rows;
+  document.getElementById('alertTradeBtn').textContent = isBuy ? '🛒 BUY Now' : '💰 SELL Now';
   document.getElementById('alertOverlay').classList.add('show');
 }
 
-function alertDoTrade(){ const {k,type}=st.alertPend; dismissAlert(); openModal(k,type,true); }
-function dismissAlert(){ document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
+function alertDoTrade() { const {k,type}=st.alertPend; dismissAlert(); openModal(k,type,true); }
+function dismissAlert()  { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
 
-function openModal(k,type,auto=false){
-  const p=st.price[k]; if(!p){showToast('Price not loaded!');return;}
-  const rb=st.refBuy[k]||p, rs=st.refSell[k]||p;
-  const bt=rb*(1-cfg.buy/100), sv=rs*(1+cfg.sell/100);
-  const tgt=type==='buy'?bt:sv;
-  const hs=st.hold[k];
-  const tu=hs.reduce((s,h)=>s+h.units,0);
-  const tc=hs.reduce((s,h)=>s+(h.buyPrice||h.price)*h.units,0);
-  const avg=tu>0?tc/tu:0;
-  const un=cfg.units;
-  const est=(p*un).toFixed(2);
-  const ep=avg>0?((p-avg)*un).toFixed(2):null;
+function openModal(k, type, auto=false) {
+  const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; }
+  const rb = st.refBuy[k]  || p;
+  const rs = st.refSell[k] || p;
+  const bt = rb * (1 - cfg.buy  / 100);
+  const sv = rs * (1 + cfg.sell / 100);
+  const tgt = type === 'buy' ? bt : sv;
+  const hs  = st.hold[k];
+  const tu  = hs.reduce((s,h) => s + h.units, 0);
+  const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
+  const avg = tu > 0 ? tc / tu : 0;
+  const un  = cfg.units;
+  const est = (p * un).toFixed(2);
+  const ep  = avg > 0 ? ((p - avg) * un).toFixed(2) : null;
 
-  st.pend={k,type};
-  document.getElementById('mBox').className='modal '+ETF[k].mc;
-  document.getElementById('mIco').textContent=ETF[k].icon;
-  document.getElementById('mTit').textContent='Confirm '+type.toUpperCase();
-  document.getElementById('mTit').className=type==='buy'?'bh':'sh';
-  document.getElementById('mSub').textContent=auto?ETF[k].name+' — Grid signal!':ETF[k].name+' — Manual trade';
-  document.getElementById('mUnits').value=un;
+  st.pend = {k, type};
+  document.getElementById('mBox').className      = 'modal ' + ETF[k].mc;
+  document.getElementById('mIco').textContent     = ETF[k].icon;
+  document.getElementById('mTit').textContent     = 'Confirm ' + type.toUpperCase();
+  document.getElementById('mTit').className       = type === 'buy' ? 'bh' : 'sh';
+  document.getElementById('mSub').textContent     = auto ? ETF[k].name + ' — Grid signal!' : ETF[k].name + ' — Manual trade';
+  document.getElementById('mUnits').value         = un;
 
-  const bpWrap=document.getElementById('mBuyPriceWrap');
-  const bpInp=document.getElementById('mBuyPrice');
-  if(type==='buy'){bpWrap.style.display='block'; bpInp.value=p.toFixed(2);}
-  else bpWrap.style.display='none';
+  const bpWrap = document.getElementById('mBuyPriceWrap');
+  const bpInp  = document.getElementById('mBuyPrice');
+  if (type === 'buy') { bpWrap.style.display = 'block'; bpInp.value = p.toFixed(2); }
+  else                  bpWrap.style.display = 'none';
 
-  let rows=`
+  let rows = `
     <div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div>
     <div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div>
     <div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div>
     <div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${est}</span></div>`;
-  if(type==='sell'){
-    rows+=`<div class="mr"><span class="mk">Holdings</span><span class="mv">${tu} units</span></div>`;
-    if(avg>0) rows+=`<div class="mr"><span class="mk">Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
-    if(ep) rows+=`<div class="mr"><span class="mk">Est. P&L</span><span class="mv ${parseFloat(ep)>=0?'profit':'loss'}">${parseFloat(ep)>=0?'+':''}₹ ${ep}</span></div>`;
+  if (type === 'sell') {
+    rows += `<div class="mr"><span class="mk">Holdings</span><span class="mv">${tu} units</span></div>`;
+    if (avg > 0) rows += `<div class="mr"><span class="mk">Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
+    if (ep)      rows += `<div class="mr"><span class="mk">Est. P&L</span><span class="mv ${parseFloat(ep)>=0?'profit':'loss'}">${parseFloat(ep)>=0?'+':''}₹ ${ep}</span></div>`;
   }
-  document.getElementById('mRows').innerHTML=rows;
+  document.getElementById('mRows').innerHTML = rows;
 
-  const cb=document.getElementById('mCfm');
-  cb.textContent='Confirm '+type.toUpperCase();
-  cb.className=type==='buy'?'mcfb':'mcfs';
-  cb.disabled=(type==='sell'&&tu===0);
-  cb.style.opacity=(type==='sell'&&tu===0)?'0.35':'1';
-  if(type==='sell'&&tu===0) document.getElementById('mSub').textContent='⚠️ No holdings to sell!';
+  const cb = document.getElementById('mCfm');
+  cb.textContent    = 'Confirm ' + type.toUpperCase();
+  cb.className      = type === 'buy' ? 'mcfb' : 'mcfs';
+  cb.disabled       = (type === 'sell' && tu === 0);
+  cb.style.opacity  = (type === 'sell' && tu === 0) ? '0.35' : '1';
+  if (type === 'sell' && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!';
   document.getElementById('overlay').classList.add('show');
 }
 
-function closeModal(){ document.getElementById('overlay').classList.remove('show'); st.pend=null; }
+function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend = null; }
 
-function confirmTrade(){
-  const {k,type}=st.pend;
-  const units=parseInt(document.getElementById('mUnits').value)||cfg.units;
-  const liveP=st.price[k];
-  const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+function confirmTrade() {
+  const {k, type} = st.pend;
+  const units  = parseInt(document.getElementById('mUnits').value) || cfg.units;
+  const liveP  = st.price[k];
+  const time   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-  if(type==='buy'){
-    const bpRaw=parseFloat(document.getElementById('mBuyPrice').value);
-    const buyPrice=(bpRaw&&bpRaw>0)?bpRaw:liveP;
-    st.hold[k].push({price:buyPrice,buyPrice,units,time});
-    st.refBuy[k]=liveP; st.refSell[k]=liveP;
-    st.alerted[k].buy=false; st.alerted[k].sell=false;
-    addLog({type:'buy',k,price:buyPrice,units,time});
-    showToast('✅ BOUGHT '+units+' '+ETF[k].name+' @ ₹'+buyPrice.toFixed(2));
+  if (type === 'buy') {
+    const bpRaw  = parseFloat(document.getElementById('mBuyPrice').value);
+    const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP;
+    st.hold[k].push({price:buyPrice, buyPrice, units, time});
+    st.refBuy[k]  = liveP;
+    st.refSell[k] = liveP;
+    st.alerted[k].buy  = false;
+    st.alerted[k].sell = false;
+    addLog({type:'buy', k, price:buyPrice, units, time});
+    showToast('✅ BOUGHT ' + units + ' ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2));
   } else {
-    let toS=units,cost=0;
-    const hs=st.hold[k];
-    while(toS>0&&hs.length>0){
-      const h=hs[0],n=Math.min(h.units,toS);
-      cost+=n*(h.buyPrice||h.price); h.units-=n; toS-=n;
-      if(h.units===0)hs.shift();
+    let toS = units, cost = 0;
+    const hs = st.hold[k];
+    while (toS > 0 && hs.length > 0) {
+      const h = hs[0], n = Math.min(h.units, toS);
+      cost += n * (h.buyPrice || h.price);
+      h.units -= n; toS -= n;
+      if (h.units === 0) hs.shift();
     }
-    const pnl=(liveP*units)-cost;
-    st.real+=pnl; st.refSell[k]=liveP;
-    st.alerted[k].sell=false;
-    addLog({type:'sell',k,price:liveP,units,pnl,time});
-    showToast('✅ SOLD '+units+' '+ETF[k].name+' @ ₹'+liveP.toFixed(2)+' | P&L: '+(pnl>=0?'+':'')+'₹'+pnl.toFixed(2));
+    const pnl = (liveP * units) - cost;
+    st.real   += pnl;
+    st.refSell[k]      = liveP;
+    st.alerted[k].sell = false;
+    addLog({type:'sell', k, price:liveP, units, pnl, time});
+    showToast('✅ SOLD ' + units + ' ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl>=0?'+':'') + '₹' + pnl.toFixed(2));
   }
   closeModal(); updateCard(k); saveSt();
 }
 
-function addLog(e){ st.log.unshift(e); renderLog(); }
-function renderLog(){
-  const el=document.getElementById('logBar');
-  if(!st.log.length){el.innerHTML='<span class="log-empty-txt">Trades will appear here…</span>';return;}
-  el.innerHTML=st.log.slice(0,25).map(l=>
+function addLog(e)  { st.log.unshift(e); renderLog(); }
+function renderLog() {
+  const el = document.getElementById('logBar');
+  if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; }
+  el.innerHTML = st.log.slice(0,25).map(l =>
     `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units}u @ ₹${l.price.toFixed(2)} ${l.pnl!==undefined?(l.pnl>=0?'+':'')+'₹'+l.pnl.toFixed(2):''} · ${l.time}</div>`
   ).join('');
 }
 
-function saveSt(){
-  try{sessionStorage.setItem('etf5',JSON.stringify({refBuy:st.refBuy,refSell:st.refSell,hold:st.hold,log:st.log,real:st.real,alerted:st.alerted}));}catch(_){}
+function saveSt() {
+  try {
+    sessionStorage.setItem('etf5', JSON.stringify({
+      refBuy:st.refBuy, refSell:st.refSell,
+      hold:st.hold, log:st.log,
+      real:st.real, alerted:st.alerted
+    }));
+  } catch(_) {}
 }
-function loadSt(){
-  try{const r=sessionStorage.getItem('etf5');if(!r)return;Object.assign(st,JSON.parse(r));renderLog();}catch(_){}
+function loadSt() {
+  try {
+    const r = sessionStorage.getItem('etf5');
+    if (!r) return;
+    Object.assign(st, JSON.parse(r));
+    renderLog();
+  } catch(_) {}
 }
-function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 // CAPITAL PLANNER
-function toggleCap(){
-  const p=document.getElementById('capPanel'),b=document.getElementById('capToggle');
-  const o=p.classList.toggle('open'); b.classList.toggle('open',o);
-  if(o)calcCapital();
+function toggleCap() {
+  const p = document.getElementById('capPanel'), b = document.getElementById('capToggle');
+  const o = p.classList.toggle('open');
+  b.classList.toggle('open', o);
+  if (o) calcCapital();
 }
-function fmt(n){return '₹ '+n.toLocaleString('en-IN',{maximumFractionDigits:2});}
-function calcCapital(){
-  const total=parseFloat(document.getElementById('cp-total').value)||0;
-  const parts=parseInt(document.getElementById('cp-parts').value)||1;
-  const gOrd=parseInt(document.getElementById('cp-gord').value)||1;
-  const sOrd=parseInt(document.getElementById('cp-sord').value)||1;
-  const pp=total/parts;
-  document.getElementById('cp-gallot').textContent=fmt(pp);
-  document.getElementById('cp-sallot').textContent=fmt(pp);
-  renderCapCard('G',pp,gOrd); renderCapCard('S',pp,sOrd);
+function fmt(n) { return '₹ ' + n.toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function calcCapital() {
+  const total = parseFloat(document.getElementById('cp-total').value) || 0;
+  const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
+  const gOrd  = parseInt(document.getElementById('cp-gord').value)    || 1;
+  const sOrd  = parseInt(document.getElementById('cp-sord').value)    || 1;
+  const pp    = total / parts;
+  document.getElementById('cp-gallot').textContent = fmt(pp);
+  document.getElementById('cp-sallot').textContent = fmt(pp);
+  renderCapCard('G', pp, gOrd);
+  renderCapCard('S', pp, sOrd);
 }
-function renderCapCard(k,allot,orders){
-  const po=allot/orders,price=st.price[k];
-  const resEl=document.getElementById('cp-'+(k==='G'?'g':'s')+'res');
-  const rows=resEl.querySelectorAll('.cap-rr .cv');
-  rows[0].textContent=fmt(po);
-  if(price&&price>0){
-    const u=Math.floor(po/price),used=u*price;
-    rows[1].textContent=u+' units';
-    rows[2].textContent=fmt(used);
-    rows[3].textContent='₹ '+(po-used).toFixed(2)+' leftover';
-  } else { rows[1].textContent='— (loading)'; rows[2].textContent='—'; rows[3].textContent='—'; }
+function renderCapCard(k, allot, orders) {
+  const po    = allot / orders, price = st.price[k];
+  const resEl = document.getElementById('cp-' + (k==='G'?'g':'s') + 'res');
+  const rows  = resEl.querySelectorAll('.cap-rr .cv');
+  rows[0].textContent = fmt(po);
+  if (price && price > 0) {
+    const u    = Math.floor(po / price);
+    const used = u * price;
+    rows[1].textContent = u + ' units';
+    rows[2].textContent = fmt(used);
+    rows[3].textContent = '₹ ' + (po - used).toFixed(2) + ' leftover';
+  } else {
+    rows[1].textContent = '— (loading)';
+    rows[2].textContent = '—';
+    rows[3].textContent = '—';
+  }
 }
 
-document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
-document.getElementById('alertOverlay').addEventListener('click',e=>{if(e.target.id==='alertOverlay')dismissAlert();});
+document.getElementById('overlay').addEventListener('click', e => { if(e.target.id==='overlay') closeModal(); });
+document.getElementById('alertOverlay').addEventListener('click', e => { if(e.target.id==='alertOverlay') dismissAlert(); });
 </script>
 </body>
 </html>
