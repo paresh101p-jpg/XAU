@@ -12,7 +12,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111; color:#fff; min-height:100vh; padding-bottom:52px; }
 
-/* Login Screen */
+/* Login Screen - sabse pehle ye dikhega */
 .login-screen {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -20,7 +20,7 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
   backdrop-filter: blur(10px);
 }
 .login-card {
@@ -62,7 +62,9 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .btn-google:hover { background: #e0e0e0; transform: scale(0.98); }
 .app-hidden { display: none; }
 
-/* Main App Styles (same as original) */
+/* Rest of your app styles (same as before) */
+/* ... (I'll include full styles from previous working code) ... */
+/* For brevity, I'll include a minimal set but you need full. Actually I'll paste the full style block from my previous code. */
 .top-header { background:#1a1a1a; border-bottom:2px solid #2e2e2e; padding:10px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 .app-title { font-size:0.95rem; }
 .app-title .g { color:#FFD700; }
@@ -347,18 +349,18 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 </head>
 <body>
 
-<!-- LOGIN SCREEN (Pehle yeh dikhega) -->
+<!-- LOGIN SCREEN - यही सबसे पहले दिखेगा -->
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <h1>⚜️ Gold & Silver</h1>
-    <p>Sign in with Google to sync your portfolio across devices</p>
+    <p>अपने पोर्टफोलियो को सभी डिवाइस पर सिंक करने के लिए Google से साइन इन करें</p>
     <button id="googleSignInBtn" class="btn-google">
       <span>🔐</span> Sign in with Google
     </button>
   </div>
 </div>
 
-<!-- MAIN APP (Login ke baad dikhega) -->
+<!-- MAIN APP (पहले hidden रहेगा, login के बाद दिखेगा) -->
 <div id="appContent" style="display: none;">
   <div class="top-header">
     <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES Tracker <span class="save-dot" id="saveDot"></span></div>
@@ -434,7 +436,6 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 
-  <!-- Modals -->
   <div class="overlay" id="overlay"><div class="modal" id="mBox"><div class="mtop"><div class="mic" id="mIco">🥇</div><h3 id="mTit" class="bh">Confirm BUY</h3><p id="mSub">Grid signal</p></div><div class="mrows" id="mRows"></div><div class="m-buy-price" id="mBuyPriceWrap"><label>✏️ Actual Buy Price (Dhan App Fill Price)</label><input type="number" id="mBuyPrice" step="0.01" placeholder="Actual fill price daalo"><div class="bp-hint">Live price default hai — apna actual fill price daalo</div></div><div class="munits"><label>Units to Trade</label><input type="number" id="mUnits" value="10" min="1"></div><div class="mbtns"><button class="mcnl" onclick="closeModal()">Cancel</button><button id="mCfm" class="mcfb" onclick="confirmTrade()">Confirm BUY</button></div></div></div>
   <div class="alert-overlay" id="alertOverlay"><div class="alert-box" id="alertBox"><div class="ap-head"><span class="ap-icon" id="apIcon">🥇</span><div class="ap-type" id="apType">BUY SIGNAL</div><div class="ap-title" id="apTitle">Target Hit!</div></div><div class="alert-rows" id="alertRows"></div><div class="alert-btns"><button class="btn-alert-trade" id="alertTradeBtn" onclick="alertDoTrade()">🛒 Trade Now</button><button class="btn-alert-dismiss" onclick="dismissAlert()">✕ Dismiss</button></div></div></div>
   <div class="toast" id="toast"></div>
