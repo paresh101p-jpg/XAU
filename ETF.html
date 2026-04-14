@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold & Silver Bees Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0f0e0c;
+  --s1: #181610;
+  --s2: #201e17;
+  --border: #2e2b20;
+  --gold: #d4a843;
+  --gold2: #f0c866;
+  --silver: #9eb3c8;
+  --silver2: #c8dded;
+  --green: #3ecf6a;
+  --red: #e85555;
+  --text: #ede8d8;
+  --muted: #6b6550;
+  --glow-gold: 0 0 32px rgba(212,168,67,0.18);
+  --glow-silver: 0 0 32px rgba(158,179,200,0.18);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 0 0 80px;
+  background-image:
+    radial-gradient(ellipse at 10% 0%, rgba(212,168,67,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(158,179,200,0.05) 0%, transparent 55%);
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 40px 20px 28px;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  display: block;
+  margin: 20px auto 0;
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 50%, var(--silver2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.header p {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+.date-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--gold);
+  background: rgba(212,168,67,0.08);
+  border: 1px solid rgba(212,168,67,0.2);
+  border-radius: 20px;
+  padding: 4px 14px;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+/* ── Summary Bar ── */
+.summary-bar {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  max-width: 700px;
+  margin: 0 auto 32px;
+  padding: 0 16px;
+}
+
+.sum-card {
+  flex: 1;
+  min-width: 130px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.sum-card .slabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.sum-card .sval {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.sum-card .sval.profit { color: var(--green); }
+.sum-card .sval.loss { color: var(--red); }
+.sum-card .sval.gold { color: var(--gold2); }
+.sum-card .sval.silver { color: var(--silver2); }
+
+/* ── ETF Cards ── */
+.cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.etf-card {
+  background: var(--s1);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+
+.etf-card.gold-card { box-shadow: var(--glow-gold); border-color: rgba(212,168,67,0.2); }
+.etf-card.silver-card { box-shadow: var(--glow-silver); border-color: rgba(158,179,200,0.15); }
+
+/* Card Header */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  margin-right: 8px;
+}
+
+.card-title h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.gold-card .card-title h2 { color: var(--gold2); }
+.silver-card .card-title h2 { color: var(--silver2); }
+
+.card-title p {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.live-price-block { text-align: right; }
+
+.live-price-block .lprice {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.live-price-block .lchange {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.lchange.up { color: var(--green); }
+.lchange.down { color: var(--red); }
+
+.live-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 5px;
+  animation: blink 1.4s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* Card Body — Grid */
+.card-body { padding: 16px 20px; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.info-cell {
+  background: var(--s2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+
+.info-cell .iclabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.info-cell .icval {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.icval.profit { color: var(--green); }
+.icval.loss { color: var(--red); }
+.icval.wait { color: var(--gold); }
+.icval.gold { color: var(--gold2); }
+.icval.silver { color: var(--silver2); }
+
+/* Targets Row */
+.targets-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.target-box {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.target-box.buy-box {
+  background: rgba(62,207,106,0.05);
+  border-color: rgba(62,207,106,0.2);
+}
+
+.target-box.sell-box {
+  background: rgba(232,85,85,0.05);
+  border-color: rgba(232,85,85,0.2);
+}
+
+.target-box .tblabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.target-box .tbval {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.target-box.buy-box .tbval { color: var(--green); }
+.target-box.sell-box .tbval { color: var(--red); }
+
+.alert-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  animation: blink 1s infinite;
+}
+
+.alert-badge.buy-alert { background: rgba(62,207,106,0.15); color: var(--green); }
+.alert-badge.sell-alert { background: rgba(232,85,85,0.15); color: var(--red); }
+
+/* Trade Buttons */
+.trade-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
+}
+
+.btn-buy { background: var(--green); color: #0a0f0d; }
+.btn-buy:hover { background: #4fe87a; transform: translateY(-1px); }
+.btn-sell { background: var(--red); color: #fff; }
+.btn-sell:hover { background: #ff6565; transform: translateY(-1px); }
+.btn-refresh {
+  background: var(--s2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  flex: 0 0 auto;
+  padding: 11px 16px;
+}
+.btn-refresh:hover { color: var(--text); border-color: var(--gold); }
+
+/* Formulas Section */
+.formulas-section {
+  max-width: 700px;
+  margin: 20px auto 0;
+  padding: 0 16px;
+}
+
+.formulas-section h3 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.formula-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.formula-chip {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.formula-chip .fc-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.formula-chip .fc-formula {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--gold);
+  word-break: break-all;
+}
+
+.silver-card ~ .formulas-section .fc-formula { color: var(--silver); }
+
+/* Trade Log */
+.log-section {
+  max-width: 700px;
+  margin: 20px auto 0;
+  padding: 0 16px;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.log-header h3 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.log-clear {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.log-clear:hover { color: var(--red); }
+
+.log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.log-row.buy-log { background: rgba(62,207,106,0.06); color: var(--green); border-left: 2px solid var(--green); }
+.log-row.sell-log { background: rgba(232,85,85,0.06); color: var(--red); border-left: 2px solid var(--red); }
+.log-row .log-time { color: var(--muted); font-size: 0.62rem; }
+.log-row .log-pnl { font-weight: 500; }
+
+.no-log {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 16px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--s1);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 360px;
+  width: 100%;
+  animation: popUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.modal.gold-modal { border: 1px solid rgba(212,168,67,0.35); box-shadow: var(--glow-gold); }
+.modal.silver-modal { border: 1px solid rgba(158,179,200,0.3); box-shadow: var(--glow-silver); }
+
+@keyframes popUp {
+  from { opacity:0; transform: scale(0.9) translateY(20px); }
+  to { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.modal-icon { font-size: 2.2rem; text-align: center; margin-bottom: 12px; }
+.modal h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; text-align: center; margin-bottom: 4px; }
+.modal h3.buy-title { color: var(--green); }
+.modal h3.sell-title { color: var(--red); }
+.modal .modal-sub { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
+
+.modal-detail {
+  background: var(--s2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mdr {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.mdr span:first-child { color: var(--muted); }
+.mdr span:last-child { color: var(--text); font-weight: 500; }
+.mdr span.profit { color: var(--green); }
+.mdr span.loss { color: var(--red); }
+
+.modal-units {
+  margin-bottom: 16px;
+}
+
+.modal-units label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modal-units input {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.modal-units input:focus { border-color: var(--gold); }
+
+.modal-actions { display: flex; gap: 10px; }
+.modal-actions .btn { flex: 1; }
+.btn-cancel { background: var(--s2); color: var(--muted); border: 1px solid var(--border); }
+.btn-confirm-buy { background: var(--green); color: #0a0f0d; }
+.btn-confirm-sell { background: var(--red); color: #fff; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--s1);
+  border: 1px solid var(--gold);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  padding: 12px 22px;
+  border-radius: 12px;
+  z-index: 300;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Settings */
+.settings-bar {
+  max-width: 700px;
+  margin: 0 auto 24px;
+  padding: 0 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.setting-group { display: flex; flex-direction: column; gap: 5px; }
+
+.setting-group label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.setting-group input {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  width: 100px;
+  outline: none;
+}
+
+.setting-group input:focus { border-color: var(--gold); }
+
+.btn-apply {
+  background: var(--gold);
+  color: #0f0e0c;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
+.btn-apply:hover { background: var(--gold2); }
+
+.status-row {
+  max-width: 700px;
+  margin: 0 auto 8px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.status-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.error-bar {
+  max-width: 700px;
+  margin: 0 auto 10px;
+  padding: 0 16px;
+}
+
+.error-msg {
+  background: rgba(255,200,0,0.06);
+  border: 1px solid rgba(255,200,0,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: #ffd600;
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .info-grid { grid-template-columns: repeat(2, 1fr); }
+  .formula-grid { grid-template-columns: 1fr; }
+  .targets-row { grid-template-columns: 1fr; }
+  .summary-bar { gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚜️ Gold & Silver Bees</h1>
+  <p>Grid Strategy Tracker · 2% Rule</p>
+  <div class="date-badge" id="dateDisplay">—</div>
+</div>
+
+<!-- Settings -->
+<div class="settings-bar">
+  <div class="setting-group">
+    <label>Buy % (below)</label>
+    <input type="number" id="cfg-buy" value="2" min="0.5" max="20" step="0.5">
+  </div>
+  <div class="setting-group">
+    <label>Sell % (above)</label>
+    <input type="number" id="cfg-sell" value="2" min="0.5" max="20" step="0.5">
+  </div>
+  <div class="setting-group">
+    <label>Default Units</label>
+    <input type="number" id="cfg-units" value="10" min="1" step="1">
+  </div>
+  <div class="setting-group">
+    <label>Refresh (sec)</label>
+    <input type="number" id="cfg-refresh" value="60" min="15" max="600" step="15">
+  </div>
+  <button class="btn-apply" onclick="applySettings()">Apply ↺</button>
+</div>
+
+<div class="status-row">
+  <span class="status-text" id="lastUpdated">Not yet refreshed</span>
+  <span class="status-text" id="nextRefresh"></span>
+</div>
+
+<div class="error-bar"><div class="error-msg" id="errorMsg"></div></div>
+
+<!-- Summary -->
+<div class="summary-bar">
+  <div class="sum-card">
+    <div class="slabel">Total Invested</div>
+    <div class="sval" id="sumInvested">₹ —</div>
+  </div>
+  <div class="sum-card">
+    <div class="slabel">Current Value</div>
+    <div class="sval" id="sumValue">₹ —</div>
+  </div>
+  <div class="sum-card">
+    <div class="slabel">Total P&L</div>
+    <div class="sval" id="sumPnl">₹ —</div>
+  </div>
+  <div class="sum-card">
+    <div class="slabel">Realised P&L</div>
+    <div class="sval" id="sumRealised">₹ 0</div>
+  </div>
+</div>
+
+<!-- ETF Cards -->
+<div class="cards-wrap">
+
+  <!-- GOLD BEES -->
+  <div class="etf-card gold-card" id="card-GOLDBEES">
+    <div class="card-head">
+      <div style="display:flex;align-items:center">
+        <span class="card-icon">🥇</span>
+        <div class="card-title">
+          <h2>Gold BeES</h2>
+          <p>GOLDBEES · NSE · <span class="live-dot"></span>LIVE</p>
+        </div>
+      </div>
+      <div class="live-price-block">
+        <div class="lprice" id="price-GOLDBEES">₹ —</div>
+        <div class="lchange" id="change-GOLDBEES">—</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="iclabel">Holdings</div>
+          <div class="icval gold" id="units-GOLDBEES">0 units</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Avg Buy Price</div>
+          <div class="icval" id="avg-GOLDBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Live P&L</div>
+          <div class="icval" id="pnl-GOLDBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">P&L %</div>
+          <div class="icval" id="pnlpct-GOLDBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Signal</div>
+          <div class="icval wait" id="signal-GOLDBEES">WAIT</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Today %</div>
+          <div class="icval" id="today-GOLDBEES">—</div>
+        </div>
+      </div>
+      <div class="targets-row">
+        <div class="target-box buy-box">
+          <div>
+            <div class="tblabel">Next Buy Target</div>
+            <div class="tbval" id="buytgt-GOLDBEES">₹ —</div>
+            <div style="font-family:'DM Mono';font-size:0.58rem;color:var(--muted);margin-top:2px" id="buyfrom-GOLDBEES">from ref —</div>
+          </div>
+          <span class="alert-badge buy-alert" id="buyalert-GOLDBEES" style="display:none">NOW</span>
+        </div>
+        <div class="target-box sell-box">
+          <div>
+            <div class="tblabel">Next Sell Target</div>
+            <div class="tbval" id="selltgt-GOLDBEES">₹ —</div>
+            <div style="font-family:'DM Mono';font-size:0.58rem;color:var(--muted);margin-top:2px" id="sellfrom-GOLDBEES">from ref —</div>
+          </div>
+          <span class="alert-badge sell-alert" id="sellalert-GOLDBEES" style="display:none">NOW</span>
+        </div>
+      </div>
+      <div class="trade-btns">
+        <button class="btn btn-buy" onclick="openModal('GOLDBEES','buy')">＋ BUY</button>
+        <button class="btn btn-sell" onclick="openModal('GOLDBEES','sell')">－ SELL</button>
+        <button class="btn btn-refresh" onclick="fetchOne('GOLDBEES')" title="Refresh">↺</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULAS — GOLD -->
+  <div class="formulas-section">
+    <h3>📐 Formulas Used — Gold Bees</h3>
+    <div class="formula-grid">
+      <div class="formula-chip">
+        <div class="fc-name">Buy Target</div>
+        <div class="fc-formula">RefPrice × (1 − Buy% ÷ 100)</div>
+      </div>
+      <div class="formula-chip">
+        <div class="fc-name">Sell Target</div>
+        <div class="fc-formula">RefPrice × (1 + Sell% ÷ 100)</div>
+      </div>
+      <div class="formula-chip">
+        <div class="fc-name">Live P&L</div>
+        <div class="fc-formula">(LivePrice − AvgBuy) × Units</div>
+      </div>
+      <div class="formula-chip">
+        <div class="fc-name">Avg Buy Price</div>
+        <div class="fc-formula">Σ(cost) ÷ Σ(units) [FIFO]</div>
+      </div>
+      <div class="formula-chip">
+        <div class="fc-name">P&L %</div>
+        <div class="fc-formula">(LiveP&L ÷ Invested) × 100</div>
+      </div>
+      <div class="formula-chip">
+        <div class="fc-name">Realised P&L (Sell)</div>
+        <div class="fc-formula">(SellPrice − AvgCost) × Units</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SILVER BEES -->
+  <div class="etf-card silver-card" id="card-SILVERBEES" style="margin-top:12px">
+    <div class="card-head">
+      <div style="display:flex;align-items:center">
+        <span class="card-icon">🥈</span>
+        <div class="card-title">
+          <h2>Silver BeES</h2>
+          <p>SILVERBEES · NSE · <span class="live-dot"></span>LIVE</p>
+        </div>
+      </div>
+      <div class="live-price-block">
+        <div class="lprice" id="price-SILVERBEES">₹ —</div>
+        <div class="lchange" id="change-SILVERBEES">—</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="iclabel">Holdings</div>
+          <div class="icval silver" id="units-SILVERBEES">0 units</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Avg Buy Price</div>
+          <div class="icval" id="avg-SILVERBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Live P&L</div>
+          <div class="icval" id="pnl-SILVERBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">P&L %</div>
+          <div class="icval" id="pnlpct-SILVERBEES">—</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Signal</div>
+          <div class="icval wait" id="signal-SILVERBEES">WAIT</div>
+        </div>
+        <div class="info-cell">
+          <div class="iclabel">Today %</div>
+          <div class="icval" id="today-SILVERBEES">—</div>
+        </div>
+      </div>
+      <div class="targets-row">
+        <div class="target-box buy-box">
+          <div>
+            <div class="tblabel">Next Buy Target</div>
+            <div class="tbval" id="buytgt-SILVERBEES">₹ —</div>
+            <div style="font-family:'DM Mono';font-size:0.58rem;color:var(--muted);margin-top:2px" id="buyfrom-SILVERBEES">from ref —</div>
+          </div>
+          <span class="alert-badge buy-alert" id="buyalert-SILVERBEES" style="display:none">NOW</span>
+        </div>
+        <div class="target-box sell-box">
+          <div>
+            <div class="tblabel">Next Sell Target</div>
+            <div class="tbval" id="selltgt-SILVERBEES">₹ —</div>
+            <div style="font-family:'DM Mono';font-size:0.58rem;color:var(--muted);margin-top:2px" id="sellfrom-SILVERBEES">from ref —</div>
+          </div>
+          <span class="alert-badge sell-alert" id="sellalert-SILVERBEES" style="display:none">NOW</span>
+        </div>
+      </div>
+      <div class="trade-btns">
+        <button class="btn btn-buy" onclick="openModal('SILVERBEES','buy')">＋ BUY</button>
+        <button class="btn btn-sell" onclick="openModal('SILVERBEES','sell')">－ SELL</button>
+        <button class="btn btn-refresh" onclick="fetchOne('SILVERBEES')" title="Refresh">↺</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULAS — SILVER -->
+  <div class="formulas-section">
+    <h3>📐 Formulas Used — Silver Bees</h3>
+    <div class="formula-grid" style="--fc-col: var(--silver)">
+      <div class="formula-chip" style="border-color:rgba(158,179,200,0.2)">
+        <div class="fc-name">Buy Target</div>
+        <div class="fc-formula" style="color:var(--silver2)">RefPrice × (1 − Buy% ÷ 100)</div>
+      </div>
+      <div class="formula-chip" style="border-color:rgba(158,179,200,0.2)">
+        <div class="fc-name">Sell Target</div>
+        <div class="fc-formula" style="color:var(--silver2)">RefPrice × (1 + Sell% ÷ 100)</div>
+      </div>
+      <div class="formula-chip" style="border-color:rgba(158,179,200,0.2)">
+        <div class="fc-name">Live P&L</div>
+        <div class="fc-formula" style="color:var(--silver2)">(LivePrice − AvgBuy) × Units</div>
+      </div>
+      <div class="formula-chip" style="border-color:rgba(158,179,200,0.2)">
+        <div class="fc-name">Today's Change</div>
+        <div class="fc-formula" style="color:var(--silver2)">(Live − PrevClose) ÷ PrevClose × 100</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade Log -->
+  <div class="log-section">
+    <div class="log-header">
+      <h3>📋 Trade Log</h3>
+      <button class="log-clear" onclick="clearLog()">Clear All</button>
+    </div>
+    <div id="tradeLog"><div class="no-log">No trades yet. Start buying!</div></div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-icon" id="modalIcon">🥇</div>
+    <h3 id="modalTitle" class="buy-title">Confirm BUY</h3>
+    <p class="modal-sub" id="modalSub">Grid signal triggered</p>
+    <div class="modal-detail" id="modalDetail"></div>
+    <div class="modal-units">
+      <label>Units to Trade</label>
+      <input type="number" id="modalUnits" value="10" min="1" step="1">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn" id="modalConfirm" onclick="confirmTrade()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────
+const ETFs = {
+  GOLDBEES:   { symbol: 'GOLDBEES.NS',   name: 'Gold BeES',   icon: '🥇' },
+  SILVERBEES: { symbol: 'SILVERBEES.NS', name: 'Silver BeES', icon: '🥈' }
+};
+
+let cfg = { buyPct: 2, sellPct: 2, defaultUnits: 10, refreshSec: 60 };
+
+let state = {
+  prices: { GOLDBEES: null, SILVERBEES: null },
+  prevClose: { GOLDBEES: null, SILVERBEES: null },
+  refBuy:  { GOLDBEES: null, SILVERBEES: null },   // last buy ref price
+  refSell: { GOLDBEES: null, SILVERBEES: null },   // last sell ref price
+  holdings: { GOLDBEES: [], SILVERBEES: [] },      // [{price, units}]
+  tradeLog: [],
+  realisedPnl: 0,
+  pendingTrade: null,
+  refreshTimer: null,
+  countdown: 0,
+  countdownTimer: null
+};
+
+// ─── INIT ─────────────────────────────────────────────
+window.onload = () => {
+  updateDate();
+  loadState();
+  fetchAll();
+  startRefreshLoop();
+};
+
+function updateDate() {
+  const d = new Date();
+  document.getElementById('dateDisplay').textContent =
+    d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) +
+    ' · ' + d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ─── SETTINGS ─────────────────────────────────────────
+function applySettings() {
+  cfg.buyPct       = parseFloat(document.getElementById('cfg-buy').value)     || 2;
+  cfg.sellPct      = parseFloat(document.getElementById('cfg-sell').value)     || 2;
+  cfg.defaultUnits = parseInt(document.getElementById('cfg-units').value)      || 10;
+  cfg.refreshSec   = parseInt(document.getElementById('cfg-refresh').value)    || 60;
+  document.getElementById('modalUnits').value = cfg.defaultUnits;
+  startRefreshLoop();
+  updateAllUI();
+  showToast('Settings applied!');
+}
+
+// ─── REFRESH LOOP ─────────────────────────────────────
+function startRefreshLoop() {
+  if (state.refreshTimer) clearInterval(state.refreshTimer);
+  if (state.countdownTimer) clearInterval(state.countdownTimer);
+  state.refreshTimer = setInterval(fetchAll, cfg.refreshSec * 1000);
+  state.countdown = cfg.refreshSec;
+  state.countdownTimer = setInterval(() => {
+    state.countdown--;
+    if (state.countdown <= 0) state.countdown = cfg.refreshSec;
+    document.getElementById('nextRefresh').textContent = `Next refresh in ${state.countdown}s`;
+  }, 1000);
+}
+
+// ─── FETCH ────────────────────────────────────────────
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`
+];
+
+async function fetchOne(etfKey) {
+  const sym = ETFs[etfKey].symbol;
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`;
+  let data = null;
+
+  for (const makeProxy of PROXIES) {
+    try {
+      const res = await fetch(makeProxy(yahooUrl));
+      if (!res.ok) continue;
+      const json = await res.json();
+      // allorigins wraps in contents
+      const parsed = json?.chart?.result ? json : (json?.contents ? JSON.parse(json.contents) : null);
+      if (parsed?.chart?.result?.[0]) { data = parsed; break; }
+    } catch (_) {}
+  }
+
+  if (!data) { showError(`${ETFs[etfKey].name}: Price fetch failed. Check internet.`); return; }
+
+  const meta = data.chart.result[0].meta;
+  const price  = meta.regularMarketPrice || meta.previousClose;
+  const prevC  = meta.chartPreviousClose || meta.previousClose;
+
+  state.prices[etfKey]   = price;
+  state.prevClose[etfKey] = prevC;
+  if (!state.refBuy[etfKey])  state.refBuy[etfKey]  = price;
+  if (!state.refSell[etfKey]) state.refSell[etfKey] = price;
+
+  updateCardUI(etfKey);
+  updateSummary();
+  checkAlerts(etfKey);
+  hideError();
+  saveState();
+
+  document.getElementById('lastUpdated').textContent =
+    'Updated: ' + new Date().toLocaleTimeString('en-IN');
+  updateDate();
+}
+
+async function fetchAll() {
+  await fetchOne('GOLDBEES');
+  await fetchOne('SILVERBEES');
+}
+
+// ─── UI UPDATE ────────────────────────────────────────
+function updateAllUI() {
+  for (const k of Object.keys(ETFs)) updateCardUI(k);
+  updateSummary();
+}
+
+function updateCardUI(k) {
+  const p = state.prices[k];
+  const pv = state.prevClose[k];
+  if (!p) return;
+
+  // Price + change
+  document.getElementById(`price-${k}`).textContent = '₹ ' + p.toFixed(2);
+  const chg = p - pv;
+  const chgPct = (chg / pv) * 100;
+  const cel = document.getElementById(`change-${k}`);
+  cel.textContent = `${chg >= 0 ? '▲' : '▼'} ₹${Math.abs(chg).toFixed(2)} (${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%)`;
+  cel.className = 'lchange ' + (chg >= 0 ? 'up' : 'down');
+
+  // Today %
+  const tdEl = document.getElementById(`today-${k}`);
+  tdEl.textContent = (chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%';
+  tdEl.className = 'icval ' + (chgPct >= 0 ? 'profit' : 'loss');
+
+  // Holdings & P&L
+  const holdings = state.holdings[k];
+  const totalUnits = holdings.reduce((s, h) => s + h.units, 0);
+  const totalCost  = holdings.reduce((s, h) => s + h.price * h.units, 0);
+  const avgBuy     = totalUnits > 0 ? totalCost / totalUnits : 0;
+  const pnl        = totalUnits > 0 ? (p - avgBuy) * totalUnits : 0;
+  const pnlPct     = avgBuy > 0 ? ((p - avgBuy) / avgBuy) * 100 : 0;
+
+  document.getElementById(`units-${k}`).textContent = totalUnits + ' units';
+  document.getElementById(`avg-${k}`).textContent   = avgBuy > 0 ? '₹ ' + avgBuy.toFixed(2) : '—';
+
+  const pnlEl = document.getElementById(`pnl-${k}`);
+  pnlEl.textContent = totalUnits > 0 ? (pnl >= 0 ? '+₹ ' : '-₹ ') + Math.abs(pnl).toFixed(2) : '—';
+  pnlEl.className   = 'icval ' + (pnl >= 0 ? 'profit' : 'loss');
+
+  const pnlPctEl = document.getElementById(`pnlpct-${k}`);
+  pnlPctEl.textContent = totalUnits > 0 ? (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%' : '—';
+  pnlPctEl.className   = 'icval ' + (pnlPct >= 0 ? 'profit' : 'loss');
+
+  // Targets — Formula: RefPrice × (1 ± pct/100)
+  const rb = state.refBuy[k]  || p;
+  const rs = state.refSell[k] || p;
+  const buyTarget  = rb  * (1 - cfg.buyPct  / 100);
+  const sellTarget = rs  * (1 + cfg.sellPct / 100);
+
+  document.getElementById(`buytgt-${k}`).textContent  = '₹ ' + buyTarget.toFixed(2);
+  document.getElementById(`selltgt-${k}`).textContent = '₹ ' + sellTarget.toFixed(2);
+  document.getElementById(`buyfrom-${k}`).textContent  = `from ref ₹${rb.toFixed(2)} −${cfg.buyPct}%`;
+  document.getElementById(`sellfrom-${k}`).textContent = `from ref ₹${rs.toFixed(2)} +${cfg.sellPct}%`;
+
+  // Signal
+  const sigEl = document.getElementById(`signal-${k}`);
+  if (p <= buyTarget) {
+    sigEl.textContent = '🟢 BUY NOW';
+    sigEl.className   = 'icval profit';
+  } else if (p >= sellTarget && totalUnits > 0) {
+    sigEl.textContent = '🔴 SELL NOW';
+    sigEl.className   = 'icval loss';
+  } else {
+    sigEl.textContent = 'WAIT';
+    sigEl.className   = 'icval wait';
+  }
+
+  // Alert badges
+  document.getElementById(`buyalert-${k}`).style.display  = p <= buyTarget ? 'inline' : 'none';
+  document.getElementById(`sellalert-${k}`).style.display = (p >= sellTarget && totalUnits > 0) ? 'inline' : 'none';
+}
+
+function updateSummary() {
+  let totalInvested = 0, totalValue = 0;
+  for (const k of Object.keys(ETFs)) {
+    const p = state.prices[k];
+    const h = state.holdings[k];
+    const units = h.reduce((s,x) => s + x.units, 0);
+    const cost  = h.reduce((s,x) => s + x.price * x.units, 0);
+    totalInvested += cost;
+    totalValue    += p ? p * units : cost;
+  }
+  const pnl = totalValue - totalInvested;
+  document.getElementById('sumInvested').textContent = '₹ ' + fmtNum(totalInvested);
+  document.getElementById('sumValue').textContent    = '₹ ' + fmtNum(totalValue);
+
+  const pnlEl = document.getElementById('sumPnl');
+  pnlEl.textContent = (pnl >= 0 ? '+₹ ' : '-₹ ') + fmtNum(Math.abs(pnl));
+  pnlEl.className   = 'sval ' + (pnl >= 0 ? 'profit' : 'loss');
+
+  const rEl = document.getElementById('sumRealised');
+  rEl.textContent = (state.realisedPnl >= 0 ? '+₹ ' : '-₹ ') + fmtNum(Math.abs(state.realisedPnl));
+  rEl.className   = 'sval ' + (state.realisedPnl >= 0 ? 'profit' : 'loss');
+}
+
+// ─── ALERTS ───────────────────────────────────────────
+function checkAlerts(k) {
+  const p = state.prices[k];
+  if (!p) return;
+  const rb = state.refBuy[k]  || p;
+  const rs = state.refSell[k] || p;
+  const buyTarget  = rb  * (1 - cfg.buyPct  / 100);
+  const sellTarget = rs  * (1 + cfg.sellPct / 100);
+  const hasHoldings = state.holdings[k].reduce((s,h)=>s+h.units,0) > 0;
+
+  if (p <= buyTarget && !document.getElementById('modalOverlay').classList.contains('show')) {
+    openModal(k, 'buy', true);
+  } else if (p >= sellTarget && hasHoldings && !document.getElementById('modalOverlay').classList.contains('show')) {
+    openModal(k, 'sell', true);
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────
+function openModal(etfKey, type, auto = false) {
+  const p = state.prices[etfKey];
+  if (!p) { showToast('Price not loaded yet!'); return; }
+  const rb = state.refBuy[etfKey]  || p;
+  const rs = state.refSell[etfKey] || p;
+  const buyTarget  = rb  * (1 - cfg.buyPct  / 100);
+  const sellTarget = rs  * (1 + cfg.sellPct / 100);
+  const trigPrice  = type === 'buy' ? buyTarget : sellTarget;
+  const units      = cfg.defaultUnits;
+  const totalUnits = state.holdings[etfKey].reduce((s,h)=>s+h.units,0);
+  const totalCost  = state.holdings[etfKey].reduce((s,h)=>s+h.price*h.units,0);
+  const avgBuy     = totalUnits > 0 ? totalCost / totalUnits : 0;
+
+  state.pendingTrade = { etfKey, type };
+
+  const isGold = etfKey === 'GOLDBEES';
+  document.getElementById('modalBox').className = 'modal ' + (isGold ? 'gold-modal' : 'silver-modal');
+  document.getElementById('modalIcon').textContent     = ETFs[etfKey].icon;
+  document.getElementById('modalTitle').textContent    = `Confirm ${type.toUpperCase()}`;
+  document.getElementById('modalTitle').className      = type === 'buy' ? 'buy-title' : 'sell-title';
+  document.getElementById('modalSub').textContent      = auto
+    ? `${ETFs[etfKey].name} — Grid signal triggered!`
+    : `${ETFs[etfKey].name} — Manual trade`;
+  document.getElementById('modalUnits').value          = cfg.defaultUnits;
+
+  const estimated = (p * units).toFixed(2);
+  const pnlOnSell = avgBuy > 0 ? ((p - avgBuy) * units).toFixed(2) : '—';
+
+  document.getElementById('modalDetail').innerHTML = `
+    <div class="mdr"><span>ETF</span><span>${ETFs[etfKey].name}</span></div>
+    <div class="mdr"><span>Live Price</span><span>₹ ${p.toFixed(2)}</span></div>
+    <div class="mdr"><span>Target Price</span><span>₹ ${trigPrice.toFixed(2)}</span></div>
+    <div class="mdr"><span>Est. Total</span><span>₹ ${estimated}</span></div>
+    ${type === 'sell' ? `<div class="mdr"><span>Holdings</span><span>${totalUnits} units</span></div>` : ''}
+    ${type === 'sell' && avgBuy > 0 ? `<div class="mdr"><span>Avg Buy</span><span>₹ ${avgBuy.toFixed(2)}</span></div>` : ''}
+    ${type === 'sell' && avgBuy > 0 ? `<div class="mdr"><span>Est. P&L</span><span class="${parseFloat(pnlOnSell)>=0?'profit':'loss'}">${parseFloat(pnlOnSell)>=0?'+':''}₹ ${pnlOnSell}</span></div>` : ''}
+  `;
+
+  const cb = document.getElementById('modalConfirm');
+  cb.textContent = `Confirm ${type.toUpperCase()}`;
+  cb.className   = `btn btn-confirm-${type}`;
+
+  if (type === 'sell' && totalUnits === 0) {
+    cb.disabled   = true;
+    cb.style.opacity = '0.4';
+    document.getElementById('modalSub').textContent = '⚠️ No holdings to sell!';
+  } else {
+    cb.disabled   = false;
+    cb.style.opacity = '1';
+  }
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  state.pendingTrade = null;
+}
+
+function confirmTrade() {
+  const t = state.pendingTrade;
+  if (!t) return;
+  const { etfKey, type } = t;
+  const units = parseInt(document.getElementById('modalUnits').value) || cfg.defaultUnits;
+  const p     = state.prices[etfKey];
+  const now   = new Date().toLocaleString('en-IN');
+
+  if (type === 'buy') {
+    // Formula: add holding, update refBuy
+    state.holdings[etfKey].push({ price: p, units });
+    state.refBuy[etfKey]  = p;
+    state.refSell[etfKey] = p;
+    addLog({ type: 'buy', etf: etfKey, price: p, units, time: now });
+    showToast(`✅ BUY ${units} ${ETFs[etfKey].name} @ ₹${p.toFixed(2)}`);
+  } else {
+    // FIFO Sell — Formula: (SellPrice − CostBasis) × Units
+    let toSell   = units;
+    let costBasis = 0;
+    const holdings = state.holdings[etfKey];
+    while (toSell > 0 && holdings.length > 0) {
+      const h = holdings[0];
+      const sellNow = Math.min(h.units, toSell);
+      costBasis += sellNow * h.price;
+      h.units   -= sellNow;
+      toSell    -= sellNow;
+      if (h.units === 0) holdings.shift();
+    }
+    const realisedPnl = (p * units) - costBasis;
+    state.realisedPnl += realisedPnl;
+    state.refSell[etfKey] = p;
+    addLog({ type: 'sell', etf: etfKey, price: p, units, pnl: realisedPnl, time: now });
+    showToast(`✅ SELL ${units} ${ETFs[etfKey].name} @ ₹${p.toFixed(2)} | P&L: ${realisedPnl >= 0 ? '+' : ''}₹${realisedPnl.toFixed(2)}`);
+  }
+
+  closeModal();
+  updateCardUI(etfKey);
+  updateSummary();
+  saveState();
+}
+
+// ─── LOG ──────────────────────────────────────────────
+function addLog(entry) {
+  state.tradeLog.unshift(entry);
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('tradeLog');
+  if (!state.tradeLog.length) {
+    el.innerHTML = '<div class="no-log">No trades yet. Start buying!</div>';
+    return;
+  }
+  el.innerHTML = state.tradeLog.slice(0, 30).map(t =>
+    `<div class="log-row ${t.type}-log">
+      <span>${ETFs[t.etf].icon} ${t.type.toUpperCase()} ${t.units}u ${ETFs[t.etf].name} @ ₹${t.price.toFixed(2)}</span>
+      ${t.pnl !== undefined ? `<span class="log-pnl">${t.pnl >= 0 ? '+' : ''}₹${t.pnl.toFixed(2)}</span>` : ''}
+      <span class="log-time">${t.time}</span>
+    </div>`
+  ).join('');
+}
+
+function clearLog() {
+  if (!confirm('Clear all trade log? (Holdings & P&L stay)')) return;
+  state.tradeLog = [];
+  renderLog();
+  saveState();
+}
+
+// ─── PERSIST ──────────────────────────────────────────
+function saveState() {
+  try {
+    const toSave = {
+      refBuy: state.refBuy, refSell: state.refSell,
+      holdings: state.holdings, tradeLog: state.tradeLog,
+      realisedPnl: state.realisedPnl
+    };
+    sessionStorage.setItem('etf_state', JSON.stringify(toSave));
+  } catch (_) {}
+}
+
+function loadState() {
+  try {
+    const raw = sessionStorage.getItem('etf_state');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    Object.assign(state, s);
+    renderLog();
+  } catch (_) {}
+}
+
+// ─── UTILS ────────────────────────────────────────────
+function fmtNum(n) {
+  if (!n || isNaN(n)) return '0';
+  return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3800);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 8000);
+}
+
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+</script>
+</body>
+</html>
