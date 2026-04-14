@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚜️ Gold &amp; Silver BeES</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>⚜️ Gold &amp; Silver BeES (Cloud Sync)</title>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111; color:#fff; min-height:100vh; padding-bottom:52px; }
@@ -464,12 +467,30 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 <div class="toast" id="toast"></div>
 
 <script>
+// ======================= FIREBASE CONFIG =======================
+// 🔴🔴🔴 YAHAN APNI FIREBASE CONFIG PASTE KARO 🔴🔴🔴
+// Firebase console se milne wali config yahan copy karo
+const firebaseConfig = {
+  apiKey: "AIzaSyAGODV4ktENpN7k_k5OjGt4Zcx_iLfREkE",
+  authDomain: "gold-silver-tracke.firebaseapp.com",
+  projectId: "gold-silver-tracke",
+  storageBucket: "gold-silver-tracke.firebasestorage.app",
+  messagingSenderId: "741308063485",
+  appId: "1:741308063485:web:0d42f26f428e8b036d6894",
+  measurementId: "G-25WVBN0B0G"
+};
+// ================================================================
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const DB_REF = 'etf_bees_user_data';
+
+// ======================= GLOBAL STATE =======================
 const ETF = {
   G:{sym:'GOLDBEES.NS',  name:'Gold BeES',  icon:'🥇',mc:'gm',cls:'gd'},
   S:{sym:'SILVERBEES.NS',name:'Silver BeES',icon:'🥈',mc:'sm',cls:'sv'}
 };
-
-const LS_KEY = 'etf_bees_v1';
 
 let cfg = {buy:2,sell:2,units:10,ref:60};
 let st  = {
@@ -483,6 +504,66 @@ let st  = {
   prevPrice:{G:null,S:null}
 };
 
+// ======================= FIREBASE SAVE/LOAD =======================
+async function saveToFirebase() {
+  try {
+    const dataToSave = {
+      refBuy: st.refBuy,
+      refSell: st.refSell,
+      hold: st.hold,
+      log: st.log,
+      real: st.real,
+      alerted: st.alerted,
+      cfg: { buy: cfg.buy, sell: cfg.sell },
+      cap: {
+        total: document.getElementById('cp-total').value,
+        parts: document.getElementById('cp-parts').value,
+        gord: document.getElementById('cp-gord').value,
+        sord: document.getElementById('cp-sord').value
+      }
+    };
+    await database.ref(DB_REF).set(dataToSave);
+    const dot = document.getElementById('saveDot');
+    if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
+  } catch(e) { console.warn("Firebase save error", e); }
+}
+
+async function loadFromFirebase() {
+  try {
+    const snapshot = await database.ref(DB_REF).get();
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.refBuy)  st.refBuy  = data.refBuy;
+      if (data.refSell) st.refSell = data.refSell;
+      if (data.hold)    st.hold    = data.hold;
+      if (data.log)     st.log     = data.log;
+      if (data.real !== undefined) st.real = data.real;
+      if (data.alerted) st.alerted = data.alerted;
+      if (data.cfg) {
+        cfg.buy  = data.cfg.buy  || 2;
+        cfg.sell = data.cfg.sell || 2;
+        document.getElementById('c-buy').value  = cfg.buy;
+        document.getElementById('c-sell').value = cfg.sell;
+      }
+      if (data.cap) {
+        if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
+        if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
+        if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
+        if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
+      }
+      renderLog();
+      updateAll();
+      showToast('☁️ Cloud data loaded! Same holdings on all devices.');
+    } else {
+      await saveToFirebase();
+    }
+  } catch(e) { console.warn("Firebase load error", e); showToast('⚠️ Cloud load failed, using local data'); }
+}
+
+// Override save function
+window.saveSt = function() { saveToFirebase(); };
+
+// ======================= ORIGINAL APP FUNCTIONS =======================
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -644,7 +725,7 @@ async function fetchOne(k) {
   updatePriceColor(k);
   updateCard(k);
   alertCheck(k);
-  saveSt();
+  saveToFirebase();
   const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = 'Updated ' + t;
   setFetchStatus('', '✓ Live · ' + t);
@@ -661,7 +742,7 @@ async function tickOne(k) {
   updatePriceColor(k);
   updateCard(k);
   alertCheck(k);
-  saveSt();
+  saveToFirebase();
   const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = '🔄 ' + t;
   setFetchStatus('', '✓ Live · ' + t);
@@ -697,44 +778,6 @@ async function fetchAll() {
   setFetchStatus('loading', 'Fetching live prices…');
   await fetchOne('G');
   await fetchOne('S');
-}
-
-window.onload = () => {
-  loadSt();
-  setFetchStatus('loading', 'Connecting to price feed…');
-  fetchAll();
-  startLoop();
-  startTickLoop();
-  mktCheck();
-  setInterval(mktCheck, 30000);
-  if (Notification && Notification.permission === 'default')
-    setTimeout(() => Notification.requestPermission(), 2000);
-};
-
-function mktCheck() {
-  const ist  = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
-  const d    = ist.getDay();
-  const mins = ist.getHours() * 60 + ist.getMinutes();
-  const isOpen = d >= 1 && d <= 5 && mins >= 555 && mins <= 930;
-  document.getElementById('mktDot').className   = 'mkt-dot '   + (isOpen ? 'open' : 'closed');
-  document.getElementById('mktLabel').className = 'mkt-label ' + (isOpen ? 'open' : 'closed');
-  document.getElementById('mktLabel').textContent = isOpen ? 'Market OPEN' : 'Market CLOSED';
-  document.getElementById('mktTime').textContent  = ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' IST';
-}
-
-function applySettings() {
-  cfg.buy   = parseFloat(document.getElementById('c-buy').value)  || 2;
-  cfg.sell  = parseFloat(document.getElementById('c-sell').value) || 2;
-  cfg.units = 10;
-  cfg.ref   = 60;
-  document.getElementById('mUnits').value = cfg.units;
-  st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
-  st.workingProxy = null;
-  saveSettings();
-  startLoop();
-  updateAll();
-  updateTabTitle();
-  showToast('Settings applied!');
 }
 
 function updateCard(k) {
@@ -833,7 +876,6 @@ function updateCard(k) {
     }
     snx.className = 'sig-next';
   }
-
   renderHold(k, p);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
@@ -948,7 +990,6 @@ function openModal(k, type, auto=false) {
   const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
   const avg = tu > 0 ? tc / tu : 0;
 
-  // ── FIX: Sell par last lot ke units pre-fill karo (LIFO) ──
   const lastLot = hs.length > 0 ? hs[0] : null;
   const un  = (type === 'sell' && lastLot) ? lastLot.units : cfg.units;
   const est = (p * un).toFixed(2);
@@ -1020,11 +1061,9 @@ function confirmTrade() {
     addLog({type:'buy', k, price:buyPrice, units, time});
     showToast('✅ BOUGHT ' + units + ' ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2));
   } else {
-    // LIFO: last lot pehle sell karo
     let toS  = units;
     let cost = 0;
     const hs = st.hold[k];
-
     while (toS > 0 && hs.length > 0) {
       const h = hs[0];
       const n = Math.min(h.units, toS);
@@ -1033,7 +1072,6 @@ function confirmTrade() {
       toS     -= n;
       if (h.units === 0) hs.pop();
     }
-
     const pnl = (liveP * units) - cost;
     st.real   += pnl;
     st.refSell[k]      = liveP;
@@ -1041,7 +1079,7 @@ function confirmTrade() {
     addLog({type:'sell', k, price:liveP, units, pnl, time});
     showToast('✅ SOLD ' + units + ' ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl>=0?'+':'') + '₹' + pnl.toFixed(2));
   }
-  closeModal(); updateCard(k); saveSt(); updateTabTitle();
+  closeModal(); updateCard(k); saveToFirebase(); updateTabTitle();
 }
 
 function addLog(e)  { st.log.unshift(e); renderLog(); }
@@ -1051,62 +1089,6 @@ function renderLog() {
   el.innerHTML = st.log.slice(0,25).map(l =>
     `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units}u @ ₹${l.price.toFixed(2)} ${l.pnl!==undefined?(l.pnl>=0?'+':'')+'₹'+l.pnl.toFixed(2):''} · ${l.time}</div>`
   ).join('');
-}
-
-function saveSt() {
-  try {
-    const data = {
-      refBuy:st.refBuy, refSell:st.refSell,
-      hold:st.hold, log:st.log,
-      real:st.real, alerted:st.alerted,
-      cfg: { buy: cfg.buy, sell: cfg.sell },
-      cap: {
-        total: document.getElementById('cp-total').value,
-        parts: document.getElementById('cp-parts').value,
-        gord:  document.getElementById('cp-gord').value,
-        sord:  document.getElementById('cp-sord').value
-      }
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
-    const dot = document.getElementById('saveDot');
-    if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
-  } catch(e) { console.warn('localStorage save failed:', e); }
-}
-
-function saveSettings() {
-  try {
-    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    existing.cfg = { buy: cfg.buy, sell: cfg.sell };
-    localStorage.setItem(LS_KEY, JSON.stringify(existing));
-  } catch(_) {}
-}
-
-function loadSt() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (data.refBuy)  st.refBuy  = data.refBuy;
-    if (data.refSell) st.refSell = data.refSell;
-    if (data.hold)    st.hold    = data.hold;
-    if (data.log)     st.log     = data.log;
-    if (data.real   !== undefined) st.real    = data.real;
-    if (data.alerted) st.alerted = data.alerted;
-    if (data.cfg) {
-      cfg.buy  = data.cfg.buy  || 2;
-      cfg.sell = data.cfg.sell || 2;
-      document.getElementById('c-buy').value  = cfg.buy;
-      document.getElementById('c-sell').value = cfg.sell;
-    }
-    if (data.cap) {
-      if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
-      if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
-      if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
-      if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
-    }
-    renderLog();
-    showToast('💾 Data loaded from previous session!');
-  } catch(e) { console.warn('localStorage load failed:', e); }
 }
 
 function showToast(msg) {
@@ -1128,7 +1110,7 @@ function calcCapital() {
   const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
   const gOrd  = parseInt(document.getElementById('cp-gord').value)    || 1;
   const sOrd  = parseInt(document.getElementById('cp-sord').value)    || 1;
-  saveSt();
+  saveToFirebase();
   const pp    = total / parts;
   document.getElementById('cp-gallot').textContent = fmt(pp);
   document.getElementById('cp-sallot').textContent = fmt(pp);
@@ -1152,6 +1134,46 @@ function renderCapCard(k, allot, orders) {
     rows[3].textContent = '—';
   }
 }
+
+function applySettings() {
+  cfg.buy   = parseFloat(document.getElementById('c-buy').value)  || 2;
+  cfg.sell  = parseFloat(document.getElementById('c-sell').value) || 2;
+  cfg.units = 10;
+  cfg.ref   = 60;
+  document.getElementById('mUnits').value = cfg.units;
+  st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
+  st.workingProxy = null;
+  saveToFirebase();
+  startLoop();
+  updateAll();
+  updateTabTitle();
+  showToast('Settings applied!');
+}
+
+function mktCheck() {
+  const ist  = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const d    = ist.getDay();
+  const mins = ist.getHours() * 60 + ist.getMinutes();
+  const isOpen = d >= 1 && d <= 5 && mins >= 555 && mins <= 930;
+  document.getElementById('mktDot').className   = 'mkt-dot '   + (isOpen ? 'open' : 'closed');
+  document.getElementById('mktLabel').className = 'mkt-label ' + (isOpen ? 'open' : 'closed');
+  document.getElementById('mktLabel').textContent = isOpen ? 'Market OPEN' : 'Market CLOSED';
+  document.getElementById('mktTime').textContent  = ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' IST';
+}
+
+// Initialization
+window.onload = () => {
+  loadFromFirebase().then(() => {
+    setFetchStatus('loading', 'Connecting to price feed…');
+    fetchAll();
+    startLoop();
+    startTickLoop();
+    mktCheck();
+    setInterval(mktCheck, 30000);
+    if (Notification && Notification.permission === 'default')
+      setTimeout(() => Notification.requestPermission(), 2000);
+  });
+};
 
 document.getElementById('overlay').addEventListener('click', e => { if(e.target.id==='overlay') closeModal(); });
 document.getElementById('alertOverlay').addEventListener('click', e => { if(e.target.id==='alertOverlay') dismissAlert(); });
