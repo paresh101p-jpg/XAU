@@ -133,18 +133,31 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .sig-next.ns { color:#ef4444; }
 
 .tgt-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.tbox { border-radius:9px; padding:9px 10px; border:1px solid; transition:box-shadow 0.3s; }
+.tbox { border-radius:9px; padding:9px 10px; border:1px solid; transition:all 0.4s; }
 .tbox.buy-b  { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.2); }
 .tbox.sell-b { background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.2); }
-.tbox.alert-buy  { background:rgba(34,197,94,0.13); border-color:#22c55e; box-shadow:0 0 10px rgba(34,197,94,0.35); animation:gG 1s infinite alternate; }
-.tbox.alert-sell { background:rgba(239,68,68,0.13); border-color:#ef4444; box-shadow:0 0 10px rgba(239,68,68,0.35); animation:gR 1s infinite alternate; }
-@keyframes gG { to{box-shadow:0 0 18px rgba(34,197,94,0.5)} }
-@keyframes gR { to{box-shadow:0 0 18px rgba(239,68,68,0.5)} }
+/* proximity levels */
+.tbox.near-buy   { background:rgba(34,197,94,0.08); border-color:rgba(34,197,94,0.45); box-shadow:0 0 7px rgba(34,197,94,0.2); }
+.tbox.close-buy  { background:rgba(34,197,94,0.13); border-color:rgba(34,197,94,0.7); box-shadow:0 0 13px rgba(34,197,94,0.35); }
+.tbox.near-sell  { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.45); box-shadow:0 0 7px rgba(239,68,68,0.2); }
+.tbox.close-sell { background:rgba(239,68,68,0.13); border-color:rgba(239,68,68,0.7); box-shadow:0 0 13px rgba(239,68,68,0.35); }
+.tbox.alert-buy  { background:rgba(34,197,94,0.18); border-color:#22c55e; box-shadow:0 0 10px rgba(34,197,94,0.45); animation:gG 1s infinite alternate; }
+.tbox.alert-sell { background:rgba(239,68,68,0.18); border-color:#ef4444; box-shadow:0 0 10px rgba(239,68,68,0.45); animation:gR 1s infinite alternate; }
+@keyframes gG { to{box-shadow:0 0 20px rgba(34,197,94,0.6)} }
+@keyframes gR { to{box-shadow:0 0 20px rgba(239,68,68,0.6)} }
 .tbox .tl { font-size:0.58rem; color:#ddd; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
 .tbox .tv { font-size:0.85rem; }
-.tbox.buy-b .tv  { color:#22c55e; }
-.tbox.sell-b .tv { color:#ef4444; }
+.tbox.buy-b .tv,.tbox.near-buy .tv,.tbox.close-buy .tv   { color:#22c55e; }
+.tbox.sell-b .tv,.tbox.near-sell .tv,.tbox.close-sell .tv { color:#ef4444; }
 .tbox .ts { font-size:0.58rem; color:#bbb; margin-top:2px; }
+/* progress bar */
+.tprog-wrap { margin-top:6px; background:rgba(255,255,255,0.06); border-radius:6px; height:5px; overflow:hidden; }
+.tprog-bar  { height:100%; border-radius:6px; transition:width 0.5s ease; }
+.tbox.buy-b  .tprog-bar, .tbox.near-buy  .tprog-bar, .tbox.close-buy  .tprog-bar { background:linear-gradient(90deg,#14532d,#22c55e); }
+.tbox.sell-b .tprog-bar, .tbox.near-sell .tprog-bar, .tbox.close-sell .tprog-bar { background:linear-gradient(90deg,#7f1d1d,#ef4444); }
+.tbox.alert-buy  .tprog-bar { background:#22c55e; }
+.tbox.alert-sell .tprog-bar { background:#ef4444; }
+.tprog-lbl { display:flex; justify-content:space-between; margin-top:3px; font-size:0.55rem; color:#777; }
 
 .trade-btns { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 .btn-buy,.btn-sell { border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; transition:0.15s; }
@@ -355,8 +368,8 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
       <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-G">⏳ WAIT</div><div class="sig-next" id="snx-G"></div></div>
     </div>
     <div class="tgt-row">
-      <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div></div>
-      <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div></div>
+      <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
+      <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
     </div>
     <div class="trade-btns">
       <button class="btn-buy" onclick="openModal('G','buy')">＋ BUY</button>
@@ -382,8 +395,8 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
       <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-S">⏳ WAIT</div><div class="sig-next" id="snx-S"></div></div>
     </div>
     <div class="tgt-row">
-      <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div></div>
-      <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div></div>
+      <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
+      <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
     </div>
     <div class="trade-btns">
       <button class="btn-buy" onclick="openModal('S','buy')">＋ BUY</button>
@@ -727,8 +740,42 @@ function updateCard(k) {
   document.getElementById('st-'  + k).textContent = '₹ ' + sv.toFixed(2);
   document.getElementById('bts-' + k).textContent = 'ref ₹' + rb.toFixed(2) + ' −' + cfg.buy  + '%';
   document.getElementById('sts-' + k).textContent = 'ref ₹' + rs.toFixed(2) + ' +' + cfg.sell + '%';
-  document.getElementById('bb-'  + k).className   = 'tbox buy-b'  + (p <= bt ? ' alert-buy'  : '');
-  document.getElementById('sb-'  + k).className   = 'tbox sell-b' + (p >= sv && tu > 0 ? ' alert-sell' : '');
+
+  // ── Proximity highlight + progress bar ──────────────────────────────────
+  // Buy: price needs to DROP to bt. gap = how far price is above bt
+  const buyGap  = bt > 0 ? (p - bt) / (rb - bt) * 100 : 100; // 100%=far, 0%=hit
+  const buyPct  = Math.max(0, Math.min(100, buyGap));
+  const buyDist = ((p - bt) / p * 100).toFixed(2); // % price needs to drop
+
+  // Sell: price needs to RISE to sv. gap = how far price is below sv
+  const sellGap = sv > bt ? (sv - p) / (sv - rs) * 100 : 100;
+  const sellPct = Math.max(0, Math.min(100, 100 - sellGap)); // inverted: 100=at target
+  const sellDist = ((sv - p) / p * 100).toFixed(2);
+
+  // Buy box class
+  let buyClass = 'tbox buy-b';
+  if      (p <= bt)      buyClass = 'tbox buy-b alert-buy';
+  else if (buyPct <= 25) buyClass = 'tbox buy-b close-buy';   // within 25% of range
+  else if (buyPct <= 50) buyClass = 'tbox buy-b near-buy';    // within 50% of range
+
+  // Sell box class (only highlight if have holdings)
+  let sellClass = 'tbox sell-b';
+  if      (p >= sv && tu > 0)       sellClass = 'tbox sell-b alert-sell';
+  else if (sellPct >= 75 && tu > 0) sellClass = 'tbox sell-b close-sell';
+  else if (sellPct >= 50 && tu > 0) sellClass = 'tbox sell-b near-sell';
+
+  document.getElementById('bb-' + k).className = buyClass;
+  document.getElementById('sb-' + k).className = sellClass;
+
+  // Progress bars
+  const buyBarW  = p <= bt ? 100 : Math.max(2, 100 - buyPct);
+  const sellBarW = p >= sv ? 100 : Math.max(2, sellPct);
+  document.getElementById('bpb-' + k).style.width = buyBarW + '%';
+  document.getElementById('spb-' + k).style.width = sellBarW + '%';
+
+  // Labels below bar
+  document.getElementById('bpl-' + k).textContent = p <= bt ? '🎯 HIT!' : '▼ ' + buyDist + '% door';
+  document.getElementById('spl-' + k).textContent = p >= sv ? '🎯 HIT!' : '▲ ' + (tu > 0 ? sellDist + '% door' : 'No holdings');
 
   const sg  = document.getElementById('sig-' + k);
   const snx = document.getElementById('snx-' + k);
