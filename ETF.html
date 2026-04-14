@@ -470,7 +470,7 @@ const ETF = {
 };
 
 const LS_KEY = 'etf_bees_v1';
-const GITHUB_TOKEN = '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';
+const GITHUB_TOKEN = localStorage.getItem('etf_gh_token') || '';
 const GIST_ID_KEY  = 'etf_bees_gist_id';
 
 let cfg = {buy:2,sell:2,units:10,ref:60};
