@@ -186,6 +186,9 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .h-card { background:#1a1a1a; border-radius:11px; overflow:hidden; border:2px solid #2e2e2e; }
 .h-card.pc { border-color:rgba(34,197,94,0.4); box-shadow:0 0 8px rgba(34,197,94,0.1); }
 .h-card.lc { border-color:rgba(239,68,68,0.35); box-shadow:0 0 8px rgba(239,68,68,0.08); }
+
+/* ✅ Latest lot highlight - sabse upar dikhega aur SELL NEXT badge green */
+.h-card.latest-lot { border-color:rgba(34,197,94,0.7) !important; box-shadow:0 0 14px rgba(34,197,94,0.2) !important; }
 .h-card-top { display:flex; justify-content:space-between; align-items:center; padding:7px 11px; background:rgba(255,255,255,0.03); border-bottom:1px solid #252525; }
 .h-lot-lbl { font-size:0.6rem; color:#aaa; }
 .h-pct { font-size:0.65rem; padding:2px 9px; border-radius:10px; }
@@ -204,7 +207,9 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .h-pnl-big.loss   { color:#ef4444; }
 .h-time-txt { font-size:0.58rem; color:#666; }
 
-.lifo-badge { font-size:0.52rem; background:rgba(239,68,68,0.18); color:#ef4444; border:1px solid rgba(239,68,68,0.4); border-radius:6px; padding:2px 6px; margin-left:5px; }
+/* ✅ SELL NEXT badge - green pulsing (latest buy = pehle profit hoga) */
+.lifo-badge { font-size:0.52rem; background:rgba(34,197,94,0.2); color:#22c55e; border:1px solid rgba(34,197,94,0.6); border-radius:6px; padding:2px 7px; margin-left:5px; animation:sellNextPulse 1.2s ease infinite alternate; }
+@keyframes sellNextPulse { from{opacity:0.7; box-shadow:none} to{opacity:1; box-shadow:0 0 8px rgba(34,197,94,0.5)} }
 
 .log-bar { position:fixed; bottom:0; left:0; right:0; background:#131313; border-top:2px solid #252525; padding:5px 12px; display:flex; align-items:center; gap:6px; overflow-x:auto; z-index:50; height:36px; }
 .log-bar::-webkit-scrollbar { height:0; }
@@ -838,32 +843,47 @@ function updateCard(k) {
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
 
+// ====================================================
+// ✅ MAIN FIX: renderHold
+// Array mein: hs[0] = pehla buy (purana), hs[last] = latest buy
+// Display: REVERSE karo → latest upar aaye
+// SELL NEXT badge: hs[hs.length-1] = latest lot (LIFO mein pehle bikega)
+// ====================================================
 function renderHold(k, p) {
   const el = document.getElementById('hl-' + k);
   const hs = st.hold[k];
   if (!hs.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
-  el.innerHTML = hs.map((h, i) => {
-    const bp   = h.buyPrice || h.price;
-    const pnl  = p ? (p - bp) * h.units : 0;
-    const pct  = (p - bp) / bp * 100;
-    const isP  = pnl >= 0;
+
+  // Latest lot = hs[hs.length - 1] — jo pehle sell hoga (LIFO)
+  const latestOrigIdx = hs.length - 1;
+
+  // Reverse: latest pehle dikhao
+  el.innerHTML = [...hs].reverse().map((h, dispIdx) => {
+    const origIdx  = hs.length - 1 - dispIdx; // original array index
+    const isLatest = (origIdx === latestOrigIdx); // latest buy = SELL NEXT
+
+    const bp  = h.buyPrice || h.price;
+    const pnl = p ? (p - bp) * h.units : 0;
+    const pct = (p - bp) / bp * 100;
+    const isP = pnl >= 0;
     const curVal   = (p * h.units).toFixed(2);
     const invested = (bp * h.units).toFixed(2);
-    const isLast   = (i === hs.length - 1);
-    return `<div class="h-card ${isP?'pc':'lc'}">
+    const lotNum   = origIdx + 1; // lot number = original position
+
+    return `<div class="h-card ${isP ? 'pc' : 'lc'}${isLatest ? ' latest-lot' : ''}">
       <div class="h-card-top">
-        <span class="h-lot-lbl">📦 Lot ${i+1} &nbsp;·&nbsp; ${h.units} units${isLast ? '<span class="lifo-badge">SELL NEXT</span>' : ''}</span>
-        <span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
+        <span class="h-lot-lbl">📦 Lot ${lotNum} &nbsp;·&nbsp; ${h.units} units${isLatest ? ' <span class="lifo-badge">🔴 SELL NEXT</span>' : ''}</span>
+        <span class="h-pct ${isP ? 'up' : 'dn'}">${isP ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%</span>
       </div>
       <div class="h-card-body">
         <div class="h-cell"><div class="hcl">Buy Price</div><div class="hcv ${ETF[k].cls}">₹ ${bp.toFixed(2)}</div></div>
-        <div class="h-cell"><div class="hcl">Live Price</div><div class="hcv">₹ ${p?p.toFixed(2):'—'}</div></div>
+        <div class="h-cell"><div class="hcl">Live Price</div><div class="hcv">₹ ${p ? p.toFixed(2) : '—'}</div></div>
         <div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
         <div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div>
       </div>
       <div class="h-card-footer">
-        <span class="h-pnl-big ${isP?'profit':'loss'}">${isP?'+':'-'} ₹${Math.abs(pnl).toFixed(2)}</span>
-        <span class="h-time-txt">${h.time||'—'}</span>
+        <span class="h-pnl-big ${isP ? 'profit' : 'loss'}">${isP ? '+' : '-'} ₹${Math.abs(pnl).toFixed(2)}</span>
+        <span class="h-time-txt">${h.time || '—'}</span>
       </div>
     </div>`;
   }).join('');
@@ -936,6 +956,11 @@ function showAlertPopup(k, type, bt, sv, tu) {
 function alertDoTrade() { const {k,type}=st.alertPend; dismissAlert(); openModal(k,type,true); }
 function dismissAlert()  { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
 
+// ====================================================
+// ✅ openModal FIX
+// latestLot = hs[hs.length - 1] = sabse naya buy (LIFO mein pehle bikega)
+// Modal mein isi lot ki details aur units pre-fill honge
+// ====================================================
 function openModal(k, type, auto=false) {
   const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; }
   const rb = st.refBuy[k]  || p;
@@ -948,9 +973,9 @@ function openModal(k, type, auto=false) {
   const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
   const avg = tu > 0 ? tc / tu : 0;
 
-  // ── FIX: Sell par last lot ke units pre-fill karo (LIFO) ──
-  const lastLot = hs.length > 0 ? hs[hs.length - 1] : null;
-  const un  = (type === 'sell' && lastLot) ? lastLot.units : cfg.units;
+  // ✅ LIFO: Latest lot = hs[hs.length - 1] (sabse aakhri push = sabse naya buy)
+  const latestLot = hs.length > 0 ? hs[hs.length - 1] : null;
+  const un  = (type === 'sell' && latestLot) ? latestLot.units : cfg.units;
   const est = (p * un).toFixed(2);
 
   st.pend = {k, type};
@@ -976,16 +1001,17 @@ function openModal(k, type, auto=false) {
     rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} units</span></div>`;
     if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
 
-    if (lastLot) {
-      const lotBp   = lastLot.buyPrice || lastLot.price;
-      const sellU   = Math.min(un, lastLot.units);
+    // ✅ Latest lot ki P&L dikhao (jo pehle bikegi)
+    if (latestLot) {
+      const lotBp   = latestLot.buyPrice || latestLot.price;
+      const sellU   = Math.min(un, latestLot.units);
       const lotPnl  = (p - lotBp) * sellU;
       const lotPct  = ((p - lotBp) / lotBp * 100).toFixed(2);
       const isProfit = lotPnl >= 0;
       rows += `<div class="mr-divider"></div>`;
-      rows += `<div class="mr"><span class="mk">🔴 LIFO Lot (Last Buy)</span><span class="mv" style="color:#f59e0b">${lastLot.time || '—'}</span></div>`;
+      rows += `<div class="mr"><span class="mk">🔴 LIFO: Latest Lot (Sell Hoga Pehle)</span><span class="mv" style="color:#f59e0b">${latestLot.time || '—'}</span></div>`;
       rows += `<div class="mr"><span class="mk">Lot Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div>`;
-      rows += `<div class="mr"><span class="mk">Lot Units to Sell</span><span class="mv">${sellU} units</span></div>`;
+      rows += `<div class="mr"><span class="mk">Lot Units</span><span class="mv">${sellU} units</span></div>`;
       rows += `<div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit?'profit':'loss'}">${isProfit?'+':'-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit?'+':''}${lotPct}%)</span></div>`;
     }
   }
@@ -1003,6 +1029,11 @@ function openModal(k, type, auto=false) {
 
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend = null; }
 
+// ====================================================
+// ✅ confirmTrade FIX
+// LIFO: hs[hs.length-1] = latest buy = pehle sell karo
+// pop() se last element hata do
+// ====================================================
 function confirmTrade() {
   const {k, type} = st.pend;
   const units  = parseInt(document.getElementById('mUnits').value) || cfg.units;
@@ -1020,18 +1051,18 @@ function confirmTrade() {
     addLog({type:'buy', k, price:buyPrice, units, time});
     showToast('✅ BOUGHT ' + units + ' ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2));
   } else {
-    // LIFO: last lot pehle sell karo
+    // ✅ LIFO: hs[hs.length-1] = latest lot → pehle sell karo
     let toS  = units;
     let cost = 0;
     const hs = st.hold[k];
 
     while (toS > 0 && hs.length > 0) {
-      const h = hs[hs.length - 1];
+      const h = hs[hs.length - 1]; // latest buy (last pushed)
       const n = Math.min(h.units, toS);
       cost    += n * (h.buyPrice || h.price);
       h.units -= n;
       toS     -= n;
-      if (h.units === 0) hs.pop();
+      if (h.units === 0) hs.pop(); // latest lot khatam → remove karo
     }
 
     const pnl = (liveP * units) - cost;
