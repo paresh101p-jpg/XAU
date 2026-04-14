@@ -949,7 +949,7 @@ function openModal(k, type, auto=false) {
   const avg = tu > 0 ? tc / tu : 0;
 
   // ── FIX: Sell par last lot ke units pre-fill karo (LIFO) ──
-  const lastLot = hs.length > 0 ? hs[hs.length - 1] : null;
+  const lastLot = hs.length > 0 ? hs[0] : null;
   const un  = (type === 'sell' && lastLot) ? lastLot.units : cfg.units;
   const est = (p * un).toFixed(2);
 
@@ -1026,7 +1026,7 @@ function confirmTrade() {
     const hs = st.hold[k];
 
     while (toS > 0 && hs.length > 0) {
-      const h = hs[hs.length - 1];
+      const h = hs[0];
       const n = Math.min(h.units, toS);
       cost    += n * (h.buyPrice || h.price);
       h.units -= n;
