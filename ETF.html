@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gold & Silver BeES Tracker</title>
+<title>⚜️ Gold &amp; Silver BeES</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-weight: bold; }
 body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111; color:#fff; min-height:100vh; padding-bottom:52px; }
 
-.top-header { background:#1a1a1a; border-bottom:1px solid #2a2a2a; padding:10px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.top-header { background:#1a1a1a; border-bottom:2px solid #2e2e2e; padding:10px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 .app-title { font-size:0.95rem; }
 .app-title .g { color:#FFD700; }
 .app-title .s { color:#C0D8E8; }
@@ -31,8 +31,8 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .btn-apply:hover { background:#ffe84d; }
 
 /* FETCH STATUS */
-.fetch-status-bar { background:#0d1a0d; border-bottom:1px solid #1a2e1a; padding:5px 14px; display:flex; align-items:center; gap:10px; min-height:32px; flex-wrap:wrap; }
-.fetch-status-bar.fail    { background:#1a0d0d; border-color:#2e1a1a; }
+.fetch-status-bar { background:#0d1a0d; border-bottom:2px solid #1a3a1a; padding:5px 14px; display:flex; align-items:center; gap:10px; min-height:32px; flex-wrap:wrap; }
+.fetch-status-bar.fail    { background:#1a0d0d; border-color:#3a1a1a; }
 .fetch-status-bar.loading { background:#13130d; border-color:#2a2a1a; }
 #fetchStatusDot { width:7px; height:7px; border-radius:50%; background:#22c55e; flex-shrink:0; }
 .fetch-status-bar.fail    #fetchStatusDot { background:#ef4444; }
@@ -40,9 +40,13 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .fsb-prices { display:flex; align-items:center; gap:10px; flex:1; }
 .fsb-etf { display:flex; align-items:center; gap:5px; }
 .fsb-etf .fsb-lbl { font-size:0.6rem; color:#888; letter-spacing:1px; }
-.fsb-etf .fsb-val { font-size:0.82rem; }
-.fsb-etf.gold   .fsb-val { color:#FFD700; }
-.fsb-etf.silver .fsb-val { color:#C0D8E8; }
+.fsb-etf .fsb-val { font-size:0.82rem; transition: color 0.4s; }
+.fsb-etf.gold   .fsb-val.price-up   { color:#22c55e; }
+.fsb-etf.gold   .fsb-val.price-down { color:#ef4444; }
+.fsb-etf.gold   .fsb-val.price-flat { color:#FFD700; }
+.fsb-etf.silver .fsb-val.price-up   { color:#22c55e; }
+.fsb-etf.silver .fsb-val.price-down { color:#ef4444; }
+.fsb-etf.silver .fsb-val.price-flat { color:#C0D8E8; }
 .fsb-etf .fsb-chg { font-size:0.6rem; padding:1px 5px; border-radius:8px; }
 .fsb-etf .fsb-chg.up   { background:rgba(34,197,94,0.15); color:#22c55e; }
 .fsb-etf .fsb-chg.down { background:rgba(239,68,68,0.15); color:#ef4444; }
@@ -53,22 +57,28 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .fetch-status-bar.fail    .fsb-status-txt { color:#ef4444; }
 .fetch-status-bar.loading .fsb-status-txt { color:#f59e0b; }
 
-.cap-toggle { width:100%; background:#181818; border:none; border-bottom:1px solid #1e1e1e; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.75rem; padding:7px 18px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
+/* PRICE ICONS */
+.price-icon { font-size:1.1rem; vertical-align:middle; margin-right:4px; }
+.price-dir-icon { font-size:1rem; vertical-align:middle; margin-left:4px; transition: all 0.3s; }
+.price-dir-icon.up   { color:#22c55e; }
+.price-dir-icon.down { color:#ef4444; }
+
+.cap-toggle { width:100%; background:#181818; border:none; border-bottom:2px solid #252525; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.75rem; padding:7px 18px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
 .cap-toggle:hover { background:#1e1e1e; }
 .cap-toggle .cta { transition:transform 0.3s; }
 .cap-toggle.open .cta { transform:rotate(180deg); }
-.cap-panel { background:#141414; border-bottom:1px solid #1e1e1e; overflow:hidden; max-height:0; transition:max-height 0.35s ease; }
+.cap-panel { background:#141414; border-bottom:2px solid #252525; overflow:hidden; max-height:0; transition:max-height 0.35s ease; }
 .cap-panel.open { max-height:700px; }
 .cap-inner { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
 .cap-row1 { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .cap-ig { display:flex; align-items:center; gap:6px; flex:1; min-width:150px; }
 .cap-ig label { font-size:0.68rem; color:#ccc; white-space:nowrap; }
-.cap-ig input { flex:1; background:#1e1e1e; border:1px solid #2e2e2e; border-radius:7px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.8rem; padding:6px 9px; outline:none; text-align:center; min-width:80px; }
+.cap-ig input { flex:1; background:#1e1e1e; border:2px solid #333; border-radius:7px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.8rem; padding:6px 9px; outline:none; text-align:center; min-width:80px; }
 .cap-ig input:focus { border-color:#FFD700; }
 .cap-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .cap-card { border-radius:11px; padding:12px 13px; display:flex; flex-direction:column; gap:8px; }
-.cap-card.gc { background:linear-gradient(135deg,#1f1800,#191400); border:1px solid rgba(255,215,0,0.2); }
-.cap-card.sc { background:linear-gradient(135deg,#0c1620,#0a1018); border:1px solid rgba(192,216,232,0.18); }
+.cap-card.gc { background:linear-gradient(135deg,#1f1800,#191400); border:2px solid rgba(255,215,0,0.35); box-shadow:0 0 10px rgba(255,215,0,0.08); }
+.cap-card.sc { background:linear-gradient(135deg,#0c1620,#0a1018); border:2px solid rgba(192,216,232,0.3); box-shadow:0 0 10px rgba(192,216,232,0.06); }
 .cap-ctitle { font-size:0.72rem; }
 .cap-card.gc .cap-ctitle { color:#FFD700; }
 .cap-card.sc .cap-ctitle { color:#C0D8E8; }
@@ -79,7 +89,7 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .cap-card.sc .av { color:#C0D8E8; }
 .cap-dca { display:flex; align-items:center; gap:6px; }
 .cap-dca label { font-size:0.63rem; color:#aaa; white-space:nowrap; }
-.cap-dca input { width:58px; background:#1a1a1a; border:1px solid #2e2e2e; border-radius:6px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.76rem; padding:4px 7px; outline:none; text-align:center; }
+.cap-dca input { width:58px; background:#1a1a1a; border:2px solid #333; border-radius:6px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.76rem; padding:4px 7px; outline:none; text-align:center; }
 .cap-res { background:rgba(0,0,0,0.3); border-radius:7px; padding:7px 9px; display:flex; flex-direction:column; gap:4px; }
 .cap-rr { display:flex; justify-content:space-between; font-size:0.68rem; }
 .cap-rr .ck { color:#888; }
@@ -91,7 +101,7 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .cap-note { font-size:0.6rem; color:#555; text-align:center; }
 
 .split { display:grid; grid-template-columns:1fr 1fr; }
-.gold-col { background:linear-gradient(170deg,#1c1700 0%,#111 60%); border-right:1px solid #222; padding:16px 14px; display:flex; flex-direction:column; gap:12px; }
+.gold-col   { background:linear-gradient(170deg,#1c1700 0%,#111 60%); border-right:2px solid #2a2a2a; padding:16px 14px; display:flex; flex-direction:column; gap:12px; }
 .silver-col { background:linear-gradient(170deg,#0c1218 0%,#111 60%); padding:16px 14px; display:flex; flex-direction:column; gap:12px; }
 .etf-head { display:flex; align-items:center; gap:9px; }
 .etf-icon { font-size:1.7rem; }
@@ -100,14 +110,21 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .gold-col .en   { color:#FFD700; }
 .silver-col .en { color:#C0D8E8; }
 
-.price-block { background:#1c1c1c; border:1px solid #272727; border-radius:12px; padding:12px; text-align:center; position:relative; overflow:hidden; }
+/* PRICE BLOCK — bold border highlight */
+.price-block { border-radius:12px; padding:12px; text-align:center; position:relative; overflow:hidden; transition: border-color 0.4s, box-shadow 0.4s; }
+.gold-col   .price-block { background:#1c1c1c; border:2px solid #3a3000; }
+.silver-col .price-block { background:#1c1c1c; border:2px solid #1a2535; }
+.price-block.price-up   { border-color:#22c55e !important; box-shadow:0 0 14px rgba(34,197,94,0.25); }
+.price-block.price-down { border-color:#ef4444 !important; box-shadow:0 0 14px rgba(239,68,68,0.2); }
 .price-flash-up   { animation:flashG 0.5s ease; }
 .price-flash-down { animation:flashR 0.5s ease; }
 @keyframes flashG { 0%{background:#0d2b0d} 100%{background:#1c1c1c} }
 @keyframes flashR { 0%{background:#2b0d0d} 100%{background:#1c1c1c} }
-.price-big { font-size:1.8rem; line-height:1; }
-.gold-col .price-big   { color:#FFD700; }
-.silver-col .price-big { color:#C0D8E8; }
+.price-big { font-size:1.8rem; line-height:1; display:flex; align-items:center; justify-content:center; gap:4px; transition: color 0.4s; }
+.price-big.price-up   { color:#22c55e !important; }
+.price-big.price-down { color:#ef4444 !important; }
+.gold-col   .price-big.price-flat { color:#FFD700; }
+.silver-col .price-big.price-flat { color:#C0D8E8; }
 .price-loading { color:#888; font-size:1.2rem; }
 .tick-badge { position:absolute; top:8px; right:10px; font-size:0.58rem; padding:2px 7px; border-radius:10px; }
 .tick-badge.up   { background:rgba(34,197,94,0.2); color:#22c55e; }
@@ -119,8 +136,11 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .chg-pill.flat { background:rgba(255,255,255,0.07); color:#aaa; }
 .prev-label { font-size:0.62rem; color:#bbb; margin-top:4px; letter-spacing:1px; }
 
+/* INFO GRID — bold borders */
 .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.ibox { background:#1a1a1a; border:1px solid #232323; border-radius:9px; padding:8px 10px; }
+.ibox { background:#1a1a1a; border:2px solid #2e2e2e; border-radius:9px; padding:8px 10px; transition: border-color 0.3s; }
+.gold-col   .ibox:hover { border-color:rgba(255,215,0,0.3); }
+.silver-col .ibox:hover { border-color:rgba(192,216,232,0.25); }
 .ibox .il { font-size:0.58rem; color:#ccc; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:3px; }
 .ibox .iv { font-size:0.82rem; color:#fff; }
 .iv.profit { color:#22c55e; }
@@ -132,19 +152,20 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .sig-next.nb { color:#22c55e; }
 .sig-next.ns { color:#ef4444; }
 
+/* TARGET BOXES — bold borders */
 .tgt-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.tbox { border-radius:9px; padding:9px 10px; border:1px solid; transition:all 0.4s; }
-.tbox.buy-b  { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.2); }
-.tbox.sell-b { background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.2); }
+.tbox { border-radius:9px; padding:9px 10px; border:2px solid; transition:all 0.4s; }
+.tbox.buy-b  { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.35); }
+.tbox.sell-b { background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.3); }
 /* proximity levels */
-.tbox.near-buy   { background:rgba(34,197,94,0.08); border-color:rgba(34,197,94,0.45); box-shadow:0 0 7px rgba(34,197,94,0.2); }
-.tbox.close-buy  { background:rgba(34,197,94,0.13); border-color:rgba(34,197,94,0.7); box-shadow:0 0 13px rgba(34,197,94,0.35); }
-.tbox.near-sell  { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.45); box-shadow:0 0 7px rgba(239,68,68,0.2); }
-.tbox.close-sell { background:rgba(239,68,68,0.13); border-color:rgba(239,68,68,0.7); box-shadow:0 0 13px rgba(239,68,68,0.35); }
-.tbox.alert-buy  { background:rgba(34,197,94,0.18); border-color:#22c55e; box-shadow:0 0 10px rgba(34,197,94,0.45); animation:gG 1s infinite alternate; }
-.tbox.alert-sell { background:rgba(239,68,68,0.18); border-color:#ef4444; box-shadow:0 0 10px rgba(239,68,68,0.45); animation:gR 1s infinite alternate; }
-@keyframes gG { to{box-shadow:0 0 20px rgba(34,197,94,0.6)} }
-@keyframes gR { to{box-shadow:0 0 20px rgba(239,68,68,0.6)} }
+.tbox.near-buy   { background:rgba(34,197,94,0.08); border-color:rgba(34,197,94,0.55); box-shadow:0 0 9px rgba(34,197,94,0.2); }
+.tbox.close-buy  { background:rgba(34,197,94,0.13); border-color:rgba(34,197,94,0.8); box-shadow:0 0 15px rgba(34,197,94,0.35); }
+.tbox.near-sell  { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.55); box-shadow:0 0 9px rgba(239,68,68,0.2); }
+.tbox.close-sell { background:rgba(239,68,68,0.13); border-color:rgba(239,68,68,0.8); box-shadow:0 0 15px rgba(239,68,68,0.35); }
+.tbox.alert-buy  { background:rgba(34,197,94,0.18); border-color:#22c55e; box-shadow:0 0 12px rgba(34,197,94,0.5); animation:gG 1s infinite alternate; }
+.tbox.alert-sell { background:rgba(239,68,68,0.18); border-color:#ef4444; box-shadow:0 0 12px rgba(239,68,68,0.5); animation:gR 1s infinite alternate; }
+@keyframes gG { to{box-shadow:0 0 22px rgba(34,197,94,0.65)} }
+@keyframes gR { to{box-shadow:0 0 22px rgba(239,68,68,0.65)} }
 .tbox .tl { font-size:0.58rem; color:#ddd; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
 .tbox .tv { font-size:0.85rem; }
 .tbox.buy-b .tv,.tbox.near-buy .tv,.tbox.close-buy .tv   { color:#22c55e; }
@@ -169,10 +190,10 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .sec-label { font-size:0.58rem; color:#ddd; letter-spacing:2px; text-transform:uppercase; }
 .h-list { display:flex; flex-direction:column; gap:7px; }
 .no-h { color:#aaa; font-size:0.7rem; text-align:center; padding:12px; }
-.h-card { background:#1a1a1a; border-radius:11px; overflow:hidden; border:1px solid #252525; }
-.h-card.pc { border-color:rgba(34,197,94,0.3); }
-.h-card.lc { border-color:rgba(239,68,68,0.25); }
-.h-card-top { display:flex; justify-content:space-between; align-items:center; padding:7px 11px; background:rgba(255,255,255,0.03); border-bottom:1px solid #222; }
+.h-card { background:#1a1a1a; border-radius:11px; overflow:hidden; border:2px solid #2e2e2e; }
+.h-card.pc { border-color:rgba(34,197,94,0.4); box-shadow:0 0 8px rgba(34,197,94,0.1); }
+.h-card.lc { border-color:rgba(239,68,68,0.35); box-shadow:0 0 8px rgba(239,68,68,0.08); }
+.h-card-top { display:flex; justify-content:space-between; align-items:center; padding:7px 11px; background:rgba(255,255,255,0.03); border-bottom:1px solid #252525; }
 .h-lot-lbl { font-size:0.6rem; color:#aaa; }
 .h-pct { font-size:0.65rem; padding:2px 9px; border-radius:10px; }
 .h-pct.up { background:rgba(34,197,94,0.15); color:#22c55e; }
@@ -190,41 +211,41 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .h-pnl-big.loss   { color:#ef4444; }
 .h-time-txt { font-size:0.58rem; color:#666; }
 
-.log-bar { position:fixed; bottom:0; left:0; right:0; background:#131313; border-top:1px solid #1e1e1e; padding:5px 12px; display:flex; align-items:center; gap:6px; overflow-x:auto; z-index:50; height:36px; }
+.log-bar { position:fixed; bottom:0; left:0; right:0; background:#131313; border-top:2px solid #252525; padding:5px 12px; display:flex; align-items:center; gap:6px; overflow-x:auto; z-index:50; height:36px; }
 .log-bar::-webkit-scrollbar { height:0; }
 .lchip { flex-shrink:0; font-size:0.6rem; border-radius:5px; padding:2px 8px; white-space:nowrap; }
-.lchip.buy  { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.18); }
-.lchip.sell { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.18); }
+.lchip.buy  { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.25); }
+.lchip.sell { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.22); }
 .log-empty-txt { font-size:0.6rem; color:#aaa; }
 
 .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(7px); z-index:100; display:none; align-items:center; justify-content:center; padding:20px; }
 .overlay.show { display:flex; }
 .modal { background:#1a1a1a; border-radius:16px; padding:22px; max-width:340px; width:100%; animation:pop 0.2s ease; max-height:90vh; overflow-y:auto; }
 @keyframes pop { from{opacity:0;transform:scale(0.93)} to{opacity:1;transform:scale(1)} }
-.modal.gm { border:1px solid rgba(255,215,0,0.28); }
-.modal.sm { border:1px solid rgba(192,216,232,0.25); }
+.modal.gm { border:2px solid rgba(255,215,0,0.4); box-shadow:0 0 20px rgba(255,215,0,0.1); }
+.modal.sm { border:2px solid rgba(192,216,232,0.35); box-shadow:0 0 20px rgba(192,216,232,0.08); }
 .mtop { text-align:center; margin-bottom:14px; }
 .mtop .mic { font-size:1.8rem; }
 .mtop h3 { font-size:1.05rem; margin-top:5px; }
 .mtop h3.bh { color:#22c55e; }
 .mtop h3.sh { color:#ef4444; }
 .mtop p { font-size:0.68rem; color:#ccc; margin-top:3px; }
-.mrows { background:#111; border-radius:9px; padding:11px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
+.mrows { background:#111; border-radius:9px; padding:11px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; border:1px solid #2a2a2a; }
 .mr { display:flex; justify-content:space-between; font-size:0.74rem; }
 .mr .mk { color:#ccc; }
 .mr .mv { color:#fff; }
 .mr .mv.profit { color:#22c55e; }
 .mr .mv.loss   { color:#ef4444; }
-.m-buy-price { background:#111; border-radius:9px; padding:11px 12px; margin-bottom:12px; }
+.m-buy-price { background:#111; border-radius:9px; padding:11px 12px; margin-bottom:12px; border:1px solid #2a2a2a; }
 .m-buy-price label { display:block; font-size:0.62rem; color:#FFD700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
-.m-buy-price input { width:100%; background:#1a1a1a; border:1px solid #FFD700; border-radius:8px; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:1rem; padding:8px 12px; outline:none; text-align:center; }
+.m-buy-price input { width:100%; background:#1a1a1a; border:2px solid #FFD700; border-radius:8px; color:#FFD700; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:1rem; padding:8px 12px; outline:none; text-align:center; }
 .m-buy-price .bp-hint { font-size:0.58rem; color:#666; margin-top:4px; text-align:center; }
 .munits { margin-bottom:12px; }
 .munits label { display:block; font-size:0.62rem; color:#ccc; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; }
-.munits input { width:100%; background:#111; border:1px solid #2e2e2e; border-radius:8px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.95rem; padding:8px 12px; outline:none; text-align:center; }
+.munits input { width:100%; background:#111; border:2px solid #2e2e2e; border-radius:8px; color:#fff; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.95rem; padding:8px 12px; outline:none; text-align:center; }
 .munits input:focus { border-color:#FFD700; }
 .mbtns { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
-.mcnl { background:#222; color:#ddd; border:1px solid #2e2e2e; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
+.mcnl { background:#222; color:#ddd; border:2px solid #2e2e2e; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
 .mcfb { background:#22c55e; color:#000; border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
 .mcfs { background:#ef4444; color:#fff; border:none; border-radius:9px; padding:9px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.78rem; cursor:pointer; }
 
@@ -243,7 +264,7 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .ap-title { font-size:1.3rem; margin-top:4px; }
 .alert-box.ab .ap-title { color:#22c55e; }
 .alert-box.as .ap-title { color:#ef4444; }
-.alert-rows { background:rgba(0,0,0,0.4); border-radius:11px; padding:13px; margin-bottom:14px; display:flex; flex-direction:column; gap:9px; }
+.alert-rows { background:rgba(0,0,0,0.4); border-radius:11px; padding:13px; margin-bottom:14px; display:flex; flex-direction:column; gap:9px; border:1px solid #2a2a2a; }
 .alert-row { display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; }
 .alert-row .ark { color:#aaa; }
 .alert-row .arv { color:#fff; }
@@ -256,14 +277,19 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 .btn-alert-trade { border:none; border-radius:10px; padding:11px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.82rem; cursor:pointer; }
 .alert-box.ab .btn-alert-trade { background:#22c55e; color:#000; }
 .alert-box.as .btn-alert-trade { background:#ef4444; color:#fff; }
-.btn-alert-dismiss { background:#222; color:#aaa; border:1px solid #333; border-radius:10px; padding:11px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.82rem; cursor:pointer; }
+.btn-alert-dismiss { background:#222; color:#aaa; border:2px solid #333; border-radius:10px; padding:11px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.82rem; cursor:pointer; }
 
-.toast { position:fixed; bottom:44px; left:50%; transform:translateX(-50%) translateY(70px); background:#1c1c1c; border:1px solid #444; color:#fff; font-size:0.72rem; padding:8px 17px; border-radius:9px; z-index:300; transition:transform 0.28s ease; white-space:nowrap; max-width:92vw; text-align:center; }
+.toast { position:fixed; bottom:44px; left:50%; transform:translateX(-50%) translateY(70px); background:#1c1c1c; border:2px solid #444; color:#fff; font-size:0.72rem; padding:8px 17px; border-radius:9px; z-index:300; transition:transform 0.28s ease; white-space:nowrap; max-width:92vw; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
+
+/* SAVE INDICATOR */
+.save-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; display:inline-block; margin-left:6px; opacity:0; transition:opacity 0.3s; }
+.save-dot.show { opacity:1; animation:savePop 1.5s ease forwards; }
+@keyframes savePop { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
 
 @media(max-width:580px){
   .split { grid-template-columns:1fr; }
-  .gold-col { border-right:none; border-bottom:1px solid #222; }
+  .gold-col { border-right:none; border-bottom:2px solid #222; }
   .price-big { font-size:1.5rem; }
   .cap-cards { grid-template-columns:1fr; }
 }
@@ -273,7 +299,7 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
 
 <!-- TOP BAR -->
 <div class="top-header">
-  <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES Tracker</div>
+  <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES Tracker <span class="save-dot" id="saveDot"></span></div>
   <div class="right-header">
     <div class="market-status">
       <div class="mkt-dot" id="mktDot"></div>
@@ -297,13 +323,13 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   <div class="fsb-prices">
     <div class="fsb-etf gold">
       <span class="fsb-lbl">🥇 GOLD</span>
-      <span class="fsb-val" id="fsb-gPrice">—</span>
+      <span class="fsb-val price-flat" id="fsb-gPrice">—</span>
       <span class="fsb-chg flat" id="fsb-gChg"></span>
     </div>
     <div class="fsb-div"></div>
     <div class="fsb-etf silver">
       <span class="fsb-lbl">🥈 SILVER</span>
-      <span class="fsb-val" id="fsb-sPrice">—</span>
+      <span class="fsb-val price-flat" id="fsb-sPrice">—</span>
       <span class="fsb-chg flat" id="fsb-sChg"></span>
     </div>
   </div>
@@ -355,9 +381,9 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   <!-- GOLD -->
   <div class="gold-col">
     <div class="etf-head"><div class="etf-icon">🥇</div><div class="etf-name"><div class="en">Gold BeES</div><div class="es">GOLDBEES · NSE</div></div></div>
-    <div class="price-block" id="pb-G">
+    <div class="price-block price-flat" id="pb-G">
       <div class="tick-badge flat" id="tick-G">LIVE</div>
-      <div class="price-big" id="pr-G"><span class="price-loading">Loading…</span></div>
+      <div class="price-big price-flat" id="pr-G"><span class="price-loading">Loading…</span></div>
       <div><span class="chg-pill flat" id="pill-G">— —</span></div>
       <div class="prev-label" id="prev-G">PREV CLOSE: —</div>
     </div>
@@ -382,9 +408,9 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   <!-- SILVER -->
   <div class="silver-col">
     <div class="etf-head"><div class="etf-icon">🥈</div><div class="etf-name"><div class="en">Silver BeES</div><div class="es">SILVERBEES · NSE</div></div></div>
-    <div class="price-block" id="pb-S">
+    <div class="price-block price-flat" id="pb-S">
       <div class="tick-badge flat" id="tick-S">LIVE</div>
-      <div class="price-big" id="pr-S"><span class="price-loading">Loading…</span></div>
+      <div class="price-big price-flat" id="pr-S"><span class="price-loading">Loading…</span></div>
       <div><span class="chg-pill flat" id="pill-S">— —</span></div>
       <div class="prev-label" id="prev-S">PREV CLOSE: —</div>
     </div>
@@ -460,6 +486,9 @@ const ETF = {
   S:{sym:'SILVERBEES.NS',name:'Silver BeES',icon:'🥈',mc:'sm',cls:'sv'}
 };
 
+// ─── STORAGE KEY ─────────────────────────────────────────────────────────────
+const LS_KEY = 'etf_bees_v1';
+
 let cfg = {buy:2,sell:2,units:10,ref:60};
 let st  = {
   price:{G:null,S:null}, prev:{G:null,S:null},
@@ -468,10 +497,12 @@ let st  = {
   pend:null, timer:null, tickTimer:null,
   alertPend:null,
   alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}},
-  workingProxy:null, fetchFailCount:0
+  workingProxy:null, fetchFailCount:0,
+  // Track previous price for direction
+  prevPrice:{G:null,S:null}
 };
 
-// ─── PROXY LIST (ordered by reliability) ───────────────────────────────────
+// ─── PROXY LIST ─────────────────────────────────────────────────────────────
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -480,7 +511,6 @@ const PROX = [
   u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
 ];
 
-// ─── YAHOO URLS for a symbol ────────────────────────────────────────────────
 function yahooUrls(sym) {
   return [
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`,
@@ -491,31 +521,22 @@ function yahooUrls(sym) {
   ];
 }
 
-// ─── Parse Yahoo response ────────────────────────────────────────────────────
 function parseYahoo(j) {
-  // v8 chart response
   const res = j?.chart?.result?.[0];
   if (res) {
     const price = res.meta?.regularMarketPrice || res.meta?.previousClose;
     const prev  = res.meta?.chartPreviousClose  || res.meta?.previousClose || price;
     if (price && price > 0) return {price, prev};
   }
-  // v7 quote response
   const q = j?.quoteResponse?.result?.[0];
   if (q?.regularMarketPrice) {
-    return {
-      price: q.regularMarketPrice,
-      prev:  q.regularMarketPreviousClose || q.regularMarketPrice
-    };
+    return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketPrice };
   }
   return null;
 }
 
-// ─── Core fetch: try working proxy first, then rotate ────────────────────────
 async function tryFetch(k) {
   const urls = yahooUrls(ETF[k].sym);
-
-  // If we have a known-working proxy, try it first with all urls
   if (st.workingProxy !== null) {
     const px = PROX[st.workingProxy];
     for (const yu of urls) {
@@ -528,11 +549,8 @@ async function tryFetch(k) {
         if (d) return d;
       } catch(_) {}
     }
-    // Working proxy failed, reset and try all
     st.workingProxy = null;
   }
-
-  // Rotate through all proxies × all urls
   for (let pi = 0; pi < PROX.length; pi++) {
     for (const yu of urls) {
       try {
@@ -541,26 +559,98 @@ async function tryFetch(k) {
         const raw = await r.json();
         const j   = typeof raw === 'string' ? JSON.parse(raw) : raw;
         const d   = parseYahoo(j);
-        if (d) {
-          st.workingProxy = pi; // remember this working proxy
-          return d;
-        }
+        if (d) { st.workingProxy = pi; return d; }
       } catch(_) {}
     }
   }
   return null;
 }
 
-// ─── Status bar + ago timer ───────────────────────────────────────────────────
+// ─── DIRECTION TRACKING ──────────────────────────────────────────────────────
+function getPriceDir(k) {
+  const cur = st.price[k], pv = st.prev[k];
+  if (!cur || !pv) return 'flat';
+  const chg = cur - pv;
+  if (chg > 0.001) return 'up';
+  if (chg < -0.001) return 'down';
+  return 'flat';
+}
+
+function updatePriceColor(k) {
+  const dir = getPriceDir(k);
+  const prEl = document.getElementById('pr-' + k);
+  const pbEl = document.getElementById('pb-' + k);
+  // Price text color
+  prEl.className = 'price-big price-' + dir;
+  // Price block border
+  pbEl.className = 'price-block price-' + dir;
+  // Status bar price color
+  const sbEl = document.getElementById(k === 'G' ? 'fsb-gPrice' : 'fsb-sPrice');
+  if (sbEl) {
+    sbEl.className = 'fsb-val price-' + dir;
+  }
+}
+
+// ─── TAB TITLE UPDATE ────────────────────────────────────────────────────────
+function updateTabTitle() {
+  // Find which ETF is closest to its next signal (buy or sell)
+  let bestSignal = null;
+  let bestDist   = Infinity;
+
+  for (const k of ['G','S']) {
+    const p  = st.price[k]; if (!p) continue;
+    const rb = st.refBuy[k]  || p;
+    const rs = st.refSell[k] || p;
+    const bt = rb * (1 - cfg.buy  / 100);
+    const sv = rs * (1 + cfg.sell / 100);
+    const tu = st.hold[k].reduce((s,h) => s + h.units, 0);
+
+    // Buy distance (% price needs to drop)
+    const buyDist  = ((p - bt) / p * 100);
+    // Sell distance (% price needs to rise) — only if have holdings
+    const sellDist = tu > 0 ? ((sv - p) / p * 100) : Infinity;
+
+    if (buyDist <= 0) {
+      // BUY HIT
+      document.title = `${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`;
+      return;
+    }
+    if (sellDist <= 0 && tu > 0) {
+      document.title = `${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`;
+      return;
+    }
+
+    // Closest to buy
+    if (buyDist < bestDist) {
+      bestDist   = buyDist;
+      bestSignal = { k, type:'BUY', dist: buyDist.toFixed(2) };
+    }
+    // Closest to sell (if holdings)
+    if (tu > 0 && sellDist < bestDist) {
+      bestDist   = sellDist;
+      bestSignal = { k, type:'SELL', dist: sellDist.toFixed(2) };
+    }
+  }
+
+  if (bestSignal) {
+    const name = bestSignal.k === 'G' ? 'GOLD' : 'SILVER';
+    const dir  = bestSignal.type === 'BUY' ? '↓' : '↑';
+    document.title = `${ETF[bestSignal.k].icon} ${name} ${bestSignal.type} ${dir}${bestSignal.dist}% · BeES`;
+  } else {
+    document.title = '⚜️ Gold & Silver BeES';
+  }
+}
+
+// ─── STATUS BAR ──────────────────────────────────────────────────────────────
 let lastFetchTs = null;
 let agoTimer    = null;
 
 function updateAgo() {
   if (!lastFetchTs) return;
-  const sec  = Math.floor((Date.now() - lastFetchTs) / 1000);
-  const el   = document.getElementById('fsb-ago');
+  const sec = Math.floor((Date.now() - lastFetchTs) / 1000);
+  const el  = document.getElementById('fsb-ago');
   if (!el) return;
-  if (sec < 60)       el.textContent = sec + 's ago';
+  if (sec < 60)        el.textContent = sec + 's ago';
   else if (sec < 3600) el.textContent = Math.floor(sec/60) + 'm ' + (sec%60) + 's ago';
   else                 el.textContent = Math.floor(sec/3600) + 'h ago';
 }
@@ -570,19 +660,15 @@ function setFetchStatus(state, statusTxt) {
   bar.className = 'fetch-status-bar ' + state;
   document.getElementById('fetchStatusText').textContent = statusTxt;
 
-  // Update Gold price pill
   if (st.price.G && st.prev.G) {
     const gChg = st.price.G - st.prev.G;
-    document.getElementById('fsb-gPrice').textContent = '₹' + st.price.G.toFixed(2);
-    const gEl = document.getElementById('fsb-gChg');
+    const gEl  = document.getElementById('fsb-gChg');
     gEl.textContent = (gChg >= 0 ? '▲' : '▼') + Math.abs(((gChg/st.prev.G)*100)).toFixed(2) + '%';
     gEl.className   = 'fsb-chg ' + (gChg >= 0 ? 'up' : 'down');
   }
-  // Update Silver price pill
   if (st.price.S && st.prev.S) {
     const sChg = st.price.S - st.prev.S;
-    document.getElementById('fsb-sPrice').textContent = '₹' + st.price.S.toFixed(2);
-    const sEl = document.getElementById('fsb-sChg');
+    const sEl  = document.getElementById('fsb-sChg');
     sEl.textContent = (sChg >= 0 ? '▲' : '▼') + Math.abs(((sChg/st.prev.S)*100)).toFixed(2) + '%';
     sEl.className   = 'fsb-chg ' + (sChg >= 0 ? 'up' : 'down');
   }
@@ -594,7 +680,6 @@ function setFetchStatus(state, statusTxt) {
   }
 }
 
-// ─── Fetch one symbol (full) ─────────────────────────────────────────────────
 async function fetchOne(k) {
   const d = await tryFetch(k);
   if (!d) {
@@ -609,15 +694,16 @@ async function fetchOne(k) {
   if (!st.refBuy[k])  st.refBuy[k]  = d.price;
   if (!st.refSell[k]) st.refSell[k] = d.price;
   showTick(k, old, d.price);
+  updatePriceColor(k);
   updateCard(k);
   alertCheck(k);
   saveSt();
   const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = 'Updated ' + t;
   setFetchStatus('', '✓ Live · ' + t);
+  updateTabTitle();
 }
 
-// ─── Tick fetch (lightweight, every 15s) ────────────────────────────────────
 async function tickOne(k) {
   const d = await tryFetch(k);
   if (!d) return;
@@ -625,42 +711,43 @@ async function tickOne(k) {
   st.price[k] = d.price;
   st.prev[k]  = d.prev;
   if (d.price !== old) showTick(k, old, d.price);
+  updatePriceColor(k);
   updateCard(k);
   alertCheck(k);
   saveSt();
   const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = '🔄 ' + t;
   setFetchStatus('', '✓ Live · ' + t);
+  updateTabTitle();
 }
 
 function showTick(k, oldP, newP) {
   if (!oldP || oldP === newP) return;
-  const pb    = document.getElementById('pb-'   + k);
+  const pb    = document.getElementById('pb-' + k);
   const badge = document.getElementById('tick-' + k);
   if (newP > oldP) {
-    pb.className = 'price-block price-flash-up';
+    pb.classList.add('price-flash-up');
     badge.className = 'tick-badge up'; badge.textContent = '▲ LIVE';
   } else {
-    pb.className = 'price-block price-flash-down';
+    pb.classList.add('price-flash-down');
     badge.className = 'tick-badge down'; badge.textContent = '▼ LIVE';
   }
-  setTimeout(()=>pb.className='price-block', 600);
+  setTimeout(()=>{
+    pb.classList.remove('price-flash-up','price-flash-down');
+  }, 600);
 }
 
 function startLoop() {
   if (st.timer) clearInterval(st.timer);
   st.timer = setInterval(fetchAll, cfg.ref * 1000);
 }
-
 function startTickLoop() {
   if (st.tickTimer) clearInterval(st.tickTimer);
-  // Stagger G and S by 7s so they don't fire simultaneously
   st.tickTimer = setInterval(() => {
     tickOne('G');
     setTimeout(() => tickOne('S'), 7000);
   }, 15000);
 }
-
 async function fetchAll() {
   setFetchStatus('loading', 'Fetching live prices…');
   await fetchOne('G');
@@ -698,8 +785,10 @@ function applySettings() {
   document.getElementById('mUnits').value = cfg.units;
   st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
   st.workingProxy = null;
+  saveSettings();
   startLoop();
   updateAll();
+  updateTabTitle();
   showToast('Settings applied!');
 }
 
@@ -707,7 +796,14 @@ function updateCard(k) {
   const p = st.price[k], pv = st.prev[k];
   if (!p) return;
 
-  document.getElementById('pr-' + k).textContent = '₹ ' + p.toFixed(2);
+  // Price display with icon + directional arrow
+  const dir  = getPriceDir(k);
+  const icon = ETF[k].icon;
+  const arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '';
+  const prEl = document.getElementById('pr-' + k);
+  prEl.innerHTML = `<span class="price-icon">${icon}</span>₹ ${p.toFixed(2)}<span class="price-dir-icon ${dir}">${arrow}</span>`;
+  prEl.className = 'price-big price-' + dir;
+
   const chg = p - pv, pct = (chg / pv) * 100;
   const pill = document.getElementById('pill-' + k);
   pill.textContent = (chg > 0 ? '▲' : '▼') + ' ₹' + Math.abs(chg).toFixed(2) + '  (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)';
@@ -741,24 +837,18 @@ function updateCard(k) {
   document.getElementById('bts-' + k).textContent = 'ref ₹' + rb.toFixed(2) + ' −' + cfg.buy  + '%';
   document.getElementById('sts-' + k).textContent = 'ref ₹' + rs.toFixed(2) + ' +' + cfg.sell + '%';
 
-  // ── Proximity highlight + progress bar ──────────────────────────────────
-  // Buy: price needs to DROP to bt. gap = how far price is above bt
-  const buyGap  = bt > 0 ? (p - bt) / (rb - bt) * 100 : 100; // 100%=far, 0%=hit
+  const buyGap  = bt > 0 ? (p - bt) / (rb - bt) * 100 : 100;
   const buyPct  = Math.max(0, Math.min(100, buyGap));
-  const buyDist = ((p - bt) / p * 100).toFixed(2); // % price needs to drop
-
-  // Sell: price needs to RISE to sv. gap = how far price is below sv
+  const buyDist = ((p - bt) / p * 100).toFixed(2);
   const sellGap = sv > bt ? (sv - p) / (sv - rs) * 100 : 100;
-  const sellPct = Math.max(0, Math.min(100, 100 - sellGap)); // inverted: 100=at target
+  const sellPct = Math.max(0, Math.min(100, 100 - sellGap));
   const sellDist = ((sv - p) / p * 100).toFixed(2);
 
-  // Buy box class
   let buyClass = 'tbox buy-b';
   if      (p <= bt)      buyClass = 'tbox buy-b alert-buy';
-  else if (buyPct <= 25) buyClass = 'tbox buy-b close-buy';   // within 25% of range
-  else if (buyPct <= 50) buyClass = 'tbox buy-b near-buy';    // within 50% of range
+  else if (buyPct <= 25) buyClass = 'tbox buy-b close-buy';
+  else if (buyPct <= 50) buyClass = 'tbox buy-b near-buy';
 
-  // Sell box class (only highlight if have holdings)
   let sellClass = 'tbox sell-b';
   if      (p >= sv && tu > 0)       sellClass = 'tbox sell-b alert-sell';
   else if (sellPct >= 75 && tu > 0) sellClass = 'tbox sell-b close-sell';
@@ -767,13 +857,11 @@ function updateCard(k) {
   document.getElementById('bb-' + k).className = buyClass;
   document.getElementById('sb-' + k).className = sellClass;
 
-  // Progress bars
   const buyBarW  = p <= bt ? 100 : Math.max(2, 100 - buyPct);
   const sellBarW = p >= sv ? 100 : Math.max(2, sellPct);
   document.getElementById('bpb-' + k).style.width = buyBarW + '%';
   document.getElementById('spb-' + k).style.width = sellBarW + '%';
 
-  // Labels below bar
   document.getElementById('bpl-' + k).textContent = p <= bt ? '🎯 HIT!' : '▼ ' + buyDist + '% door';
   document.getElementById('spl-' + k).textContent = p >= sv ? '🎯 HIT!' : '▲ ' + (tu > 0 ? sellDist + '% door' : 'No holdings');
 
@@ -961,7 +1049,7 @@ function confirmTrade() {
   const time   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
   if (type === 'buy') {
-    const bpRaw  = parseFloat(document.getElementById('mBuyPrice').value);
+    const bpRaw   = parseFloat(document.getElementById('mBuyPrice').value);
     const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP;
     st.hold[k].push({price:buyPrice, buyPrice, units, time});
     st.refBuy[k]  = liveP;
@@ -986,7 +1074,7 @@ function confirmTrade() {
     addLog({type:'sell', k, price:liveP, units, pnl, time});
     showToast('✅ SOLD ' + units + ' ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl>=0?'+':'') + '₹' + pnl.toFixed(2));
   }
-  closeModal(); updateCard(k); saveSt();
+  closeModal(); updateCard(k); saveSt(); updateTabTitle();
 }
 
 function addLog(e)  { st.log.unshift(e); renderLog(); }
@@ -998,23 +1086,57 @@ function renderLog() {
   ).join('');
 }
 
+// ─── SAVE / LOAD — localStorage (permanent, survives refresh & next day) ─────
 function saveSt() {
   try {
-    sessionStorage.setItem('etf5', JSON.stringify({
+    const data = {
       refBuy:st.refBuy, refSell:st.refSell,
       hold:st.hold, log:st.log,
-      real:st.real, alerted:st.alerted
-    }));
+      real:st.real, alerted:st.alerted,
+      cfg: { buy: cfg.buy, sell: cfg.sell }
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    // Flash save dot
+    const dot = document.getElementById('saveDot');
+    if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
+  } catch(e) {
+    console.warn('localStorage save failed:', e);
+  }
+}
+
+function saveSettings() {
+  try {
+    const existing = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    existing.cfg = { buy: cfg.buy, sell: cfg.sell };
+    localStorage.setItem(LS_KEY, JSON.stringify(existing));
   } catch(_) {}
 }
+
 function loadSt() {
   try {
-    const r = sessionStorage.getItem('etf5');
-    if (!r) return;
-    Object.assign(st, JSON.parse(r));
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.refBuy)  st.refBuy  = data.refBuy;
+    if (data.refSell) st.refSell = data.refSell;
+    if (data.hold)    st.hold    = data.hold;
+    if (data.log)     st.log     = data.log;
+    if (data.real   !== undefined) st.real    = data.real;
+    if (data.alerted) st.alerted = data.alerted;
+    // Restore settings
+    if (data.cfg) {
+      cfg.buy  = data.cfg.buy  || 2;
+      cfg.sell = data.cfg.sell || 2;
+      document.getElementById('c-buy').value  = cfg.buy;
+      document.getElementById('c-sell').value = cfg.sell;
+    }
     renderLog();
-  } catch(_) {}
+    showToast('💾 Data loaded from previous session!');
+  } catch(e) {
+    console.warn('localStorage load failed:', e);
+  }
 }
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
