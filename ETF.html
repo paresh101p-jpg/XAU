@@ -1000,8 +1000,8 @@ function updateBtnHints(k) {
   const sellHint = document.getElementById('sellHint-' + k);
   // Actual amount = units × live price
   const actualAmt = p ? (buyU * p) : 0;
-  if (buyHint)  buyHint.textContent  = buyU + ' units · ₹' + Math.round(actualAmt).toLocaleString('en-IN');
-  if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' units (Lot 1)' : '— no holdings';
+  if (buyHint)  buyHint.textContent  = buyU + ' Share · ₹' + Math.round(actualAmt).toLocaleString('en-IN');
+  if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings';
 }
 
 /* ══════════════════════
@@ -1267,7 +1267,7 @@ function updateCard(k) {
   const pnl = tu > 0 ? (p - avg) * tu : 0;
   const pp  = avg > 0 ? (p - avg) / avg * 100 : 0;
 
-  document.getElementById('u-'   + k).textContent = tu + ' units';
+  document.getElementById('u-'   + k).textContent = tu + ' Share';
   document.getElementById('avg-' + k).textContent = avg > 0 ? '₹ ' + avg.toFixed(2) : '—';
   const pel = document.getElementById('pnl-' + k);
   if (tu > 0) {
@@ -1334,11 +1334,11 @@ function updateCard(k) {
 
   if (p <= bt) {
     sg.textContent = '🟢 BUY NOW'; sg.className = 'iv profit';
-    snx.textContent = 'Lot ' + nextLotNum + ' · ' + buyU + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ' chahiye';
+    snx.textContent = 'Lot ' + nextLotNum + ' · ' + buyU + ' Share · ₹' + Number(needAmt).toLocaleString('en-IN') + ' chahiye';
     snx.className   = 'sig-next nb';
   } else if (p >= sv && tu > 0) {
     sg.textContent = '🔴 SELL NOW'; sg.className = 'iv loss';
-    snx.textContent = 'Lot 1 · ' + sellU + 'u sell karo · Profit: +₹' + potP;
+    snx.textContent = 'Lot 1 · ' + sellU + ' Share sell karo · Profit: +₹' + potP;
     snx.className   = 'sig-next ns';
   } else {
     sg.textContent = '⏳ WAIT'; sg.className = 'iv wait';
@@ -1346,7 +1346,7 @@ function updateCard(k) {
       const pp2 = ((sv - avg) * tu).toFixed(2);
       snx.innerHTML = 'BUY Lot ' + nextLotNum + ' ▼₹' + bt.toFixed(2) + ' (' + buyU + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ')<br>SELL Lot 1 ▲₹' + sv.toFixed(2) + ' (+₹' + pp2 + ')';
     } else {
-      snx.innerHTML = 'BUY ▼₹' + bt.toFixed(2) + ' · ' + buyU + ' units · ₹' + Number(needAmt).toLocaleString('en-IN');
+      snx.innerHTML = 'BUY ▼₹' + bt.toFixed(2) + ' · ' + buyU + ' Share · ₹' + Number(needAmt).toLocaleString('en-IN');
     }
     snx.className = 'sig-next';
   }
@@ -1391,7 +1391,7 @@ function renderHold(k, p, bt) {
 
     return `<div class="h-card ${isP?'pc':'lc'}">
       <div class="h-card-top">
-        <span class="h-lot-lbl">Lot ${i+1} · ${h.units} units${badgeHtml}</span>
+        <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share${badgeHtml}</span>
         <span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
       </div>
       <div class="h-card-body">
@@ -1520,10 +1520,10 @@ function openModal(k, type, auto=false) {
   if (isBuy) {
     mUnitsInput.removeAttribute('readonly');
     mUnitsInput.style.cursor = '';
-    mUnitsLabel.textContent = 'Units to Buy (floor(₹' + cfg.orderAmt.toLocaleString('en-IN') + ' ÷ live price))';
+    mUnitsLabel.textContent = 'ETF to Buy';
   } else {
     mUnitsInput.setAttribute('readonly', true);
-    mUnitsLabel.textContent = 'Units to Sell — Lot 1 (fixed)';
+    mUnitsLabel.textContent = 'ETF to Sell — Lot 1 (fixed)';
   }
 
   // Buy price field — only for buy
@@ -1626,7 +1626,7 @@ function renderLog() {
   const el = document.getElementById('logBar');
   if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; }
   el.innerHTML = st.log.slice(0,25).map(l =>
-    `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units}u @ ₹${l.price.toFixed(2)} ${l.pnl!==undefined?(l.pnl>=0?'+':'')+'₹'+l.pnl.toFixed(2):''} · ${l.time}</div>`
+    `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units}Share @ ₹${l.price.toFixed(2)} ${l.pnl!==undefined?(l.pnl>=0?'+':'')+'₹'+l.pnl.toFixed(2):''} · ${l.time}</div>`
   ).join('');
 }
 
