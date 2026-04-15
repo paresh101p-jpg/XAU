@@ -645,13 +645,16 @@ let lastFetchTs = null;
 let agoTimer    = null;
 
 function updateAgo() {
-  if (!lastFetchTs) return;
-  const sec = Math.floor((Date.now() - lastFetchTs) / 1000);
-  const el  = document.getElementById('fsb-ago');
-  if (!el) return;
-  if (sec < 60)        el.textContent = sec + 's ago';
-  else if (sec < 3600) el.textContent = Math.floor(sec/60) + 'm ' + (sec%60) + 's ago';
-  else                 el.textContent = Math.floor(sec/3600) + 'h ago';
+if (!lastFetchTs) return;
+const sec = Math.floor((Date.now() - lastFetchTs) / 1000);
+const nextSec = Math.max(0, cfg.ref - sec);
+const el = document.getElementById('fsb-ago');
+if (!el) return;
+let agoTxt;
+if (sec < 60) agoTxt = sec + 's ago';
+else if (sec < 3600) agoTxt = Math.floor(sec/60) + 'm ' + (sec%60) + 's ago';
+else agoTxt = Math.floor(sec/3600) + 'h ago';
+el.textContent = agoTxt + ' · ' + nextSec + 's mein refresh';
 }
 
 function setFetchStatus(state, statusTxt) {
