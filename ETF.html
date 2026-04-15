@@ -1233,10 +1233,10 @@ function mktCheck() {
 
 function applySettings() {
   cfg.buy  = parseFloat(document.getElementById('c-buy').value)  || 2;
-  cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3;
+  cfg.sell = parseFloat(document.getElementById('c-sell').value) || 2;
   cfg.ref  = 60;
   st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
-  saveSettings(); updateAll(); updateTabTitle();
+  saveSt(); updateAll(); updateTabTitle();
 }
 
 /* ══════════════════════════════════════
@@ -1670,12 +1670,10 @@ function loadSt() {
     if (data.real !== undefined) st.real = data.real;
     if (data.alerted) st.alerted = data.alerted;
     if (data.cfg) {
-      cfg.buy      = data.cfg.buy      || 2;
-      cfg.sell     = data.cfg.sell     || 2;
-      cfg.orderAmt = data.cfg.orderAmt || 2500;
-      document.getElementById('c-buy').value      = cfg.buy;
-      document.getElementById('c-sell').value     = cfg.sell;
-      document.getElementById('c-orderamt').value = cfg.orderAmt;
+      cfg.buy  = data.cfg.buy  || 2;
+      cfg.sell = data.cfg.sell || 2;
+      document.getElementById('c-buy').value  = cfg.buy;
+      document.getElementById('c-sell').value = cfg.sell;
     }
     if (data.cap) {
       if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
@@ -1831,12 +1829,10 @@ function applyData(data) {
   if (data.real !== undefined) st.real = data.real;
   if (data.alerted) st.alerted = data.alerted;
   if (data.cfg) {
-    cfg.buy      = data.cfg.buy      || 2;
-    cfg.sell     = data.cfg.sell     || 2;
-    cfg.orderAmt = data.cfg.orderAmt || 2500;
-    document.getElementById('c-buy').value      = cfg.buy;
-    document.getElementById('c-sell').value     = cfg.sell;
-    document.getElementById('c-orderamt').value = cfg.orderAmt;
+    cfg.buy  = data.cfg.buy  || 2;
+    cfg.sell = data.cfg.sell || 2;
+    document.getElementById('c-buy').value  = cfg.buy;
+    document.getElementById('c-sell').value = cfg.sell;
   }
   if (data.cap) {
     if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
