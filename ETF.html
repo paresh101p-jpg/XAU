@@ -396,17 +396,19 @@ body {
 .tbox.sell-b .tprog-bar, .tbox.near-sell .tprog-bar, .tbox.close-sell .tprog-bar, .tbox.alert-sell .tprog-bar { background: linear-gradient(90deg, rgba(224,82,82,0.4), var(--red)); }
 .tprog-lbl { display: flex; justify-content: space-between; margin-top: 3px; font-size: 0.55rem; color: var(--muted); }
 
-/* ── TRADE BUTTONS ── */
+/* ── TRADE BUTTONS — updated to show units ── */
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn-buy, .btn-sell {
   border: none; border-radius: 10px; padding: 10px;
-  font-size: 0.8rem; cursor: pointer; transition: 0.15s; letter-spacing: -0.2px;
+  font-size: 0.78rem; cursor: pointer; transition: 0.15s; letter-spacing: -0.2px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .btn-buy  { background: var(--green); color: #000; }
 .btn-sell { background: var(--red);   color: #fff; }
 .btn-buy:hover  { background: #62D49B; transform: translateY(-1px); }
 .btn-sell:hover { background: #F06868; transform: translateY(-1px); }
 .btn-buy:active, .btn-sell:active { transform: translateY(0); }
+.btn-units-hint { font-size: 0.6rem; opacity: 0.75; }
 
 /* ── SECTION LABEL ── */
 .sec-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
@@ -438,7 +440,6 @@ body {
   font-size: 0.52rem; background: rgba(224,82,82,0.12); color: var(--red);
   border: 1px solid rgba(224,82,82,0.3); border-radius: 5px; padding: 1px 5px; margin-left: 5px;
 }
-/* ── NEW: BUY NOW badge variant ── */
 .lifo-badge.buy-now {
   background: rgba(76,175,130,0.15) !important;
   color: var(--green) !important;
@@ -487,6 +488,8 @@ body {
 .mr .mv.profit { color: var(--green); }
 .mr .mv.loss   { color: var(--red); }
 .mr-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+/* ── BUY PRICE INPUT (editable) ── */
 .m-buy-price { background: var(--bg3); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; border: 2px solid rgba(212,168,67,0.3); }
 .m-buy-price label { display: block; font-size: 0.62rem; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
 .m-buy-price input {
@@ -494,8 +497,10 @@ body {
   border-radius: 9px; color: var(--gold); font-size: 1.1rem;
   padding: 9px 14px; outline: none; text-align: center; transition: 0.15s;
 }
-.m-buy-price input:focus { border-color: var(--gold); }
+.m-buy-price input:focus { border-color: var(--gold); box-shadow: 0 0 8px rgba(212,168,67,0.2); }
 .m-buy-price .bp-hint { font-size: 0.58rem; color: var(--muted); margin-top: 5px; text-align: center; }
+
+/* ── UNITS (read-only for sell, editable for buy) ── */
 .munits { margin-bottom: 14px; }
 .munits label { display: block; font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
 .munits input {
@@ -504,6 +509,10 @@ body {
   padding: 9px 14px; outline: none; text-align: center; transition: 0.15s;
 }
 .munits input:focus { border-color: var(--gold); }
+.munits input[readonly] {
+  background: var(--bg4); color: var(--muted); cursor: not-allowed;
+  border-color: rgba(224,82,82,0.3);
+}
 .mbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mcnl {
   background: var(--bg3); color: var(--muted); border: 2px solid var(--border);
@@ -550,6 +559,24 @@ body {
 .btn-alert-dismiss { background: var(--bg3); color: var(--muted); border: 2px solid var(--border); border-radius: 11px; padding: 12px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
 .btn-alert-dismiss:hover { color: var(--text); }
 
+/* ── SIGNAL INFO BOX ── */
+.lot-signal-info {
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lot-signal-info .lsi-label { letter-spacing: 1px; text-transform: uppercase; }
+.lot-signal-info .lsi-val   { color: var(--text); }
+.lot-signal-info .lsi-buy   { color: var(--green); }
+.lot-signal-info .lsi-sell  { color: var(--red); }
+
 /* ── TOAST ── */
 .toast {
   position: fixed; bottom: 46px; left: 50%; transform: translateX(-50%) translateY(60px);
@@ -572,24 +599,6 @@ body {
 .sound-toggle:hover { border-color: var(--gold); color: var(--text); }
 .sound-toggle.on  { border-color: rgba(76,175,130,0.5); color: var(--green); }
 .sound-toggle.off { border-color: rgba(224,82,82,0.4); color: var(--red); }
-
-/* ── SIGNAL INFO BOX ── */
-.lot-signal-info {
-  background: var(--bg3);
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-size: 0.62rem;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.lot-signal-info .lsi-label { letter-spacing: 1px; text-transform: uppercase; }
-.lot-signal-info .lsi-val   { color: var(--text); }
-.lot-signal-info .lsi-buy   { color: var(--green); }
-.lot-signal-info .lsi-sell  { color: var(--red); }
 
 @media(max-width:580px){
   .split { grid-template-columns: 1fr; }
@@ -658,6 +667,7 @@ body {
   <div class="settings-row">
     <div class="cfg"><span>Buy %</span><input id="c-buy" type="number" value="2" min="0.5" max="20" step="0.5"></div>
     <div class="cfg"><span>Sell %</span><input id="c-sell" type="number" value="2" min="0.5" max="20" step="0.5"></div>
+    <div class="cfg"><span>Per Order ₹</span><input id="c-orderamt" type="number" value="2500" min="100" step="100"></div>
     <button class="btn-apply" onclick="applySettings()">↺ Apply</button>
   </div>
 
@@ -686,7 +696,7 @@ body {
   <div class="cap-panel" id="capPanel">
     <div class="cap-inner">
       <div class="cap-row1">
-        <div class="cap-ig"><label>Total Capital ₹</label><input type="number" id="cp-total" value="500000" min="1000" step="1000" oninput="calcCapital()"></div>
+        <div class="cap-ig"><label>Total Capital ₹</label><input type="number" id="cp-total" value="100000" min="1000" step="1000" oninput="calcCapital()"></div>
         <div class="cap-ig"><label>Parts</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
       </div>
       <div class="cap-cards">
@@ -749,8 +759,14 @@ body {
           <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
         </div>
         <div class="trade-btns">
-          <button class="btn-buy" onclick="openModal('G','buy')">＋ BUY</button>
-          <button class="btn-sell" onclick="openModal('G','sell')">－ SELL</button>
+          <button class="btn-buy" id="buyBtn-G" onclick="openModal('G','buy')">
+            <span>＋ BUY</span>
+            <span class="btn-units-hint" id="buyHint-G">— units</span>
+          </button>
+          <button class="btn-sell" id="sellBtn-G" onclick="openModal('G','sell')">
+            <span>－ SELL</span>
+            <span class="btn-units-hint" id="sellHint-G">— units</span>
+          </button>
         </div>
         <div class="sec-label">Open Holdings</div>
         <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
@@ -788,8 +804,14 @@ body {
           <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
         </div>
         <div class="trade-btns">
-          <button class="btn-buy" onclick="openModal('S','buy')">＋ BUY</button>
-          <button class="btn-sell" onclick="openModal('S','sell')">－ SELL</button>
+          <button class="btn-buy" id="buyBtn-S" onclick="openModal('S','buy')">
+            <span>＋ BUY</span>
+            <span class="btn-units-hint" id="buyHint-S">— units</span>
+          </button>
+          <button class="btn-sell" id="sellBtn-S" onclick="openModal('S','sell')">
+            <span>－ SELL</span>
+            <span class="btn-units-hint" id="sellHint-S">— units</span>
+          </button>
         </div>
         <div class="sec-label">Open Holdings</div>
         <div class="h-list" id="hl-S"><div class="no-h">No holdings yet</div></div>
@@ -811,10 +833,10 @@ body {
     <div class="m-buy-price" id="mBuyPriceWrap">
       <label>Actual Buy Price (Dhan App Fill Price)</label>
       <input type="number" id="mBuyPrice" step="0.01" placeholder="Actual fill price daalo">
-      <div class="bp-hint">Live price default hai — apna actual fill price daalo</div>
+      <div class="bp-hint">Live price default hai — apna actual fill price change kar sakte ho</div>
     </div>
     <div class="munits">
-      <label>Units to Trade</label>
+      <label id="mUnitsLabel">Units to Trade</label>
       <input type="number" id="mUnits" value="10" min="1">
     </div>
     <div class="mbtns">
@@ -928,11 +950,12 @@ const ETF = {
   G:{sym:'GOLDBEES.NS',  name:'Gold BeES',  icon:'🥇',mc:'gm',cls:'gd'},
   S:{sym:'SILVERBEES.NS',name:'Silver BeES',icon:'🥈',mc:'sm',cls:'sv'}
 };
-const LS_KEY = 'etf_bees_v1';
-let cfg = {buy:2,sell:2,units:10,ref:60};
-let st  = {
+const LS_KEY = 'etf_bees_v2';
+
+let cfg = { buy: 2, sell: 2, orderAmt: 2500, ref: 60 };
+
+let st = {
   price:{G:null,S:null}, prev:{G:null,S:null},
-  refBuy:{G:null,S:null}, refSell:{G:null,S:null},
   hold:{G:[],S:[]}, log:[], real:0,
   pend:null, timer:null, tickTimer:null,
   alertPend:null,
@@ -940,6 +963,47 @@ let st  = {
   workingProxy:null, fetchFailCount:0
 };
 
+/* ══════════════════════════════════════════
+   CORE HELPER — Get Lot 1 (cheapest/latest)
+   Holdings sorted: cheapest price first (Lot 1 = top)
+   ══════════════════════════════════════════ */
+function getSortedHoldings(k) {
+  // Sort ascending by buyPrice — cheapest = Lot 1 = reference
+  return [...st.hold[k]].sort((a, b) => (a.buyPrice || a.price) - (b.buyPrice || b.price));
+}
+
+function getLot1Price(k) {
+  const sorted = getSortedHoldings(k);
+  if (!sorted.length) return null;
+  return sorted[0].buyPrice || sorted[0].price;
+}
+
+function getLot1Units(k) {
+  const sorted = getSortedHoldings(k);
+  if (!sorted.length) return 0;
+  return sorted[0].units;
+}
+
+/* Buy units = floor(orderAmt / live price) */
+function calcBuyUnits(k) {
+  const p = st.price[k];
+  if (!p || p <= 0) return 1;
+  return Math.max(1, Math.floor(cfg.orderAmt / p));
+}
+
+/* ══ UPDATE BUTTON HINTS ══ */
+function updateBtnHints(k) {
+  const buyU  = calcBuyUnits(k);
+  const sellU = getLot1Units(k);
+  const buyHint  = document.getElementById('buyHint-'  + k);
+  const sellHint = document.getElementById('sellHint-' + k);
+  if (buyHint)  buyHint.textContent  = buyU + ' units · ₹' + (cfg.orderAmt).toLocaleString('en-IN');
+  if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' units (Lot 1)' : '— no holdings';
+}
+
+/* ══════════════════════
+   PROXY / FETCH ENGINE
+   ══════════════════════ */
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -1027,14 +1091,13 @@ function updateTabTitle() {
   let bestSignal = null, bestDist = Infinity;
   for (const k of ['G','S']) {
     const p = st.price[k]; if (!p) continue;
-    const latestLotPrice = getLatestLotPrice(k);
-    const rb = latestLotPrice || st.refBuy[k] || p;
-    const rs = latestLotPrice || st.refSell[k] || p;
-    const bt = rb * (1 - cfg.buy  / 100), sv = rs * (1 + cfg.sell / 100);
-    const tu = st.hold[k].reduce((s,h) => s + h.units, 0);
+    const ref = getLot1Price(k) || p;
+    const bt  = ref * (1 - cfg.buy  / 100);
+    const sv  = ref * (1 + cfg.sell / 100);
+    const tu  = st.hold[k].reduce((s,h) => s + h.units, 0);
     const buyDist  = ((p - bt) / p * 100);
     const sellDist = tu > 0 ? ((sv - p) / p * 100) : Infinity;
-    if (buyDist <= 0) { document.title = `${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; }
+    if (buyDist <= 0)  { document.title = `${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; }
     if (sellDist <= 0 && tu > 0) { document.title = `${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`; return; }
     if (buyDist < bestDist) { bestDist = buyDist; bestSignal = { k, type:'BUY', dist: buyDist.toFixed(2) }; }
     if (tu > 0 && sellDist < bestDist) { bestDist = sellDist; bestSignal = { k, type:'SELL', dist: sellDist.toFixed(2) }; }
@@ -1046,12 +1109,6 @@ function updateTabTitle() {
   } else {
     document.title = '⚜️ Gold & Silver BeES';
   }
-}
-
-function getLatestLotPrice(k) {
-  const hs = st.hold[k];
-  if (!hs || hs.length === 0) return null;
-  return hs[0].buyPrice || hs[0].price || null;
 }
 
 let lastFetchTs = null, agoTimer = null;
@@ -1104,8 +1161,6 @@ async function fetchOne(k) {
   st.fetchFailCount = 0;
   const old = st.price[k];
   st.price[k] = d.price; st.prev[k] = d.prev;
-  if (!st.refBuy[k])  st.refBuy[k]  = d.price;
-  if (!st.refSell[k]) st.refSell[k] = d.price;
   showTick(k, old, d.price);
   updatePriceColor(k); updateCard(k); alertCheck(k); saveSt();
   const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -1174,35 +1229,44 @@ function mktCheck() {
 }
 
 function applySettings() {
-  cfg.buy  = parseFloat(document.getElementById('c-buy').value)  || 2;
-  cfg.sell = parseFloat(document.getElementById('c-sell').value) || 2;
-  cfg.units = 10; cfg.ref = 60;
-  document.getElementById('mUnits').value = cfg.units;
-  st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
+  cfg.buy      = parseFloat(document.getElementById('c-buy').value)      || 2;
+  cfg.sell     = parseFloat(document.getElementById('c-sell').value)     || 2;
+  cfg.orderAmt = parseFloat(document.getElementById('c-orderamt').value) || 2500;
+  cfg.ref      = 60;
+  st.alerted   = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
   st.workingProxy = null;
   saveSettings(); startLoop(); updateAll(); updateTabTitle();
-  showToast('Settings applied!');
+  showToast('Settings applied! Per order: ₹' + cfg.orderAmt.toLocaleString('en-IN'));
 }
 
+/* ══════════════════════════════════════
+   updateCard — MAIN RENDER
+   Reference = Lot 1 (cheapest buy price)
+   ══════════════════════════════════════ */
 function updateCard(k) {
   const p = st.price[k], pv = st.prev[k]; if (!p) return;
-  const dir = getPriceDir(k);
-  const icon = ETF[k].icon;
+  const dir   = getPriceDir(k);
+  const icon  = ETF[k].icon;
   const arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '';
+
   const prEl = document.getElementById('pr-' + k);
   prEl.innerHTML = `<span class="price-icon">${icon}</span>₹ ${p.toFixed(2)}<span class="price-dir-icon ${dir}">${arrow}</span>`;
   prEl.className = 'price-big price-' + dir;
+
   const chg = p - pv, pct = (chg / pv) * 100;
   const pill = document.getElementById('pill-' + k);
   pill.textContent = (chg > 0 ? '▲' : '▼') + ' ₹' + Math.abs(chg).toFixed(2) + '  (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)';
   pill.className   = 'chg-pill ' + (chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat');
   document.getElementById('prev-' + k).textContent = 'PREV CLOSE: ₹' + pv.toFixed(2);
+
+  // P&L across all holdings
   const hs = st.hold[k];
   const tu = hs.reduce((s,h) => s + h.units, 0);
   const tc = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
   const avg = tu > 0 ? tc / tu : 0;
   const pnl = tu > 0 ? (p - avg) * tu : 0;
   const pp  = avg > 0 ? (p - avg) / avg * 100 : 0;
+
   document.getElementById('u-'   + k).textContent = tu + ' units';
   document.getElementById('avg-' + k).textContent = avg > 0 ? '₹ ' + avg.toFixed(2) : '—';
   const pel = document.getElementById('pnl-' + k);
@@ -1211,43 +1275,47 @@ function updateCard(k) {
     pel.className   = 'iv ' + (pnl >= 0 ? 'profit' : 'loss');
   } else { pel.textContent = '—'; pel.className = 'iv'; }
 
-  const latestLotPrice = getLatestLotPrice(k);
-  const rb = latestLotPrice || st.refBuy[k] || p;
-  const rs = latestLotPrice || st.refSell[k] || p;
-  const bt = rb * (1 - cfg.buy  / 100);
-  const sv = rs * (1 + cfg.sell / 100);
+  // ── Reference = Lot 1 (cheapest price) ──
+  const lot1Price = getLot1Price(k);
+  const ref = lot1Price || p;  // fallback to live price if no holdings
+  const bt  = ref * (1 - cfg.buy  / 100);
+  const sv  = ref * (1 + cfg.sell / 100);
 
   document.getElementById('bt-'  + k).textContent = '₹ ' + bt.toFixed(2);
   document.getElementById('st-'  + k).textContent = '₹ ' + sv.toFixed(2);
-  document.getElementById('bts-' + k).textContent = 'ref ₹' + rb.toFixed(2) + ' −' + cfg.buy  + '%';
-  document.getElementById('sts-' + k).textContent = 'ref ₹' + rs.toFixed(2) + ' +' + cfg.sell + '%';
+  document.getElementById('bts-' + k).textContent = 'ref ₹' + ref.toFixed(2) + ' −' + cfg.buy  + '%';
+  document.getElementById('sts-' + k).textContent = 'ref ₹' + ref.toFixed(2) + ' +' + cfg.sell + '%';
 
+  // Signal info box
   const lsiEl = document.getElementById('lsi-val-' + k);
-  if (latestLotPrice) {
-    const buyT  = bt.toFixed(2);
-    const sellT = sv.toFixed(2);
-    lsiEl.innerHTML = `Latest lot: <span class="lsi-val">₹${latestLotPrice.toFixed(2)}</span> · Buy ≤ <span class="lsi-buy">₹${buyT}</span> · Sell ≥ <span class="lsi-sell">₹${sellT}</span>`;
+  if (lot1Price) {
+    lsiEl.innerHTML = `Lot 1 ref: <span class="lsi-val">₹${lot1Price.toFixed(2)}</span> · Buy ≤ <span class="lsi-buy">₹${bt.toFixed(2)}</span> · Sell ≥ <span class="lsi-sell">₹${sv.toFixed(2)}</span>`;
   } else {
     lsiEl.textContent = 'No holdings — Live price se ref set hoga jab pehla buy hoga';
   }
 
-  const buyGap  = bt > 0 ? (p - bt) / (rb - bt) * 100 : 100;
+  // Progress bars
+  const buyGap  = bt > 0 ? (p - bt) / (ref - bt || 1) * 100 : 100;
   const buyPct  = Math.max(0, Math.min(100, buyGap));
   const buyDist = ((p - bt) / p * 100).toFixed(2);
-  const sellGap = sv > bt ? (sv - p) / (sv - rs) * 100 : 100;
+  const sellGap = sv > bt ? (sv - p) / (sv - ref || 1) * 100 : 100;
   const sellPct = Math.max(0, Math.min(100, 100 - sellGap));
   const sellDist = ((sv - p) / p * 100).toFixed(2);
 
+  // Box styles
   let buyClass = 'tbox buy-b';
   if      (p <= bt)      buyClass = 'tbox buy-b alert-buy';
   else if (buyPct <= 25) buyClass = 'tbox buy-b close-buy';
   else if (buyPct <= 50) buyClass = 'tbox buy-b near-buy';
+
   let sellClass = 'tbox sell-b';
   if      (p >= sv && tu > 0)       sellClass = 'tbox sell-b alert-sell';
   else if (sellPct >= 75 && tu > 0) sellClass = 'tbox sell-b close-sell';
   else if (sellPct >= 50 && tu > 0) sellClass = 'tbox sell-b near-sell';
+
   document.getElementById('bb-' + k).className = buyClass;
   document.getElementById('sb-' + k).className = sellClass;
+
   const buyBarW  = p <= bt ? 100 : Math.max(2, 100 - buyPct);
   const sellBarW = p >= sv ? 100 : Math.max(2, sellPct);
   document.getElementById('bpb-' + k).style.width = buyBarW + '%';
@@ -1255,63 +1323,65 @@ function updateCard(k) {
   document.getElementById('bpl-' + k).textContent = p <= bt ? '🎯 HIT!' : '▼ ' + buyDist + '% door';
   document.getElementById('spl-' + k).textContent = p >= sv ? '🎯 HIT!' : '▲ ' + (tu > 0 ? sellDist + '% door' : 'No holdings');
 
-  const sg = document.getElementById('sig-' + k);
-  const snx = document.getElementById('snx-' + k);
-  const nu = cfg.units;
-  const needAmt = (nu * bt).toFixed(0);
+  // Signal text
+  const sg    = document.getElementById('sig-' + k);
+  const snx   = document.getElementById('snx-' + k);
+  const buyU  = calcBuyUnits(k);
+  const sellU = getLot1Units(k);
+  const nextLotNum = getSortedHoldings(k).length + 1;
+  const needAmt = (buyU * bt).toFixed(0);
   const potP    = tu > 0 ? ((sv - avg) * tu).toFixed(2) : null;
-
-  // ══ FIX: Lot number in signal text ══
-  const nextLotNum = hs.length + 1;   // next lot to be bought
 
   if (p <= bt) {
     sg.textContent = '🟢 BUY NOW'; sg.className = 'iv profit';
-    snx.textContent = 'Lot ' + nextLotNum + ' · ' + nu + 'u buy karo · ₹' + Number(needAmt).toLocaleString('en-IN') + ' chahiye';
+    snx.textContent = 'Lot ' + nextLotNum + ' · ' + buyU + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ' chahiye';
     snx.className   = 'sig-next nb';
   } else if (p >= sv && tu > 0) {
     sg.textContent = '🔴 SELL NOW'; sg.className = 'iv loss';
-    snx.textContent = tu + 'u sell karo · Profit: +₹' + potP;
+    snx.textContent = 'Lot 1 · ' + sellU + 'u sell karo · Profit: +₹' + potP;
     snx.className   = 'sig-next ns';
   } else {
     sg.textContent = '⏳ WAIT'; sg.className = 'iv wait';
     if (tu > 0) {
       const pp2 = ((sv - avg) * tu).toFixed(2);
-      snx.innerHTML  = 'BUY Lot ' + nextLotNum + ' ▼₹' + bt.toFixed(2) + ' (' + nu + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ')<br>SELL ▲₹' + sv.toFixed(2) + ' (+₹' + pp2 + ')';
+      snx.innerHTML = 'BUY Lot ' + nextLotNum + ' ▼₹' + bt.toFixed(2) + ' (' + buyU + 'u · ₹' + Number(needAmt).toLocaleString('en-IN') + ')<br>SELL Lot 1 ▲₹' + sv.toFixed(2) + ' (+₹' + pp2 + ')';
     } else {
-      snx.innerHTML  = 'BUY ▼₹' + bt.toFixed(2) + ' · ' + nu + ' units · ₹' + Number(needAmt).toLocaleString('en-IN');
+      snx.innerHTML = 'BUY ▼₹' + bt.toFixed(2) + ' · ' + buyU + ' units · ₹' + Number(needAmt).toLocaleString('en-IN');
     }
     snx.className = 'sig-next';
   }
+
+  // Update button hints
+  updateBtnHints(k);
+
+  // Render holdings sorted
   renderHold(k, p, bt);
+
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
 
-/* ══════════════════════════════════════════════
-   renderHold — FIX: SELL NEXT → 🟢 BUY NOW
-   when price ≤ buy target (buy signal active on latest lot)
-   ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   renderHold — sorted by price asc
+   Lot 1 = cheapest = top = reference
+   ══════════════════════════════════════ */
 function renderHold(k, p, bt) {
-  const el = document.getElementById('hl-' + k);
-  const hs = st.hold[k];
-  if (!hs.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
+  const el     = document.getElementById('hl-' + k);
+  const sorted = getSortedHoldings(k);
+  if (!sorted.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
 
-  // Is buy signal currently active?
   const buySignalActive = (p !== null && bt !== undefined && p <= bt);
 
-  el.innerHTML = hs.map((h, i) => {
+  el.innerHTML = sorted.map((h, i) => {
     const bp   = h.buyPrice || h.price;
     const pnl  = p ? (p - bp) * h.units : 0;
     const pct  = (p - bp) / bp * 100;
     const isP  = pnl >= 0;
     const curVal   = (p * h.units).toFixed(2);
     const invested = (bp * h.units).toFixed(2);
-    const isLast   = (i === 0);  // index 0 = most recently bought = LIFO top
+    const isLot1   = (i === 0); // cheapest = Lot 1
 
-    // ── Badge logic ──
-    // Latest lot + buy signal active → show BUY NOW (green, pulsing)
-    // Latest lot + no buy signal     → show SELL NEXT (red, default)
     let badgeHtml = '';
-    if (isLast) {
+    if (isLot1) {
       if (buySignalActive) {
         badgeHtml = `<span class="lifo-badge buy-now">🟢 BUY NOW</span>`;
       } else {
@@ -1340,68 +1410,68 @@ function renderHold(k, p, bt) {
 
 function updateAll() { ['G','S'].forEach(k => updateCard(k)); }
 
+/* ══ ALERT CHECK — uses Lot 1 as reference ══ */
 function alertCheck(k) {
   const p = st.price[k]; if (!p) return;
-  const latestLotPrice = getLatestLotPrice(k);
-  const rb = latestLotPrice || st.refBuy[k] || p;
-  const rs = latestLotPrice || st.refSell[k] || p;
-  const bt = rb * (1 - cfg.buy / 100);
-  const sv = rs * (1 + cfg.sell / 100);
-  const tu = st.hold[k].reduce((s,h) => s + h.units, 0);
+  const ref = getLot1Price(k) || p;
+  const bt  = ref * (1 - cfg.buy  / 100);
+  const sv  = ref * (1 + cfg.sell / 100);
+  const tu  = st.hold[k].reduce((s,h) => s + h.units, 0);
 
   if (p <= bt && !st.alerted[k].buy) {
     st.alerted[k].buy = true; st.alerted[k].sell = false;
     playBeep('buy');
     showAlertPopup(k, 'buy', bt, sv, tu);
-  }
-  else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
+  } else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
     st.alerted[k].sell = true; st.alerted[k].buy = false;
     playBeep('sell');
     showAlertPopup(k, 'sell', bt, sv, tu);
-  }
-  else if (p > bt && p < sv) {
+  } else if (p > bt && p < sv) {
     st.alerted[k].buy = false; st.alerted[k].sell = false;
   }
 }
 
 function showAlertPopup(k, type, bt, sv, tu) {
-  const isBuy = type === 'buy';
-  const p     = st.price[k];
-  const avg   = tu > 0 ? st.hold[k].reduce((s,h) => s + (h.buyPrice||h.price)*h.units, 0) / tu : 0;
-  const nextLot = st.hold[k].length + 1;
-  const units  = isBuy ? cfg.units : tu;
-  const amt    = isBuy ? (units * bt).toFixed(2) : null;
+  const isBuy  = type === 'buy';
+  const p      = st.price[k];
+  const avg    = tu > 0 ? st.hold[k].reduce((s,h) => s + (h.buyPrice||h.price)*h.units, 0) / tu : 0;
+  const lot1P  = getLot1Price(k);
+  const buyU   = calcBuyUnits(k);
+  const sellU  = getLot1Units(k);
+  const nextLot = getSortedHoldings(k).length + 1;
+  const amt    = isBuy ? (buyU * bt).toFixed(2) : null;
   const profit = !isBuy && avg > 0 ? ((sv - avg) * tu).toFixed(2) : null;
-  const latestLotPrice = getLatestLotPrice(k);
+
   if (Notification && Notification.permission === 'granted') {
     const title = `${ETF[k].icon} ${ETF[k].name} — ${isBuy?'BUY':'SELL'} Signal!`;
     const body  = isBuy
-      ? `Lot ${nextLot} · Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${units}u · ₹${Number(amt).toLocaleString('en-IN')}`
-      : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · ${tu}u · Profit: +₹${profit}`;
+      ? `Lot ${nextLot} · Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${buyU}u · ₹${Number(amt).toLocaleString('en-IN')}`
+      : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · Lot 1 · ${sellU}u · Profit: +₹${profit}`;
     new Notification(title, {body});
   }
+
   st.alertPend = {k, type};
   const box = document.getElementById('alertBox');
   box.className = 'alert-box ' + (isBuy ? 'ab' : 'as');
   document.getElementById('apIcon').textContent  = ETF[k].icon;
   document.getElementById('apType').textContent  = isBuy ? '🟢 BUY SIGNAL' : '🔴 SELL SIGNAL';
   document.getElementById('apTitle').textContent = isBuy ? 'Buy Target Hit! 🎯' : 'Sell Target Hit! 💰';
+
   let rows = `
     <div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div>
     <div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div>
     <div class="alert-row"><span class="ark">${isBuy?'Buy':'Sell'} Target</span><span class="arv">₹ ${isBuy?bt.toFixed(2):sv.toFixed(2)}</span></div>`;
-  if (latestLotPrice) {
-    rows += `<div class="alert-row"><span class="ark">Ref Lot Price</span><span class="arv">₹ ${latestLotPrice.toFixed(2)}</span></div>`;
+  if (lot1P) {
+    rows += `<div class="alert-row"><span class="ark">Lot 1 Ref Price</span><span class="arv">₹ ${lot1P.toFixed(2)}</span></div>`;
   }
-  // Show lot number in alert
   if (isBuy) {
-    rows += `<div class="alert-row"><span class="ark">Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`;
+    rows += `<div class="alert-row"><span class="ark">New Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`;
   }
   rows += `<div class="alert-divider"></div>
-    <div class="alert-row"><span class="ark">Units to ${isBuy?'Buy':'Sell'}</span><span class="arv big">${units} units</span></div>`;
-  if (isBuy) rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`;
+    <div class="alert-row"><span class="ark">Units to ${isBuy?'Buy':'Sell'}</span><span class="arv big">${isBuy?buyU:sellU} units</span></div>`;
+  if (isBuy)  rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`;
   else {
-    if (avg > 0)  rows += `<div class="alert-row"><span class="ark">Avg Buy Price</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`;
+    if (avg > 0)  rows += `<div class="alert-row"><span class="ark">Overall Avg Buy</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`;
     if (profit)   rows += `<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`;
   }
   document.getElementById('alertRows').innerHTML = rows;
@@ -1412,97 +1482,142 @@ function showAlertPopup(k, type, bt, sv, tu) {
 function alertDoTrade() { const {k,type}=st.alertPend; dismissAlert(); openModal(k,type,true); }
 function dismissAlert()  { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
 
+/* ══════════════════════════════════════
+   openModal
+   BUY:  units = floor(orderAmt/price), price = editable
+   SELL: units = Lot 1 units (readonly), no price input
+   ══════════════════════════════════════ */
 function openModal(k, type, auto=false) {
   const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; }
-  const latestLotPrice = getLatestLotPrice(k);
-  const rb = latestLotPrice || st.refBuy[k]  || p;
-  const rs = latestLotPrice || st.refSell[k] || p;
-  const bt = rb * (1 - cfg.buy  / 100), sv = rs * (1 + cfg.sell / 100);
-  const tgt = type === 'buy' ? bt : sv;
-  const hs  = st.hold[k];
-  const tu  = hs.reduce((s,h) => s + h.units, 0);
-  const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
-  const avg = tu > 0 ? tc / tu : 0;
-  const lastLotForUnits = (type === 'sell' && hs.length > 0) ? hs[0] : null;
-  const un  = lastLotForUnits ? lastLotForUnits.units : cfg.units;
-  const est = (p * un).toFixed(2);
-  const nextLot = hs.length + 1;
+  const ref  = getLot1Price(k) || p;
+  const bt   = ref * (1 - cfg.buy  / 100);
+  const sv   = ref * (1 + cfg.sell / 100);
+  const hs   = st.hold[k];
+  const tu   = hs.reduce((s,h) => s + h.units, 0);
+  const tc   = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
+  const avg  = tu > 0 ? tc / tu : 0;
+
+  const isBuy  = type === 'buy';
+  const buyU   = calcBuyUnits(k);
+  const sellU  = getLot1Units(k);
+  const un     = isBuy ? buyU : sellU;
+  const nextLot = getSortedHoldings(k).length + 1;
+  const tgt    = isBuy ? bt : sv;
+  const est    = (p * un).toFixed(2);
+
   st.pend = {k, type};
+
   document.getElementById('mBox').className      = 'modal ' + ETF[k].mc;
   document.getElementById('mIco').textContent     = ETF[k].icon;
-  document.getElementById('mTit').textContent     = type === 'buy' ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL';
-  document.getElementById('mTit').className       = type === 'buy' ? 'bh' : 'sh';
+  document.getElementById('mTit').textContent     = isBuy ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL — Lot 1';
+  document.getElementById('mTit').className       = isBuy ? 'bh' : 'sh';
   document.getElementById('mSub').textContent     = auto ? ETF[k].name + ' — Grid signal!' : ETF[k].name + ' — Manual trade';
-  document.getElementById('mUnits').value         = un;
+
+  // Units field
+  const mUnitsInput = document.getElementById('mUnits');
+  const mUnitsLabel = document.getElementById('mUnitsLabel');
+  mUnitsInput.value = un;
+  if (isBuy) {
+    mUnitsInput.removeAttribute('readonly');
+    mUnitsInput.style.cursor = '';
+    mUnitsLabel.textContent = 'Units to Buy (floor(₹' + cfg.orderAmt.toLocaleString('en-IN') + ' ÷ live price))';
+  } else {
+    mUnitsInput.setAttribute('readonly', true);
+    mUnitsLabel.textContent = 'Units to Sell — Lot 1 (fixed)';
+  }
+
+  // Buy price field — only for buy
   const bpWrap = document.getElementById('mBuyPriceWrap');
   const bpInp  = document.getElementById('mBuyPrice');
-  if (type === 'buy') { bpWrap.style.display = 'block'; bpInp.value = p.toFixed(2); }
-  else                  bpWrap.style.display = 'none';
+  if (isBuy) {
+    bpWrap.style.display = 'block';
+    bpInp.value = p.toFixed(2);
+  } else {
+    bpWrap.style.display = 'none';
+  }
+
+  // Modal info rows
   let rows = `
     <div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div>
     <div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div>
+    <div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div>
     <div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div>
-    <div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${est}</span></div>`;
-  if (type === 'buy') {
+    <div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`;
+
+  if (isBuy) {
     rows += `<div class="mr"><span class="mk">This will be</span><span class="mv profit">Lot ${nextLot}</span></div>`;
-  }
-  if (type === 'sell') {
-    rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} units</span></div>`;
-    if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
-    const lastLot = hs.length > 0 ? hs[0] : null;
-    if (lastLot) {
-      const lotBp   = lastLot.buyPrice || lastLot.price;
-      const sellU   = lastLot.units;
-      const lotPnl  = (p - lotBp) * sellU;
-      const lotPct  = ((p - lotBp) / lotBp * 100).toFixed(2);
+    rows += `<div class="mr"><span class="mk">Per Order Budget</span><span class="mv">₹ ${cfg.orderAmt.toLocaleString('en-IN')}</span></div>`;
+  } else {
+    // Sell: show Lot 1 details
+    const sorted = getSortedHoldings(k);
+    const lot1   = sorted[0];
+    if (lot1) {
+      const lotBp  = lot1.buyPrice || lot1.price;
+      const lotPnl = (p - lotBp) * lot1.units;
+      const lotPct = ((p - lotBp) / lotBp * 100).toFixed(2);
       const isProfit = lotPnl >= 0;
       rows += `<div class="mr-divider"></div>`;
-      rows += `<div class="mr"><span class="mk">LIFO Lot (Last Buy)</span><span class="mv" style="color:var(--amber)">${lastLot.time || '—'}</span></div>`;
-      rows += `<div class="mr"><span class="mk">Lot Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div>`;
-      rows += `<div class="mr"><span class="mk">Lot Units to Sell</span><span class="mv">${sellU} units</span></div>`;
+      rows += `<div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div>`;
+      rows += `<div class="mr"><span class="mk">Lot 1 Units</span><span class="mv">${lot1.units} units</span></div>`;
       rows += `<div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit?'profit':'loss'}">${isProfit?'+':'-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit?'+':''}${lotPct}%)</span></div>`;
     }
+    rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} units (all lots)</span></div>`;
+    if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
   }
+
   document.getElementById('mRows').innerHTML = rows;
+
   const cb = document.getElementById('mCfm');
-  cb.textContent    = type === 'buy' ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL';
-  cb.className      = type === 'buy' ? 'mcfb' : 'mcfs';
-  cb.disabled       = (type === 'sell' && tu === 0);
-  cb.style.opacity  = (type === 'sell' && tu === 0) ? '0.35' : '1';
-  if (type === 'sell' && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!';
+  cb.textContent    = isBuy ? `✅ Confirm BUY — Lot ${nextLot}` : '✅ Confirm SELL — Lot 1';
+  cb.className      = isBuy ? 'mcfb' : 'mcfs';
+  cb.disabled       = (!isBuy && tu === 0);
+  cb.style.opacity  = (!isBuy && tu === 0) ? '0.35' : '1';
+  if (!isBuy && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!';
+
   document.getElementById('overlay').classList.add('show');
 }
 
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend = null; }
 
+/* ══ CONFIRM TRADE ══ */
 function confirmTrade() {
   const {k, type} = st.pend;
-  const units  = parseInt(document.getElementById('mUnits').value) || cfg.units;
-  const liveP  = st.price[k];
-  const time   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const liveP = st.price[k];
+  const time  = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
   if (type === 'buy') {
     const bpRaw    = parseFloat(document.getElementById('mBuyPrice').value);
     const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP;
-    st.hold[k].unshift({price:buyPrice, buyPrice, units, time});
+    const units    = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k);
+
+    // Add to holdings — will be sorted by price on render
+    st.hold[k].push({ price: buyPrice, buyPrice, units, time });
     st.alerted[k].buy = false; st.alerted[k].sell = false;
     addLog({type:'buy', k, price:buyPrice, units, time});
     showToast('✅ BOUGHT ' + units + ' ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2));
+
   } else {
-    let toS = units, cost = 0;
-    const hs = st.hold[k];
-    while (toS > 0 && hs.length > 0) {
-      const h = hs[0];
-      const n = Math.min(h.units, toS);
-      cost    += n * (h.buyPrice || h.price);
-      h.units -= n; toS -= n;
-      if (h.units === 0) hs.shift();
-    }
-    const pnl = (liveP * units) - cost;
-    st.real   += pnl;
+    // SELL: always sell Lot 1 (cheapest)
+    const sorted = getSortedHoldings(k);
+    if (!sorted.length) { showToast('No holdings!'); closeModal(); return; }
+
+    const lot1   = sorted[0];
+    const lot1Bp = lot1.buyPrice || lot1.price;
+    const sellU  = lot1.units;
+    const pnl    = (liveP - lot1Bp) * sellU;
+    st.real      += pnl;
+
+    // Remove this lot from st.hold by matching buyPrice + time
+    const idx = st.hold[k].findIndex(h =>
+      (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time
+    );
+    if (idx !== -1) st.hold[k].splice(idx, 1);
+
     st.alerted[k].sell = false;
-    addLog({type:'sell', k, price:liveP, units, pnl, time});
-    showToast('✅ SOLD ' + units + ' ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl>=0?'+':'') + '₹' + pnl.toFixed(2));
+    addLog({type:'sell', k, price:liveP, units:sellU, pnl, time});
+    showToast('✅ SOLD Lot 1 · ' + sellU + ' ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl>=0?'+':'') + '₹' + pnl.toFixed(2));
   }
+
   closeModal(); updateCard(k); saveSt(); updateTabTitle();
 }
 
@@ -1517,8 +1632,8 @@ function renderLog() {
 
 function buildDataObj() {
   return {
-    refBuy:st.refBuy, refSell:st.refSell, hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
-    cfg: { buy: cfg.buy, sell: cfg.sell },
+    hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
+    cfg: { buy: cfg.buy, sell: cfg.sell, orderAmt: cfg.orderAmt },
     cap: {
       total: document.getElementById('cp-total').value,
       parts: document.getElementById('cp-parts').value,
@@ -1541,7 +1656,7 @@ function saveSt() {
 function saveSettings() {
   try {
     const existing = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    existing.cfg = { buy: cfg.buy, sell: cfg.sell };
+    existing.cfg = { buy: cfg.buy, sell: cfg.sell, orderAmt: cfg.orderAmt };
     localStorage.setItem(LS_KEY, JSON.stringify(existing));
   } catch(_) {}
 }
@@ -1550,17 +1665,17 @@ function loadSt() {
   try {
     const raw = localStorage.getItem(LS_KEY); if (!raw) return;
     const data = JSON.parse(raw);
-    if (data.refBuy)  st.refBuy  = data.refBuy;
-    if (data.refSell) st.refSell = data.refSell;
     if (data.hold)    st.hold    = data.hold;
     if (data.log)     st.log     = data.log;
     if (data.real !== undefined) st.real = data.real;
     if (data.alerted) st.alerted = data.alerted;
     if (data.cfg) {
-      cfg.buy  = data.cfg.buy  || 2;
-      cfg.sell = data.cfg.sell || 2;
-      document.getElementById('c-buy').value  = cfg.buy;
-      document.getElementById('c-sell').value = cfg.sell;
+      cfg.buy      = data.cfg.buy      || 2;
+      cfg.sell     = data.cfg.sell     || 2;
+      cfg.orderAmt = data.cfg.orderAmt || 2500;
+      document.getElementById('c-buy').value      = cfg.buy;
+      document.getElementById('c-sell').value     = cfg.sell;
+      document.getElementById('c-orderamt').value = cfg.orderAmt;
     }
     if (data.cap) {
       if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
@@ -1711,17 +1826,17 @@ window.initFirebase = () => {
 };
 
 function applyData(data) {
-  if (data.refBuy)  st.refBuy  = data.refBuy;
-  if (data.refSell) st.refSell = data.refSell;
   if (data.hold)    st.hold    = data.hold;
   if (data.log)     st.log     = data.log;
   if (data.real !== undefined) st.real = data.real;
   if (data.alerted) st.alerted = data.alerted;
   if (data.cfg) {
-    cfg.buy  = data.cfg.buy  || 2;
-    cfg.sell = data.cfg.sell || 2;
-    document.getElementById('c-buy').value  = cfg.buy;
-    document.getElementById('c-sell').value = cfg.sell;
+    cfg.buy      = data.cfg.buy      || 2;
+    cfg.sell     = data.cfg.sell     || 2;
+    cfg.orderAmt = data.cfg.orderAmt || 2500;
+    document.getElementById('c-buy').value      = cfg.buy;
+    document.getElementById('c-sell').value     = cfg.sell;
+    document.getElementById('c-orderamt').value = cfg.orderAmt;
   }
   if (data.cap) {
     if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
