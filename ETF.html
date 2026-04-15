@@ -260,7 +260,10 @@ body {
 .price-block {
   border-radius: 14px; padding: 16px; text-align: center; position: relative; overflow: hidden;
   transition: border-color 0.4s, box-shadow 0.4s; border: 2px solid var(--border); background: var(--bg2);
+  cursor: pointer;
+  user-select: none;
 }
+.price-block:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.07); }
 .price-block.price-up   { border-color: rgba(76,175,130,0.55); box-shadow: 0 0 20px rgba(76,175,130,0.1); }
 .price-block.price-down { border-color: rgba(224,82,82,0.5);   box-shadow: 0 0 20px rgba(224,82,82,0.09); }
 .price-flash-up   { animation: flashG 0.5s ease; }
@@ -295,6 +298,49 @@ body {
 .price-dir-icon { font-size: 0.9rem; transition: all 0.3s; }
 .price-dir-icon.up   { color: var(--green); }
 .price-dir-icon.down { color: var(--red); }
+
+/* ── TOGGLE HINT on price card ── */
+.toggle-hint {
+  margin-top: 10px;
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: color 0.2s;
+}
+.price-block:hover .toggle-hint { color: rgba(255,255,255,0.35); }
+.toggle-hint .th-arrow {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  font-size: 0.6rem;
+}
+.price-block.section-collapsed .toggle-hint .th-arrow {
+  transform: rotate(-90deg);
+}
+
+/* ── COLLAPSIBLE SECTION ── */
+.collapsible-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  max-height: 1400px;
+  opacity: 1;
+  transition: max-height 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease,
+              margin-top 0.3s ease;
+  margin-top: 0;
+}
+.collapsible-section.hidden {
+  max-height: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  margin-top: -14px;
+}
 
 /* ── INFO GRID ── */
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -562,7 +608,6 @@ body {
   <div class="top-header">
     <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES <span class="save-dot" id="saveDot"></span></div>
     <div class="right-header">
-      <!-- SOUND TOGGLE BUTTON -->
       <div class="sound-toggle on" id="soundToggle" onclick="toggleSound()">
         <span id="soundIcon">🔔</span>
         <span id="soundTxt">Sound ON</span>
@@ -639,56 +684,72 @@ body {
   </div>
 
   <div class="split">
+    <!-- ══ GOLD COLUMN ══ -->
     <div class="gold-col">
       <div class="etf-head"><div class="etf-icon">🥇</div><div class="etf-name"><div class="en">Gold BeES</div><div class="es">GOLDBEES · NSE</div></div></div>
-      <div class="price-block price-flat" id="pb-G">
+
+      <!-- Price block — CLICKABLE to toggle section below -->
+      <div class="price-block price-flat" id="pb-G" onclick="toggleSection('G')">
         <div class="tick-badge flat" id="tick-G">LIVE</div>
         <div class="price-big price-flat" id="pr-G"><span class="price-loading">Loading…</span></div>
         <div><span class="chg-pill flat" id="pill-G">— —</span></div>
         <div class="prev-label" id="prev-G">PREV CLOSE: —</div>
+        <div class="toggle-hint"><span class="th-arrow">▼</span> tap to show/hide details</div>
       </div>
-      <div class="info-grid">
-        <div class="ibox"><div class="il">Holdings</div><div class="iv gold" id="u-G">0 units</div></div>
-        <div class="ibox"><div class="il">Avg Buy</div><div class="iv" id="avg-G">—</div></div>
-        <div class="ibox"><div class="il">Live P&amp;L</div><div class="iv" id="pnl-G">—</div></div>
-        <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-G">⏳ WAIT</div><div class="sig-next" id="snx-G"></div></div>
+
+      <!-- COLLAPSIBLE SECTION -->
+      <div class="collapsible-section" id="sec-G">
+        <div class="info-grid">
+          <div class="ibox"><div class="il">Holdings</div><div class="iv gold" id="u-G">0 units</div></div>
+          <div class="ibox"><div class="il">Avg Buy</div><div class="iv" id="avg-G">—</div></div>
+          <div class="ibox"><div class="il">Live P&amp;L</div><div class="iv" id="pnl-G">—</div></div>
+          <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-G">⏳ WAIT</div><div class="sig-next" id="snx-G"></div></div>
+        </div>
+        <div class="tgt-row">
+          <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
+          <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
+        </div>
+        <div class="trade-btns">
+          <button class="btn-buy" onclick="openModal('G','buy')">＋ BUY</button>
+          <button class="btn-sell" onclick="openModal('G','sell')">－ SELL</button>
+        </div>
+        <div class="sec-label">Open Holdings</div>
+        <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
       </div>
-      <div class="tgt-row">
-        <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
-        <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
-      </div>
-      <div class="trade-btns">
-        <button class="btn-buy" onclick="openModal('G','buy')">＋ BUY</button>
-        <button class="btn-sell" onclick="openModal('G','sell')">－ SELL</button>
-      </div>
-      <div class="sec-label">Open Holdings</div>
-      <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
     </div>
 
+    <!-- ══ SILVER COLUMN ══ -->
     <div class="silver-col">
       <div class="etf-head"><div class="etf-icon">🥈</div><div class="etf-name"><div class="en">Silver BeES</div><div class="es">SILVERBEES · NSE</div></div></div>
-      <div class="price-block price-flat" id="pb-S">
+
+      <!-- Price block — CLICKABLE to toggle section below -->
+      <div class="price-block price-flat" id="pb-S" onclick="toggleSection('S')">
         <div class="tick-badge flat" id="tick-S">LIVE</div>
         <div class="price-big price-flat" id="pr-S"><span class="price-loading">Loading…</span></div>
         <div><span class="chg-pill flat" id="pill-S">— —</span></div>
         <div class="prev-label" id="prev-S">PREV CLOSE: —</div>
+        <div class="toggle-hint"><span class="th-arrow">▼</span> tap to show/hide details</div>
       </div>
-      <div class="info-grid">
-        <div class="ibox"><div class="il">Holdings</div><div class="iv silver" id="u-S">0 units</div></div>
-        <div class="ibox"><div class="il">Avg Buy</div><div class="iv" id="avg-S">—</div></div>
-        <div class="ibox"><div class="il">Live P&amp;L</div><div class="iv" id="pnl-S">—</div></div>
-        <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-S">⏳ WAIT</div><div class="sig-next" id="snx-S"></div></div>
+
+      <!-- COLLAPSIBLE SECTION -->
+      <div class="collapsible-section" id="sec-S">
+        <div class="info-grid">
+          <div class="ibox"><div class="il">Holdings</div><div class="iv silver" id="u-S">0 units</div></div>
+          <div class="ibox"><div class="il">Avg Buy</div><div class="iv" id="avg-S">—</div></div>
+          <div class="ibox"><div class="il">Live P&amp;L</div><div class="iv" id="pnl-S">—</div></div>
+          <div class="ibox"><div class="il">Signal</div><div class="iv wait" id="sig-S">⏳ WAIT</div><div class="sig-next" id="snx-S"></div></div>
+        </div>
+        <div class="tgt-row">
+          <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
+          <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
+        </div>
+        <div class="trade-btns">
+          <button class="btn-buy" onclick="openModal('S','buy')">＋ BUY</button>
+          <button class="btn-sell" onclick="openModal('S','sell')">－ SELL</button>
+        </div>
+        <div class="sec-label">Open Holdings</div>
+        <div class="h-list" id="hl-S"><div class="no-h">No holdings yet</div></div>
       </div>
-      <div class="tgt-row">
-        <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
-        <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
-      </div>
-      <div class="trade-btns">
-        <button class="btn-buy" onclick="openModal('S','buy')">＋ BUY</button>
-        <button class="btn-sell" onclick="openModal('S','sell')">－ SELL</button>
-      </div>
-      <div class="sec-label">Open Holdings</div>
-      <div class="h-list" id="hl-S"><div class="no-h">No holdings yet</div></div>
     </div>
   </div>
 
@@ -750,7 +811,6 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-/* Resume context on first user gesture (browser policy) */
 document.addEventListener('click', () => {
   const ctx = getAudioCtx();
   if (ctx && ctx.state === 'suspended') ctx.resume();
@@ -762,12 +822,10 @@ function playBeep(type) {
   if (!ctx) return;
   try {
     if (type === 'buy') {
-      /* Rising 2-tone chime for BUY — C5 → E5 */
       playTone(ctx, 523.25, 0,    0.18, 'sine', 0.55);
       playTone(ctx, 659.25, 0.18, 0.22, 'sine', 0.55);
       playTone(ctx, 783.99, 0.38, 0.32, 'sine', 0.6);
     } else {
-      /* Falling 2-tone alert for SELL — E5 → C5 */
       playTone(ctx, 783.99, 0,    0.18, 'sine', 0.55);
       playTone(ctx, 523.25, 0.18, 0.22, 'sine', 0.55);
       playTone(ctx, 392.00, 0.38, 0.32, 'sine', 0.5);
@@ -798,7 +856,6 @@ function toggleSound() {
     btn.className  = 'sound-toggle on';
     icon.textContent = '🔔';
     txt.textContent  = 'Sound ON';
-    /* play sample */
     playBeep('buy');
   } else {
     btn.className  = 'sound-toggle off';
@@ -806,6 +863,28 @@ function toggleSound() {
     txt.textContent  = 'Sound OFF';
   }
   showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF');
+}
+
+/* ══════════════════════════════════════════════
+   📦  SECTION TOGGLE
+   ══════════════════════════════════════════════ */
+const sectionVisible = { G: true, S: true };
+
+function toggleSection(k) {
+  sectionVisible[k] = !sectionVisible[k];
+  const sec = document.getElementById('sec-' + k);
+  const pb  = document.getElementById('pb-' + k);
+  const arrow = pb.querySelector('.th-arrow');
+
+  if (sectionVisible[k]) {
+    sec.classList.remove('hidden');
+    pb.classList.remove('section-collapsed');
+    if (arrow) arrow.style.transform = 'rotate(0deg)';
+  } else {
+    sec.classList.add('hidden');
+    pb.classList.add('section-collapsed');
+    if (arrow) arrow.style.transform = 'rotate(-90deg)';
+  }
 }
 
 /* ══════════════════════════════════════════════ */
@@ -904,7 +983,9 @@ function updatePriceColor(k) {
   const prEl = document.getElementById('pr-' + k);
   const pbEl = document.getElementById('pb-' + k);
   prEl.className = 'price-big price-' + dir;
-  pbEl.className = 'price-block price-' + dir;
+  // Preserve section-collapsed class if present
+  const collapsed = pbEl.classList.contains('section-collapsed');
+  pbEl.className = 'price-block price-' + dir + (collapsed ? ' section-collapsed' : '');
   const sbEl = document.getElementById(k === 'G' ? 'fsb-gPrice' : 'fsb-sPrice');
   if (sbEl) sbEl.className = 'fsb-val price-' + dir;
 }
@@ -1183,11 +1264,11 @@ function alertCheck(k) {
   const tu = st.hold[k].reduce((s,h) => s + h.units, 0);
   if (p <= bt && !st.alerted[k].buy) {
     st.alerted[k].buy = true; st.alerted[k].sell = false;
-    playBeep('buy');   /* 🔊 BUY sound */
+    playBeep('buy');
     showAlertPopup(k, 'buy', bt, sv, tu);
   } else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
     st.alerted[k].sell = true; st.alerted[k].buy = false;
-    playBeep('sell');  /* 🔊 SELL sound */
+    playBeep('sell');
     showAlertPopup(k, 'sell', bt, sv, tu);
   } else if (p > bt && p < sv) {
     st.alerted[k].buy = false; st.alerted[k].sell = false;
