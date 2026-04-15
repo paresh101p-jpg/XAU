@@ -988,16 +988,25 @@ function getLot1Units(k) {
 function calcBuyUnits(k) {
   const p = st.price[k];
   if (!p || p <= 0) return 1;
-  return Math.max(1, Math.floor(cfg.orderAmt / p));
+  // Capital Planner se per-order calculate karo
+  const total = parseFloat(document.getElementById('cp-total').value) || 0;
+  const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
+  const ordKey = k === 'G' ? 'cp-gord' : 'cp-sord';
+  const orders = parseInt(document.getElementById(ordKey).value)      || 1;
+  const perOrder = total / parts / orders;
+  return Math.max(1, Math.floor(perOrder / p));
 }
 
 /* ══ UPDATE BUTTON HINTS ══ */
 function updateBtnHints(k) {
+  const p = st.price[k];
   const buyU  = calcBuyUnits(k);
   const sellU = getLot1Units(k);
   const buyHint  = document.getElementById('buyHint-'  + k);
   const sellHint = document.getElementById('sellHint-' + k);
-  if (buyHint)  buyHint.textContent  = buyU + ' units · ₹' + (cfg.orderAmt).toLocaleString('en-IN');
+  // Actual amount = units × live price
+  const actualAmt = p ? (buyU * p) : 0;
+  if (buyHint)  buyHint.textContent  = buyU + ' units · ₹' + Math.round(actualAmt).toLocaleString('en-IN');
   if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' units (Lot 1)' : '— no holdings';
 }
 
