@@ -289,9 +289,57 @@ body { font-family: 'Arial Rounded MT Bold','Arial',sans-serif; background:#111;
   .price-big { font-size:1.5rem; }
   .cap-cards { grid-template-columns:1fr; }
 }
+/* ── FIREBASE LOGIN SCREEN ── */
+.fb-login-screen { position:fixed; inset:0; background:#111; z-index:999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; }
+.fb-login-screen.hide { display:none; }
+.fb-login-card { background:#1a1a1a; border:2px solid #2e2e2e; border-radius:18px; padding:32px 28px; max-width:320px; width:90%; text-align:center; display:flex; flex-direction:column; gap:16px; }
+.fb-login-title { font-size:1.3rem; color:#FFD700; }
+.fb-login-sub { font-size:0.72rem; color:#aaa; line-height:1.6; }
+.btn-google { display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#111; border:none; border-radius:10px; padding:12px 20px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.85rem; cursor:pointer; transition:0.15s; }
+.btn-google:hover { background:#f1f1f1; }
+.fb-login-note { font-size:0.6rem; color:#555; }
+/* ── USER BAR ── */
+.user-bar { background:#161616; border-bottom:1px solid #222; padding:5px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.user-bar.hide { display:none; }
+.user-info { display:flex; align-items:center; gap:8px; }
+.user-avatar { width:26px; height:26px; border-radius:50%; border:2px solid #FFD700; }
+.user-name { font-size:0.68rem; color:#ddd; }
+.sync-status { font-size:0.6rem; display:flex; align-items:center; gap:5px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; }
+.sync-dot.syncing { background:#f59e0b; animation:blink 0.8s infinite; }
+.sync-dot.offline { background:#ef4444; }
+.sync-txt { color:#888; }
+.btn-logout { background:transparent; border:1px solid #333; color:#888; border-radius:6px; padding:4px 10px; font-family:'Arial Rounded MT Bold',Arial,sans-serif; font-size:0.6rem; cursor:pointer; }
+.btn-logout:hover { border-color:#ef4444; color:#ef4444; }
 </style>
 </head>
 <body>
+
+<!-- FIREBASE LOGIN SCREEN -->
+<div class="fb-login-screen" id="fbLoginScreen">
+  <div class="fb-login-card">
+    <div class="fb-login-title">⚜️ Gold & Silver BeES</div>
+    <div class="fb-login-sub">Apna data PC aur Mobile dono mein sync karne ke liye<br>Google se login karo 👇</div>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      Google se Login Karo
+    </button>
+    <div class="fb-login-note">Sirf tumhara data · Koi aur nahi dekh sakta</div>
+  </div>
+</div>
+
+<!-- USER BAR -->
+<div class="user-bar hide" id="userBar">
+  <div class="user-info">
+    <img class="user-avatar" id="userAvatar" src="" alt="">
+    <span class="user-name" id="userName">—</span>
+  </div>
+  <div class="sync-status">
+    <div class="sync-dot" id="syncDot"></div>
+    <span class="sync-txt" id="syncTxt">Synced</span>
+  </div>
+  <button class="btn-logout" onclick="signOutUser()">Logout</button>
+</div>
 
 <div class="top-header">
   <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES Tracker <span class="save-dot" id="saveDot"></span></div>
@@ -701,16 +749,19 @@ async function fetchAll() {
 }
 
 window.onload = () => {
-  loadSt();
+  initFirebase();  // Firebase pehle init hoga, baaki baad mein
+  mktCheck();
+  setInterval(mktCheck, 30000);
+};
+
+function startApp() {
   setFetchStatus('loading', 'Connecting to price feed…');
   fetchAll();
   startLoop();
   startTickLoop();
-  mktCheck();
-  setInterval(mktCheck, 30000);
   if (Notification && Notification.permission === 'default')
     setTimeout(() => Notification.requestPermission(), 2000);
-};
+}
 
 function mktCheck() {
   const ist  = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
@@ -1063,23 +1114,29 @@ function renderLog() {
   ).join('');
 }
 
+function buildDataObj() {
+  return {
+    refBuy:st.refBuy, refSell:st.refSell,
+    hold:st.hold, log:st.log,
+    real:st.real, alerted:st.alerted,
+    cfg: { buy: cfg.buy, sell: cfg.sell },
+    cap: {
+      total: document.getElementById('cp-total').value,
+      parts: document.getElementById('cp-parts').value,
+      gord:  document.getElementById('cp-gord').value,
+      sord:  document.getElementById('cp-sord').value
+    }
+  };
+}
+
 function saveSt() {
   try {
-    const data = {
-      refBuy:st.refBuy, refSell:st.refSell,
-      hold:st.hold, log:st.log,
-      real:st.real, alerted:st.alerted,
-      cfg: { buy: cfg.buy, sell: cfg.sell },
-      cap: {
-        total: document.getElementById('cp-total').value,
-        parts: document.getElementById('cp-parts').value,
-        gord:  document.getElementById('cp-gord').value,
-        sord:  document.getElementById('cp-sord').value
-      }
-    };
+    const data = buildDataObj();
     localStorage.setItem(LS_KEY, JSON.stringify(data));
     const dot = document.getElementById('saveDot');
     if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
+    // Firebase mein bhi save karo (agar logged in hai)
+    saveToFirebase(data);
   } catch(e) { console.warn('localStorage save failed:', e); }
 }
 
@@ -1165,6 +1222,149 @@ function renderCapCard(k, allot, orders) {
 
 document.getElementById('overlay').addEventListener('click', e => { if(e.target.id==='overlay') closeModal(); });
 document.getElementById('alertOverlay').addEventListener('click', e => { if(e.target.id==='alertOverlay') dismissAlert(); });
+</script>
+
+<!-- ═══ FIREBASE SDK ═══ -->
+<script type="module">
+import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getDatabase, ref, set, onValue, off }
+                                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyAGODV4ktENpN7k_k5OjGt4Zcx_iLfREkE",
+  authDomain:        "gold-silver-tracke.firebaseapp.com",
+  databaseURL:       "https://gold-silver-tracke-default-rtdb.firebaseio.com",
+  projectId:         "gold-silver-tracke",
+  storageBucket:     "gold-silver-tracke.firebasestorage.app",
+  messagingSenderId: "741308063485",
+  appId:             "1:741308063485:web:0d42f26f428e8b036d6894"
+};
+
+const fbApp  = initializeApp(firebaseConfig);
+const auth   = getAuth(fbApp);
+const db     = getDatabase(fbApp);
+const gProv  = new GoogleAuthProvider();
+
+let currentUser = null;
+let dbRef       = null;
+let listenActive= false;
+let saveTimer   = null;
+
+// ── Global functions (called from HTML onclick) ──
+window.signInWithGoogle = async () => {
+  try {
+    await signInWithPopup(auth, gProv);
+  } catch(e) {
+    showToast('❌ Login failed: ' + e.message);
+  }
+};
+
+window.signOutUser = async () => {
+  if (!confirm('Logout karna chahte ho?')) return;
+  if (dbRef) off(dbRef);
+  listenActive = false;
+  await signOut(auth);
+  currentUser = null;
+  dbRef = null;
+  document.getElementById('userBar').classList.add('hide');
+  document.getElementById('fbLoginScreen').classList.remove('hide');
+  showToast('👋 Logged out!');
+};
+
+window.saveToFirebase = (data) => {
+  if (!currentUser || !dbRef) return;
+  setSyncStatus('syncing', 'Saving…');
+  // Debounce: 1.5s baad save karo
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    set(dbRef, JSON.stringify(data))
+      .then(() => setSyncStatus('ok', 'Synced ✓'))
+      .catch(e => { setSyncStatus('offline', 'Sync failed'); console.warn(e); });
+  }, 1500);
+};
+
+window.initFirebase = () => {
+  // Auth state listener
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      // User bar update
+      document.getElementById('userAvatar').src = user.photoURL || '';
+      document.getElementById('userName').textContent  = user.displayName || user.email;
+      document.getElementById('userBar').classList.remove('hide');
+      document.getElementById('fbLoginScreen').classList.add('hide');
+
+      // DB ref: har user ka apna data
+      dbRef = ref(db, 'users/' + user.uid + '/data');
+
+      // Firebase se data load karo (ek baar)
+      if (!listenActive) {
+        listenActive = true;
+        setSyncStatus('syncing', 'Loading data…');
+
+        onValue(dbRef, snap => {
+          const raw = snap.val();
+          if (raw) {
+            try {
+              const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+              applyData(data);
+              setSyncStatus('ok', 'Synced ✓');
+              showToast('☁️ Cloud data loaded!');
+            } catch(e) { console.warn('Firebase parse error:', e); setSyncStatus('ok','Synced ✓'); }
+          } else {
+            // Pehli baar — localStorage se Firebase mein copy karo
+            setSyncStatus('ok', 'New account');
+            const local = localStorage.getItem(LS_KEY);
+            if (local) {
+              set(dbRef, local).then(() => setSyncStatus('ok','Synced ✓'));
+            }
+          }
+          // App start karo (sirf ek baar)
+          if (!window._appStarted) { window._appStarted = true; startApp(); }
+        }, { onlyOnce: true });
+      }
+    } else {
+      // Not logged in — login screen dikhao
+      document.getElementById('fbLoginScreen').classList.remove('hide');
+      document.getElementById('userBar').classList.add('hide');
+    }
+  });
+};
+
+function applyData(data) {
+  if (data.refBuy)  st.refBuy  = data.refBuy;
+  if (data.refSell) st.refSell = data.refSell;
+  if (data.hold)    st.hold    = data.hold;
+  if (data.log)     st.log     = data.log;
+  if (data.real   !== undefined) st.real = data.real;
+  if (data.alerted) st.alerted = data.alerted;
+  if (data.cfg) {
+    cfg.buy  = data.cfg.buy  || 2;
+    cfg.sell = data.cfg.sell || 2;
+    document.getElementById('c-buy').value  = cfg.buy;
+    document.getElementById('c-sell').value = cfg.sell;
+  }
+  if (data.cap) {
+    if (data.cap.total) document.getElementById('cp-total').value = data.cap.total;
+    if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts;
+    if (data.cap.gord)  document.getElementById('cp-gord').value  = data.cap.gord;
+    if (data.cap.sord)  document.getElementById('cp-sord').value  = data.cap.sord;
+  }
+  // localStorage bhi update karo
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+  renderLog();
+  updateAll();
+}
+
+function setSyncStatus(state, txt) {
+  const dot = document.getElementById('syncDot');
+  const stxt = document.getElementById('syncTxt');
+  if (!dot) return;
+  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'offline' ? ' offline' : '');
+  stxt.textContent = txt;
+}
 </script>
 </body>
 </html>
