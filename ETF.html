@@ -29,6 +29,8 @@
   --red: #E05252;
   --red-dim: rgba(224,82,82,0.12);
   --amber: #E8A440;
+  --yellow: #F5C842;
+  --yellow-dim: rgba(245,200,66,0.15);
   --font-all: 'Arial Rounded MT Bold', 'Arial Rounded', Arial, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -115,6 +117,19 @@ body {
 }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
+/* ── API TOGGLE BUTTON ── */
+.api-toggle {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  border-radius: 20px; padding: 5px 13px; font-size: 0.68rem; transition: all 0.2s; user-select: none;
+  border: 2px solid; white-space: nowrap;
+}
+.api-toggle.on  { background: rgba(76,175,130,0.1); border-color: rgba(76,175,130,0.6); color: var(--green); }
+.api-toggle.off { background: rgba(224,82,82,0.1);  border-color: rgba(224,82,82,0.5);  color: var(--red); }
+.api-toggle:hover { transform: translateY(-1px); }
+.api-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.api-toggle.on  .api-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 1.6s infinite; }
+.api-toggle.off .api-dot { background: var(--red); }
+
 .top-header {
   background: var(--bg2); border-bottom: 2px solid var(--border);
   padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
@@ -165,6 +180,14 @@ body {
 .fsb-status-txt { font-size: 0.6rem; white-space: nowrap; color: var(--green); }
 .fetch-status-bar.fail    .fsb-status-txt { color: var(--red); }
 .fetch-status-bar.loading .fsb-status-txt { color: var(--amber); }
+
+/* ── API PAUSED BAR ── */
+.api-paused-bar {
+  background: rgba(224,82,82,0.08); border-bottom: 2px solid rgba(224,82,82,0.35);
+  padding: 6px 20px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 0.65rem; color: var(--red); display: none;
+}
+.api-paused-bar.show { display: flex; }
 
 /* ── CAPITAL PLANNER ── */
 .cap-toggle {
@@ -232,91 +255,6 @@ body {
   transition: background 0.4s, box-shadow 0.4s;
 }
 
-/* ══ BUY NOW COLUMN HIGHLIGHT ══ */
-.gold-col.signal-buy {
-  background: linear-gradient(180deg, rgba(76,175,130,0.07) 0%, var(--bg) 60%);
-  box-shadow: inset 0 0 40px rgba(76,175,130,0.06), inset 4px 0 0 rgba(76,175,130,0.5);
-  animation: colPulseG 2s ease-in-out infinite alternate;
-}
-.silver-col.signal-buy {
-  background: linear-gradient(180deg, rgba(76,175,130,0.07) 0%, var(--bg) 60%);
-  box-shadow: inset 0 0 40px rgba(76,175,130,0.06), inset -4px 0 0 rgba(76,175,130,0.5);
-  animation: colPulseG 2s ease-in-out infinite alternate;
-}
-/* ══ SELL NOW COLUMN HIGHLIGHT ══ */
-.gold-col.signal-sell {
-  background: linear-gradient(180deg, rgba(224,82,82,0.07) 0%, var(--bg) 60%);
-  box-shadow: inset 0 0 40px rgba(224,82,82,0.06), inset 4px 0 0 rgba(224,82,82,0.5);
-  animation: colPulseR 2s ease-in-out infinite alternate;
-}
-.silver-col.signal-sell {
-  background: linear-gradient(180deg, rgba(224,82,82,0.07) 0%, var(--bg) 60%);
-  box-shadow: inset 0 0 40px rgba(224,82,82,0.06), inset -4px 0 0 rgba(224,82,82,0.5);
-  animation: colPulseR 2s ease-in-out infinite alternate;
-}
-
-@keyframes colPulseG {
-  from { box-shadow: inset 0 0 30px rgba(76,175,130,0.05), inset 4px 0 0 rgba(76,175,130,0.4); }
-  to   { box-shadow: inset 0 0 60px rgba(76,175,130,0.12), inset 4px 0 0 rgba(76,175,130,0.8); }
-}
-@keyframes colPulseR {
-  from { box-shadow: inset 0 0 30px rgba(224,82,82,0.05), inset 4px 0 0 rgba(224,82,82,0.4); }
-  to   { box-shadow: inset 0 0 60px rgba(224,82,82,0.12), inset 4px 0 0 rgba(224,82,82,0.8); }
-}
-/* silver col right border */
-.silver-col.signal-buy  { animation-name: colPulseGR; }
-.silver-col.signal-sell { animation-name: colPulseRR; }
-@keyframes colPulseGR {
-  from { box-shadow: inset 0 0 30px rgba(76,175,130,0.05), inset -4px 0 0 rgba(76,175,130,0.4); }
-  to   { box-shadow: inset 0 0 60px rgba(76,175,130,0.12), inset -4px 0 0 rgba(76,175,130,0.8); }
-}
-@keyframes colPulseRR {
-  from { box-shadow: inset 0 0 30px rgba(224,82,82,0.05), inset -4px 0 0 rgba(224,82,82,0.4); }
-  to   { box-shadow: inset 0 0 60px rgba(224,82,82,0.12), inset -4px 0 0 rgba(224,82,82,0.8); }
-}
-
-/* ══ SIGNAL BANNER (top of column when signal active) ══ */
-.signal-banner {
-  display: none;
-  border-radius: 12px;
-  padding: 10px 14px;
-  text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  animation: bannerPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes bannerPop {
-  from { opacity:0; transform: scale(0.85) translateY(-8px); }
-  to   { opacity:1; transform: scale(1) translateY(0); }
-}
-.signal-banner.buy-banner {
-  display: block;
-  background: linear-gradient(135deg, rgba(76,175,130,0.18), rgba(76,175,130,0.08));
-  border: 2px solid rgba(76,175,130,0.7);
-  color: var(--green);
-  box-shadow: 0 0 20px rgba(76,175,130,0.25);
-  animation: bannerPop 0.4s cubic-bezier(0.34,1.56,0.64,1), bannerGlow 1.5s ease-in-out infinite alternate;
-}
-.signal-banner.sell-banner {
-  display: block;
-  background: linear-gradient(135deg, rgba(224,82,82,0.18), rgba(224,82,82,0.08));
-  border: 2px solid rgba(224,82,82,0.7);
-  color: var(--red);
-  box-shadow: 0 0 20px rgba(224,82,82,0.25);
-  animation: bannerPop 0.4s cubic-bezier(0.34,1.56,0.64,1), bannerGlowR 1.5s ease-in-out infinite alternate;
-}
-@keyframes bannerGlow {
-  from { box-shadow: 0 0 12px rgba(76,175,130,0.2); }
-  to   { box-shadow: 0 0 30px rgba(76,175,130,0.5); }
-}
-@keyframes bannerGlowR {
-  from { box-shadow: 0 0 12px rgba(224,82,82,0.2); }
-  to   { box-shadow: 0 0 30px rgba(224,82,82,0.5); }
-}
-.signal-banner .sb-icon { font-size: 1.4rem; display: block; margin-bottom: 3px; }
-.signal-banner .sb-txt  { font-size: 0.9rem; }
-.signal-banner .sb-sub  { font-size: 0.62rem; opacity: 0.8; margin-top: 3px; }
-
 .etf-head { display: flex; align-items: center; gap: 10px; }
 .etf-icon { font-size: 1.8rem; }
 .etf-name .en { font-size: 1rem; letter-spacing: -0.3px; }
@@ -380,7 +318,7 @@ body {
 
 .collapsible-section {
   display: flex; flex-direction: column; gap: 14px; overflow: hidden;
-  max-height: 1400px; opacity: 1;
+  max-height: 2000px; opacity: 1;
   transition: max-height 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin-top 0.3s ease;
   margin-top: 0;
 }
@@ -431,24 +369,31 @@ body {
 .tbox.sell-b .tprog-bar, .tbox.near-sell .tprog-bar, .tbox.close-sell .tprog-bar, .tbox.alert-sell .tprog-bar { background: linear-gradient(90deg, rgba(224,82,82,0.4), var(--red)); }
 .tprog-lbl { display: flex; justify-content: space-between; margin-top: 3px; font-size: 0.55rem; color: var(--muted); }
 
+/* ── TRADE BUTTONS — DEFAULT YELLOW, SIGNAL = GREEN/RED ── */
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn-buy, .btn-sell {
   border: none; border-radius: 10px; padding: 10px;
-  font-size: 0.78rem; cursor: pointer; transition: 0.15s; letter-spacing: -0.2px;
+  font-size: 0.78rem; cursor: pointer; transition: all 0.2s; letter-spacing: -0.2px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.btn-buy  { background: var(--green); color: #000; }
-.btn-sell { background: var(--red);   color: #fff; }
-.btn-buy:hover  { background: #62D49B; transform: translateY(-1px); }
-.btn-sell:hover { background: #F06868; transform: translateY(-1px); }
+/* DEFAULT: yellow for both */
+.btn-buy  { background: var(--yellow); color: #111; box-shadow: 0 2px 8px rgba(245,200,66,0.2); }
+.btn-sell { background: var(--yellow); color: #111; box-shadow: 0 2px 8px rgba(245,200,66,0.2); }
+.btn-buy:hover  { background: #FFD84D; transform: translateY(-1px); }
+.btn-sell:hover { background: #FFD84D; transform: translateY(-1px); }
 .btn-buy:active, .btn-sell:active { transform: translateY(0); }
-.btn-units-hint { font-size: 0.6rem; opacity: 0.75; }
 
-/* BUY/SELL signal — button glow */
-.signal-buy .btn-buy   { box-shadow: 0 0 16px rgba(76,175,130,0.6); animation: btnPulseG 1.2s infinite alternate; }
-.signal-sell .btn-sell { box-shadow: 0 0 16px rgba(224,82,82,0.6);  animation: btnPulseR 1.2s infinite alternate; }
+/* SIGNAL ACTIVE: buy = green, sell = red */
+.signal-buy-active .btn-buy  { background: var(--green); color: #000; box-shadow: 0 0 18px rgba(76,175,130,0.6); animation: btnPulseG 1.2s infinite alternate; }
+.signal-sell-active .btn-sell { background: var(--red);   color: #fff; box-shadow: 0 0 18px rgba(224,82,82,0.6);  animation: btnPulseR 1.2s infinite alternate; }
+/* keep the other button yellow even when signal active */
+.signal-buy-active .btn-sell  { background: var(--yellow); color: #111; }
+.signal-sell-active .btn-buy  { background: var(--yellow); color: #111; }
+
 @keyframes btnPulseG { to { box-shadow: 0 0 28px rgba(76,175,130,0.9); transform: translateY(-2px); } }
 @keyframes btnPulseR { to { box-shadow: 0 0 28px rgba(224,82,82,0.9);  transform: translateY(-2px); } }
+
+.btn-units-hint { font-size: 0.6rem; opacity: 0.75; }
 
 .sec-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
 
@@ -459,7 +404,7 @@ body {
 .h-card.pc { border-color: rgba(76,175,130,0.45); }
 .h-card.lc { border-color: rgba(224,82,82,0.4); }
 .h-card-top { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.02); border-bottom: 2px solid var(--border); }
-.h-lot-lbl { font-size: 0.62rem; color: var(--muted); }
+.h-lot-lbl { font-size: 0.82rem; color: #ffffff; font-weight: bold; display: flex; align-items: center; gap: 6px; }
 .h-pct { font-size: 0.65rem; padding: 2px 8px; border-radius: 6px; }
 .h-pct.up { background: var(--green-dim); color: var(--green); }
 .h-pct.dn { background: var(--red-dim); color: var(--red); }
@@ -470,14 +415,26 @@ body {
 .h-cell .hcv.sv { color: var(--silver); }
 .h-cell .hcv.profit { color: var(--green); }
 .h-cell .hcv.loss   { color: var(--red); }
+/* Date + days row */
+.h-date-row { padding: 5px 12px 7px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.1); }
+.h-date-txt { font-size: 0.6rem; color: var(--muted); }
+.h-days-badge { font-size: 0.58rem; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--text); }
 .h-card-footer { padding: 7px 12px; background: rgba(0,0,0,0.15); border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .h-pnl-big { font-size: 0.9rem; }
 .h-pnl-big.profit { color: var(--green); }
 .h-pnl-big.loss   { color: var(--red); }
-.h-time-txt { font-size: 0.58rem; color: var(--muted); }
+/* Edit/Delete buttons */
+.h-action-btns { display: flex; align-items: center; gap: 5px; }
+.btn-h-edit, .btn-h-del {
+  border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.62rem; cursor: pointer; transition: 0.15s;
+}
+.btn-h-edit { background: rgba(245,200,66,0.15); color: var(--yellow); border: 1px solid rgba(245,200,66,0.3); }
+.btn-h-edit:hover { background: rgba(245,200,66,0.28); }
+.btn-h-del  { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
+.btn-h-del:hover  { background: rgba(224,82,82,0.25); }
 .lifo-badge {
   font-size: 0.52rem; background: rgba(224,82,82,0.12); color: var(--red);
-  border: 1px solid rgba(224,82,82,0.3); border-radius: 5px; padding: 1px 5px; margin-left: 5px;
+  border: 1px solid rgba(224,82,82,0.3); border-radius: 5px; padding: 1px 5px;
 }
 .lifo-badge.buy-now {
   background: rgba(76,175,130,0.15) !important; color: var(--green) !important;
@@ -552,6 +509,31 @@ body {
 .mcfb:hover { background: #62D49B; }
 .mcfs { background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
 .mcfs:hover { background: #F06868; }
+
+/* ── EDIT HOLDING MODAL ── */
+.edit-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(8px);
+  z-index: 150; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.edit-overlay.show { display: flex; }
+.edit-modal {
+  background: var(--bg2); border: 2px solid rgba(245,200,66,0.4);
+  border-radius: 18px; padding: 24px; max-width: 340px; width: 100%; animation: pop 0.2s ease;
+}
+.edit-modal h3 { color: var(--yellow); font-size: 1rem; margin-bottom: 16px; text-align: center; }
+.edit-field { margin-bottom: 12px; }
+.edit-field label { display: block; font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.edit-field input {
+  width: 100%; background: var(--bg3); border: 2px solid var(--border-mid);
+  border-radius: 9px; color: var(--text); font-size: 0.95rem;
+  padding: 8px 12px; outline: none; text-align: center; transition: 0.15s;
+}
+.edit-field input:focus { border-color: var(--yellow); }
+.edit-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.edit-save { background: var(--yellow); color: #111; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
+.edit-save:hover { background: #FFD84D; }
+.edit-cancel { background: var(--bg3); color: var(--muted); border: 2px solid var(--border); border-radius: 10px; padding: 10px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
+.edit-cancel:hover { color: var(--text); }
 
 /* ── ALERT OVERLAY ── */
 .alert-overlay {
@@ -670,6 +652,11 @@ body {
         <span id="soundIcon">🔔</span>
         <span id="soundTxt">Sound ON</span>
       </div>
+      <!-- API ON/OFF BUTTON -->
+      <div class="api-toggle on" id="apiToggle" onclick="toggleApi()">
+        <div class="api-dot"></div>
+        <span id="apiTxt">API ON</span>
+      </div>
       <div class="market-status">
         <div class="mkt-dot" id="mktDot"></div>
         <span class="mkt-label" id="mktLabel">Checking...</span>
@@ -677,6 +664,11 @@ body {
       </div>
       <div class="last-upd" id="lastUpd">—</div>
     </div>
+  </div>
+
+  <!-- API PAUSED BAR -->
+  <div class="api-paused-bar" id="apiPausedBar">
+    ⏸ API Paused — Live price fetch band hai · Toggle kaaro enable karne ke liye
   </div>
 
   <div class="fetch-status-bar loading" id="fetchStatusBar">
@@ -740,7 +732,6 @@ body {
   <div class="split">
     <!-- GOLD COLUMN -->
     <div class="gold-col" id="col-G">
-      <div class="signal-banner" id="banner-G"></div>
       <div class="etf-head"><div class="etf-icon">🥇</div><div class="etf-name"><div class="en">Gold BeES</div><div class="es">GOLDBEES · NSE</div></div></div>
       <div class="price-block price-flat" id="pb-G">
         <div class="tick-badge flat" id="tick-G">LIVE</div>
@@ -766,7 +757,7 @@ body {
           <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
           <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
         </div>
-        <div class="trade-btns">
+        <div class="trade-btns" id="tradeBtns-G">
           <button class="btn-buy" id="buyBtn-G" onclick="openModal('G','buy')">
             <span>BUY</span>
             <span class="btn-units-hint" id="buyHint-G">— Share</span>
@@ -783,7 +774,6 @@ body {
 
     <!-- SILVER COLUMN -->
     <div class="silver-col" id="col-S">
-      <div class="signal-banner" id="banner-S"></div>
       <div class="etf-head"><div class="etf-icon">🥈</div><div class="etf-name"><div class="en">Silver BeES</div><div class="es">SILVERBEES · NSE</div></div></div>
       <div class="price-block price-flat" id="pb-S">
         <div class="tick-badge flat" id="tick-S">LIVE</div>
@@ -809,7 +799,7 @@ body {
           <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
           <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
         </div>
-        <div class="trade-btns">
+        <div class="trade-btns" id="tradeBtns-S">
           <button class="btn-buy" id="buyBtn-S" onclick="openModal('S','buy')">
             <span>＋ BUY</span>
             <span class="btn-units-hint" id="buyHint-S">— Share</span>
@@ -828,6 +818,7 @@ body {
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 </div>
 
+<!-- TRADE CONFIRM MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal" id="mBox">
     <div class="mtop">
@@ -852,6 +843,34 @@ body {
   </div>
 </div>
 
+<!-- EDIT HOLDING MODAL -->
+<div class="edit-overlay" id="editOverlay">
+  <div class="edit-modal">
+    <h3>✏️ Holding Edit Karo</h3>
+    <div class="edit-field">
+      <label>Buy Price (₹)</label>
+      <input type="number" id="editPrice" step="0.01" placeholder="Buy price daalo">
+    </div>
+    <div class="edit-field">
+      <label>Units (Share)</label>
+      <input type="number" id="editUnits" min="1" placeholder="Share count daalo">
+    </div>
+    <div class="edit-field">
+      <label>Date (DD-MM-YYYY)</label>
+      <input type="text" id="editDate" placeholder="e.g. 21-06-2024">
+    </div>
+    <div class="edit-field">
+      <label>Time</label>
+      <input type="text" id="editTime" placeholder="e.g. 10:30 AM">
+    </div>
+    <div class="edit-btns">
+      <button class="edit-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save" onclick="saveEditHolding()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT OVERLAY -->
 <div class="alert-overlay" id="alertOverlay">
   <div class="alert-box" id="alertBox">
     <div class="ap-head">
@@ -870,6 +889,31 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
+// ── API ON/OFF ──
+let apiEnabled = true;
+function toggleApi() {
+  apiEnabled = !apiEnabled;
+  const btn = document.getElementById('apiToggle');
+  const txt = document.getElementById('apiTxt');
+  const pausedBar = document.getElementById('apiPausedBar');
+  if (apiEnabled) {
+    btn.className = 'api-toggle on';
+    txt.textContent = 'API ON';
+    pausedBar.classList.remove('show');
+    // Restart fetching
+    if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
+    showToast('✅ API ON — Live price fetch shuru');
+  } else {
+    btn.className = 'api-toggle off';
+    txt.textContent = 'API OFF';
+    pausedBar.classList.add('show');
+    if (st.timer) clearInterval(st.timer);
+    if (st.tickTimer) clearInterval(st.tickTimer);
+    document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
+    showToast('⏸ API OFF — Price fetch band');
+  }
+}
+
 let audioCtx = null, soundEnabled = true;
 function getAudioCtx() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
@@ -924,9 +968,31 @@ let st = {
   workingProxy:null, fetchFailCount:0
 };
 
+// Edit state
+let editState = { k: null, idx: null };
+
 function getSortedHoldings(k) { return [...st.hold[k]].sort((a,b) => (a.buyPrice||a.price) - (b.buyPrice||b.price)); }
 function getLot1Price(k) { const s = getSortedHoldings(k); return s.length ? (s[0].buyPrice||s[0].price) : null; }
 function getLot1Units(k) { const s = getSortedHoldings(k); return s.length ? s[0].units : 0; }
+
+// ── DATE HELPERS ──
+function todayDateStr() {
+  const now = new Date();
+  const d = String(now.getDate()).padStart(2,'0');
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const y = now.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+function calcDaysSince(dateStr) {
+  if (!dateStr) return null;
+  // parse DD-MM-YYYY
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return null;
+  const buyDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.floor((today - buyDate) / (1000*60*60*24));
+  return diff >= 0 ? diff : null;
+}
 
 function calcBuyUnits(k) {
   const p = st.price[k]; if (!p || p <= 0) return 1;
@@ -947,28 +1013,12 @@ function updateBtnHints(k) {
   if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings';
 }
 
-/* ══ COLUMN SIGNAL HIGHLIGHT ══ */
+// ── SIGNAL: only highlight buy/sell buttons, no big column card ──
 function updateColSignal(k, signalType) {
-  const colEl    = document.getElementById('col-' + k);
-  const bannerEl = document.getElementById('banner-' + k);
-  const p = st.price[k];
-  const buyU  = calcBuyUnits(k);
-  const sellU = getLot1Units(k);
-  const actualAmt = p ? Math.round(buyU * p).toLocaleString('en-IN') : '—';
-
-  colEl.classList.remove('signal-buy','signal-sell');
-  bannerEl.className = 'signal-banner';
-  bannerEl.innerHTML = '';
-
-  if (signalType === 'buy') {
-    colEl.classList.add('signal-buy');
-    bannerEl.className = 'signal-banner buy-banner';
-    bannerEl.innerHTML = `<span class="sb-icon">🟢</span><span class="sb-txt">BUY NOW! — ${buyU} Share</span><span class="sb-sub">₹${actualAmt} chahiye · Lot ${getSortedHoldings(k).length + 1}</span>`;
-  } else if (signalType === 'sell') {
-    colEl.classList.add('signal-sell');
-    bannerEl.className = 'signal-banner sell-banner';
-    bannerEl.innerHTML = `<span class="sb-icon">🔴</span><span class="sb-txt">SELL NOW! — ${sellU} Share (Lot 1)</span><span class="sb-sub">Target hit! Profit book karo</span>`;
-  }
+  const tradeBtnsEl = document.getElementById('tradeBtns-' + k);
+  tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active');
+  if (signalType === 'buy')  tradeBtnsEl.classList.add('signal-buy-active');
+  if (signalType === 'sell') tradeBtnsEl.classList.add('signal-sell-active');
 }
 
 const PROX = [
@@ -1044,6 +1094,7 @@ function setFetchStatus(state, statusTxt) {
   if (state==='') { lastFetchTs=Date.now(); if (!agoTimer) agoTimer=setInterval(updateAgo,1000); updateAgo(); }
 }
 async function fetchOne(k) {
+  if (!apiEnabled) return;
   const d=await tryFetch(k);
   if (!d) { st.fetchFailCount++; if (st.fetchFailCount>=2) setFetchStatus('fail','Price fetch failed — retrying in '+cfg.ref+'s'); return; }
   st.fetchFailCount=0; const old=st.price[k]; st.price[k]=d.price; st.prev[k]=d.prev;
@@ -1053,6 +1104,7 @@ async function fetchOne(k) {
   setFetchStatus('','✓ Live · '+t); updateTabTitle();
 }
 async function tickOne(k) {
+  if (!apiEnabled) return;
   const d=await tryFetch(k); if (!d) return;
   const old=st.price[k]; st.price[k]=d.price; st.prev[k]=d.prev;
   if (d.price!==old) showTick(k,old,d.price);
@@ -1069,8 +1121,8 @@ function showTick(k, oldP, newP) {
   setTimeout(()=>{ pb.classList.remove('price-flash-up','price-flash-down'); },600);
 }
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
-function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
-async function fetchAll() { setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
+function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
+async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
 window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck,30000); };
 function startApp() { setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() {
@@ -1144,7 +1196,6 @@ function updateCard(k) {
   const nextLotNum=getSortedHoldings(k).length+1;
   const needAmt=(buyU*p).toFixed(0), potP=tu>0?((sv-avg)*tu).toFixed(2):null;
 
-  // Determine signal type for column highlight
   let signalType = null;
   if (p<=bt) {
     sg.textContent='🟢 BUY NOW'; sg.className='iv profit';
@@ -1163,9 +1214,7 @@ function updateCard(k) {
     snx.className='sig-next';
   }
 
-  // Update column highlight
   updateColSignal(k, signalType);
-
   updateBtnHints(k);
   renderHold(k, p, bt);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
@@ -1175,15 +1224,33 @@ function renderHold(k, p, bt) {
   const el=document.getElementById('hl-'+k), sorted=getSortedHoldings(k);
   if (!sorted.length) { el.innerHTML='<div class="no-h">No holdings yet</div>'; return; }
   const buySignalActive=(p!==null&&bt!==undefined&&p<=bt);
+
+  // Find original indices for edit/delete
   el.innerHTML=sorted.map((h,i)=>{
     const bp=h.buyPrice||h.price, pnl=p?(p-bp)*h.units:0, pct=(p-bp)/bp*100, isP=pnl>=0;
     const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0);
+
+    // Date and days
+    const dateStr = h.date || null;
+    const days = dateStr ? calcDaysSince(dateStr) : null;
+    const dateDisplay = dateStr ? dateStr : '—';
+    const daysDisplay = days !== null ? `Day ${days}` : '—';
+    const timeDisplay = h.time || '—';
+
     let badgeHtml='';
     if (isLot1) badgeHtml=buySignalActive?`<span class="lifo-badge buy-now">🟢 BUY NOW</span>`:`<span class="lifo-badge">SELL NEXT</span>`;
+
+    // Find original index in st.hold[k] for edit/delete
+    const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice||oh.price)===bp && oh.time===h.time && oh.units===h.units);
+
     return `<div class="h-card ${isP?'pc':'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share${badgeHtml}</span>
-        <span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
+          <button class="btn-h-edit" onclick="openEditModal('${k}',${origIdx})">✏️</button>
+          <button class="btn-h-del" onclick="deleteHolding('${k}',${origIdx})">🗑</button>
+        </div>
       </div>
       <div class="h-card-body">
         <div class="h-cell"><div class="hcl">Buy Price</div><div class="hcv ${ETF[k].cls}">₹ ${bp.toFixed(2)}</div></div>
@@ -1191,12 +1258,57 @@ function renderHold(k, p, bt) {
         <div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
         <div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div>
       </div>
+      <div class="h-date-row">
+        <span class="h-date-txt">📅 ${dateDisplay} · ${timeDisplay}</span>
+        <span class="h-days-badge">${daysDisplay}</span>
+      </div>
       <div class="h-card-footer">
         <span class="h-pnl-big ${isP?'profit':'loss'}">${isP?'+':'-'} ₹${Math.abs(pnl).toFixed(2)}</span>
-        <span class="h-time-txt">${h.time||'—'}</span>
+        <span style="font-size:0.58rem;color:var(--muted);"></span>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── EDIT HOLDING ──
+function openEditModal(k, idx) {
+  const h = st.hold[k][idx];
+  if (!h) return;
+  editState = { k, idx };
+  document.getElementById('editPrice').value = (h.buyPrice||h.price||'');
+  document.getElementById('editUnits').value = h.units || '';
+  document.getElementById('editDate').value  = h.date  || '';
+  document.getElementById('editTime').value  = h.time  || '';
+  document.getElementById('editOverlay').classList.add('show');
+}
+function closeEditModal() {
+  document.getElementById('editOverlay').classList.remove('show');
+  editState = { k: null, idx: null };
+}
+function saveEditHolding() {
+  const { k, idx } = editState;
+  if (k === null || idx === null) return;
+  const newPrice = parseFloat(document.getElementById('editPrice').value);
+  const newUnits = parseInt(document.getElementById('editUnits').value);
+  const newDate  = document.getElementById('editDate').value.trim();
+  const newTime  = document.getElementById('editTime').value.trim();
+  if (!newPrice || newPrice <= 0 || !newUnits || newUnits < 1) { showToast('⚠️ Valid price aur units daalo'); return; }
+  st.hold[k][idx].buyPrice = newPrice;
+  st.hold[k][idx].price    = newPrice;
+  st.hold[k][idx].units    = newUnits;
+  if (newDate)  st.hold[k][idx].date = newDate;
+  if (newTime)  st.hold[k][idx].time = newTime;
+  closeEditModal();
+  saveSt(); updateCard(k);
+  showToast('✅ Holding updated!');
+}
+function deleteHolding(k, idx) {
+  const h = st.hold[k][idx];
+  if (!h) return;
+  if (!confirm(`Lot delete karna chahte ho? Qty: ${h.units} Share @ ₹${(h.buyPrice||h.price).toFixed(2)}`)) return;
+  st.hold[k].splice(idx, 1);
+  saveSt(); updateCard(k);
+  showToast('🗑 Holding deleted');
 }
 
 function updateAll() { ['G','S'].forEach(k=>updateCard(k)); }
@@ -1294,12 +1406,14 @@ function openModal(k, type, auto=false) {
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend=null; }
 
 function confirmTrade() {
-  const {k,type}=st.pend, liveP=st.price[k], time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const {k,type}=st.pend, liveP=st.price[k];
+  const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const date=todayDateStr();
   if (type==='buy') {
     const bpRaw=parseFloat(document.getElementById('mBuyPrice').value);
     const buyPrice=(bpRaw&&bpRaw>0)?bpRaw:liveP;
     const units=parseInt(document.getElementById('mUnits').value)||calcBuyUnits(k);
-    st.hold[k].push({price:buyPrice,buyPrice,units,time});
+    st.hold[k].push({price:buyPrice,buyPrice,units,time,date});
     st.alerted[k].buy=false; st.alerted[k].sell=false;
     addLog({type:'buy',k,price:buyPrice,units,time});
     showToast('✅ BOUGHT '+units+' Share '+ETF[k].name+' @ ₹'+buyPrice.toFixed(2));
@@ -1367,6 +1481,7 @@ function renderCapCard(k, allot, orders) {
 }
 document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeModal(); });
 document.getElementById('alertOverlay').addEventListener('click',e=>{ if(e.target.id==='alertOverlay') dismissAlert(); });
+document.getElementById('editOverlay').addEventListener('click',e=>{ if(e.target.id==='editOverlay') closeEditModal(); });
 </script>
 
 <script type="module">
