@@ -663,12 +663,7 @@ body {
       <div class="last-upd" id="lastUpd">—</div>
     </div>
   </div>
-
-  <div class="settings-row">
-    <div class="cfg"><span>Buy %</span><input id="c-buy" type="number" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
-    <div class="cfg"><span>Sell %</span><input id="c-sell" type="number" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
-  </div>
-
+  
   <div class="fetch-status-bar loading" id="fetchStatusBar">
     <div id="fetchStatusDot"></div>
     <div class="fsb-prices">
@@ -696,7 +691,8 @@ body {
       <div class="cap-row1">
         <div class="cap-ig"><label>Total Capital ₹</label><input type="number" id="cp-total" value="100000" min="1000" step="1000" oninput="calcCapital()"></div>
         <div class="cap-ig"><label>Parts</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
-        <div class="cap-ig"><label>Per Order ₹ (override)</label><input type="number" id="cp-perorder" placeholder="Auto" min="100" step="100" oninput="calcCapital()"></div>
+        <div class="cap-ig"><label>Buy %</label><input type="number" id="c-buy" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
+        <div class="cap-ig"><label>Sell %</label><input type="number" id="c-sell" value="3" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
       </div>
       <div class="cap-cards">
         <div class="cap-card gc">
@@ -987,18 +983,11 @@ function getLot1Units(k) {
 function calcBuyUnits(k) {
   const p = st.price[k];
   if (!p || p <= 0) return 1;
-  // Per Order override field check karo
-  const overrideVal = parseFloat(document.getElementById('cp-perorder')?.value);
-  let perOrder;
-  if (overrideVal && overrideVal > 0) {
-    perOrder = overrideVal;
-  } else {
-    const total = parseFloat(document.getElementById('cp-total').value) || 0;
-    const parts = parseInt(document.getElementById('cp-parts').value)   || 1;
-    const ordKey = k === 'G' ? 'cp-gord' : 'cp-sord';
-    const orders = parseInt(document.getElementById(ordKey).value)      || 1;
-    perOrder = total / parts / orders;
-  }
+  const total  = parseFloat(document.getElementById('cp-total').value) || 0;
+  const parts  = parseInt(document.getElementById('cp-parts').value)   || 1;
+  const ordKey = k === 'G' ? 'cp-gord' : 'cp-sord';
+  const orders = parseInt(document.getElementById(ordKey).value)       || 1;
+  const perOrder = total / parts / orders;
   return Math.max(1, Math.floor(perOrder / p));
 }
 
