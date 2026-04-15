@@ -1329,7 +1329,7 @@ function updateCard(k) {
   const buyU  = calcBuyUnits(k);
   const sellU = getLot1Units(k);
   const nextLotNum = getSortedHoldings(k).length + 1;
-  const needAmt = (buyU * bt).toFixed(0);
+  const needAmt = (buyU * p).toFixed(0);
   const potP    = tu > 0 ? ((sv - avg) * tu).toFixed(2) : null;
 
   if (p <= bt) {
