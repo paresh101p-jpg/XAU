@@ -851,7 +851,7 @@ function renderHold(k, p) {
     const isP  = pnl >= 0;
     const curVal   = (p * h.units).toFixed(2);
     const invested = (bp * h.units).toFixed(2);
-    const isLast   = (i === hs.length - 1);  // last = most recent (LIFO target)
+    const isLast   = (i === 0);  // Lot 1 = hs[0] = SELL NEXT target
     return `<div class="h-card ${isP?'pc':'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">📦 Lot ${i+1} &nbsp;·&nbsp; ${h.units} units${isLast ? '<span class="lifo-badge">SELL NEXT</span>' : ''}</span>
@@ -953,8 +953,8 @@ function openModal(k, type, auto=false) {
   const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
   const avg = tu > 0 ? tc / tu : 0;
 
-  // ── LIFO: sell ke liye last lot ke units auto-set karo ──
-  const lastLotForUnits = (type === 'sell' && hs.length > 0) ? hs[hs.length - 1] : null;
+  // ── LIFO: sell ke liye Lot 1 (display ka pehla = hs[0]) auto-set karo ──
+  const lastLotForUnits = (type === 'sell' && hs.length > 0) ? hs[0] : null;
   const un  = lastLotForUnits ? lastLotForUnits.units : cfg.units;
   const est = (p * un).toFixed(2);
 
@@ -981,8 +981,8 @@ function openModal(k, type, auto=false) {
     rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} units</span></div>`;
     if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
 
-    // ── LIFO: sabse last lot dikhao ──
-    const lastLot = hs.length > 0 ? hs[hs.length - 1] : null;
+    // ── LIFO: Lot 1 = hs[0] dikhao (display ka pehla lot) ──
+    const lastLot = hs.length > 0 ? hs[0] : null;
     if (lastLot) {
       const lotBp   = lastLot.buyPrice || lastLot.price;
       const sellU   = lastLot.units;  // puri last lot sell hogi (LIFO)
@@ -1030,18 +1030,18 @@ function confirmTrade() {
     addLog({type:'buy', k, price:buyPrice, units, time});
     showToast('✅ BOUGHT ' + units + ' ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2));
   } else {
-    // ── LIFO: last lot pehle sell karo (array ke end se) ──
+    // ── LIFO: Lot 1 pehle sell karo (display ka pehla = hs[0]) ──
     let toS  = units;
     let cost = 0;
     const hs = st.hold[k];
 
     while (toS > 0 && hs.length > 0) {
-      const h = hs[hs.length - 1];   // ← LIFO: last element
+      const h = hs[0];               // ← Lot 1 = display ka pehla lot
       const n = Math.min(h.units, toS);
       cost    += n * (h.buyPrice || h.price);
       h.units -= n;
       toS     -= n;
-      if (h.units === 0) hs.pop();   // ← pop (last) instead of shift (first)
+      if (h.units === 0) hs.shift(); // ← shift: Lot 1 hata do jab khatam ho
     }
 
     const pnl = (liveP * units) - cost;
