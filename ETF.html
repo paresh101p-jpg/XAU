@@ -541,12 +541,13 @@ const PROX = [
 ];
 
 function yahooUrls(sym) {
+  const ts = Date.now();
   return [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`,
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=2m&range=1d`,
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}`,
-    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}`,
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=2m&range=1d&_=${ts}`,
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`,
+    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`,
   ];
 }
 
@@ -570,7 +571,7 @@ async function tryFetch(k) {
     const px = PROX[st.workingProxy];
     for (const yu of urls) {
       try {
-        const r = await fetch(px(yu), {signal: AbortSignal.timeout(8000)});
+        const r = await fetch(px(yu), {signal: AbortSignal.timeout(8000), cache: 'no-store'});
         if (!r.ok) continue;
         const raw = await r.json();
         const j   = typeof raw === 'string' ? JSON.parse(raw) : raw;
