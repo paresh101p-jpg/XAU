@@ -952,7 +952,10 @@ function openModal(k, type, auto=false) {
   const tu  = hs.reduce((s,h) => s + h.units, 0);
   const tc  = hs.reduce((s,h) => s + (h.buyPrice||h.price) * h.units, 0);
   const avg = tu > 0 ? tc / tu : 0;
-  const un  = cfg.units;
+
+  // ── LIFO: sell ke liye last lot ke units auto-set karo ──
+  const lastLotForUnits = (type === 'sell' && hs.length > 0) ? hs[hs.length - 1] : null;
+  const un  = lastLotForUnits ? lastLotForUnits.units : cfg.units;
   const est = (p * un).toFixed(2);
 
   st.pend = {k, type};
@@ -982,7 +985,7 @@ function openModal(k, type, auto=false) {
     const lastLot = hs.length > 0 ? hs[hs.length - 1] : null;
     if (lastLot) {
       const lotBp   = lastLot.buyPrice || lastLot.price;
-      const sellU   = Math.min(un, lastLot.units);  // kitne units is lot se jayenge
+      const sellU   = lastLot.units;  // puri last lot sell hogi (LIFO)
       const lotPnl  = (p - lotBp) * sellU;
       const lotPct  = ((p - lotBp) / lotBp * 100).toFixed(2);
       const isProfit = lotPnl >= 0;
