@@ -889,10 +889,21 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// ── API ON/OFF ──
-let apiEnabled = true;
+// ══════════════════════════════════════════════
+// FIX 1: apiEnabled ab localStorage se load hoga
+// Pehle: let apiEnabled = true;  ← ye hamesha true tha refresh pe
+// Ab: localStorage check karta hai — agar tumne OFF kiya tha, wahi yaad rahega
+// ══════════════════════════════════════════════
+let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
+
 function toggleApi() {
   apiEnabled = !apiEnabled;
+  // ══════════════════════════════════════════════
+  // FIX 2: State localStorage mein save karo
+  // Ye line toggle hone pe OFF/ON state save karti hai
+  // ══════════════════════════════════════════════
+  localStorage.setItem('apiEnabled', String(apiEnabled));
+
   const btn = document.getElementById('apiToggle');
   const txt = document.getElementById('apiTxt');
   const pausedBar = document.getElementById('apiPausedBar');
@@ -900,7 +911,6 @@ function toggleApi() {
     btn.className = 'api-toggle on';
     txt.textContent = 'API ON';
     pausedBar.classList.remove('show');
-    // Restart fetching
     if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
     showToast('✅ API ON — Live price fetch shuru');
   } else {
@@ -985,7 +995,6 @@ function todayDateStr() {
 }
 function calcDaysSince(dateStr) {
   if (!dateStr) return null;
-  // parse DD-MM-YYYY
   const parts = dateStr.split('-');
   if (parts.length !== 3) return null;
   const buyDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
@@ -1013,7 +1022,6 @@ function updateBtnHints(k) {
   if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings';
 }
 
-// ── SIGNAL: only highlight buy/sell buttons, no big column card ──
 function updateColSignal(k, signalType) {
   const tradeBtnsEl = document.getElementById('tradeBtns-' + k);
   tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active');
@@ -1123,8 +1131,37 @@ function showTick(k, oldP, newP) {
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
 function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
 async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
-window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck,30000); };
-function startApp() { setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
+
+// ══════════════════════════════════════════════
+// FIX 3: Page load pe API OFF state restore karo
+// Agar user ne OFF kiya tha, refresh ke baad bhi OFF dikhega
+// ══════════════════════════════════════════════
+window.onload = () => {
+  initFirebase();
+  mktCheck();
+  setInterval(mktCheck, 30000);
+  // API OFF tha to UI restore karo
+  if (!apiEnabled) {
+    document.getElementById('apiToggle').className = 'api-toggle off';
+    document.getElementById('apiTxt').textContent = 'API OFF';
+    document.getElementById('apiPausedBar').classList.add('show');
+    document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
+  }
+};
+
+function startApp() {
+  if (!apiEnabled) {
+    // API OFF hai to fetch mat karo, sirf UI show karo
+    setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye');
+    return;
+  }
+  setFetchStatus('loading','Connecting to price feed…');
+  fetchAll();
+  startLoop();
+  startTickLoop();
+  if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000);
+}
+
 function mktCheck() {
   const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes();
   const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930;
@@ -1225,12 +1262,10 @@ function renderHold(k, p, bt) {
   if (!sorted.length) { el.innerHTML='<div class="no-h">No holdings yet</div>'; return; }
   const buySignalActive=(p!==null&&bt!==undefined&&p<=bt);
 
-  // Find original indices for edit/delete
   el.innerHTML=sorted.map((h,i)=>{
     const bp=h.buyPrice||h.price, pnl=p?(p-bp)*h.units:0, pct=(p-bp)/bp*100, isP=pnl>=0;
     const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0);
 
-    // Date and days
     const dateStr = h.date || null;
     const days = dateStr ? calcDaysSince(dateStr) : null;
     const dateDisplay = dateStr ? dateStr : '—';
@@ -1240,7 +1275,6 @@ function renderHold(k, p, bt) {
     let badgeHtml='';
     if (isLot1) badgeHtml=buySignalActive?`<span class="lifo-badge buy-now">🟢 BUY NOW</span>`:`<span class="lifo-badge">SELL NEXT</span>`;
 
-    // Find original index in st.hold[k] for edit/delete
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice||oh.price)===bp && oh.time===h.time && oh.units===h.units);
 
     return `<div class="h-card ${isP?'pc':'lc'}">
