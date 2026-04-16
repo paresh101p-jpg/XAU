@@ -700,6 +700,7 @@ body {
         <div class="cap-ig"><label>ETF</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
         <div class="cap-ig buy-inp"><label>Buy %</label><input type="number" id="c-buy" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
         <div class="cap-ig sell-inp"><label>Sell %</label><input type="number" id="c-sell" value="3" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
+        <div class="cap-ig"><label>DCA Mult ×</label><input type="number" id="c-mult" value="1.25" min="1.0" max="3.0" step="0.05" oninput="applySettings()"></div>
       </div>
       <div class="cap-cards">
         <div class="cap-card gc">
@@ -1005,6 +1006,17 @@ function calcDaysSince(dateStr) {
 
 function calcBuyUnits(k) {
   const p = st.price[k]; if (!p || p <= 0) return 1;
+  const mult = parseFloat(document.getElementById('c-mult')?.value) || 1.25;
+
+  // Agar koi holding hai → last bought lot ke units × multiplier
+  const sorted = getSortedHoldings(k);
+  if (sorted.length > 0) {
+    const lastLot = sorted[sorted.length - 1]; // sabse last (highest price) lot
+    const lastUnits = lastLot.units;
+    return Math.max(1, Math.round(lastUnits * mult));
+  }
+
+  // No holdings → capital planner se normal calculate (Lot 1)
   const total  = parseFloat(document.getElementById('cp-total').value) || 0;
   const parts  = parseInt(document.getElementById('cp-parts').value)   || 1;
   const ordKey = k === 'G' ? 'cp-gord' : 'cp-sord';
