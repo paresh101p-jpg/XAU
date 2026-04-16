@@ -1016,12 +1016,14 @@ function calcBuyUnits(k) {
   const mult = parseFloat(document.getElementById('c-mult')?.value);
   if (!mult || mult <= 1) return baseUnits;
 
-  const sorted = getSortedHoldings(k);
-  if (sorted.length > 0) {
-    const lastLot = st.hold[k][st.hold[k].length - 1];
+  // Holdings hain → last lot ke ACTUAL units × multiplier
+  const holdings = st.hold[k];
+  if (holdings.length > 0) {
+    const lastLot = holdings[holdings.length - 1];
     return Math.max(1, Math.round(lastLot.units * mult));
   }
 
+  // No holdings → capital se Lot 1
   return baseUnits;
 }
 
