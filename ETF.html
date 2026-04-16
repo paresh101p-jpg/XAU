@@ -945,9 +945,11 @@ function toggleSound() {
 }
 
 // ── TOGGLE: sirf info-grid + lsi bar collapse hoga ──
-const sectionVisible = { G: true, S: true };
-function toggleSection(k) {
-  sectionVisible[k] = !sectionVisible[k];
+// localStorage se restore karo
+const _sv = JSON.parse(localStorage.getItem('secVisible') || '{}');
+const sectionVisible = { G: _sv.G !== false, S: _sv.S !== false };
+
+function applySectionState(k) {
   const sec = document.getElementById('sec-' + k);
   const btn = document.getElementById('toggleBtn-' + k);
   if (sectionVisible[k]) {
@@ -959,6 +961,13 @@ function toggleSection(k) {
     btn.classList.add('collapsed');
     btn.innerHTML = '<span class="th-arrow" style="display:inline-block;transform:rotate(-90deg);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1)">▼</span> Stats Dikhao';
   }
+}
+
+function toggleSection(k) {
+  sectionVisible[k] = !sectionVisible[k];
+  // localStorage mein save karo
+  localStorage.setItem('secVisible', JSON.stringify(sectionVisible));
+  applySectionState(k);
 }
 
 const ETF = {
@@ -1140,6 +1149,9 @@ window.onload = () => {
   initFirebase();
   mktCheck();
   setInterval(mktCheck, 30000);
+  // Section visible state restore karo
+  applySectionState('G');
+  applySectionState('S');
   if (!apiEnabled) {
     document.getElementById('apiToggle').className = 'api-toggle off';
     document.getElementById('apiTxt').textContent = 'API OFF';
