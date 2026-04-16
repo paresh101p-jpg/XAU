@@ -1011,10 +1011,11 @@ function calcBuyUnits(k) {
   // Agar koi holding hai → last bought lot ke units × multiplier
   const sorted = getSortedHoldings(k);
   if (sorted.length > 0) {
-    const lastLot = sorted[sorted.length - 1]; // sabse last (highest price) lot
-    const lastUnits = lastLot.units;
-    return Math.max(1, Math.round(lastUnits * mult));
-  }
+  // st.hold[k] mein jo sabse last push hua = most recently bought lot
+  const lastLot = st.hold[k][st.hold[k].length - 1];
+  const lastUnits = lastLot.units;
+  return Math.max(1, Math.round(lastUnits * mult));
+}
 
   // No holdings → capital planner se normal calculate (Lot 1)
   const total  = parseFloat(document.getElementById('cp-total').value) || 0;
