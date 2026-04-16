@@ -1006,24 +1006,23 @@ function calcDaysSince(dateStr) {
 
 function calcBuyUnits(k) {
   const p = st.price[k]; if (!p || p <= 0) return 1;
-  const mult = parseFloat(document.getElementById('c-mult')?.value) || 1.25;
-
-  // Agar koi holding hai → last bought lot ke units × multiplier
-  const sorted = getSortedHoldings(k);
-  if (sorted.length > 0) {
-  // st.hold[k] mein jo sabse last push hua = most recently bought lot
-  const lastLot = st.hold[k][st.hold[k].length - 1];
-  const lastUnits = lastLot.units;
-  return Math.max(1, Math.round(lastUnits * mult));
-}
-
-  // No holdings → capital planner se normal calculate (Lot 1)
   const total  = parseFloat(document.getElementById('cp-total').value) || 0;
   const parts  = parseInt(document.getElementById('cp-parts').value)   || 1;
   const ordKey = k === 'G' ? 'cp-gord' : 'cp-sord';
   const orders = parseInt(document.getElementById(ordKey).value)       || 1;
   const perOrder = total / parts / orders;
-  return Math.max(1, Math.floor(perOrder / p));
+  const baseUnits = Math.max(1, Math.floor(perOrder / p));
+
+  const mult = parseFloat(document.getElementById('c-mult')?.value);
+  if (!mult || mult <= 1) return baseUnits;
+
+  const sorted = getSortedHoldings(k);
+  if (sorted.length > 0) {
+    const lastLot = st.hold[k][st.hold[k].length - 1];
+    return Math.max(1, Math.round(lastLot.units * mult));
+  }
+
+  return baseUnits;
 }
 
 function updateBtnHints(k) {
