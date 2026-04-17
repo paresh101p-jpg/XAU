@@ -187,6 +187,52 @@ body {
 }
 .api-paused-bar.show { display: flex; }
 
+/* Manual Portfolio Summary Styles */
+.portfolio-summary {
+  background: var(--bg2); border-bottom: 2px solid var(--border);
+  padding: 12px 20px;
+}
+.summary-grid {
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+  background: var(--bg3); border-radius: 16px; padding: 14px 18px;
+  margin-bottom: 12px;
+}
+.summary-item {
+  display: flex; flex-direction: column; gap: 4px; min-width: 100px;
+}
+.summary-label {
+  font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+}
+.summary-value {
+  font-size: 1.1rem; font-weight: bold;
+}
+.summary-value.positive { color: var(--green); }
+.summary-value.negative { color: var(--red); }
+.manual-inputs {
+  display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;
+}
+.manual-field {
+  display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px;
+}
+.manual-field label {
+  font-size: 0.6rem; color: var(--muted); letter-spacing: 1px;
+}
+.manual-field input {
+  background: var(--bg4); border: 2px solid var(--border-mid); border-radius: 10px;
+  padding: 8px 10px; color: var(--text); font-size: 0.85rem;
+}
+.manual-field input:focus { border-color: var(--gold); outline: none; }
+.btn-manual {
+  background: var(--yellow); color: #111; border: none; border-radius: 10px;
+  padding: 8px 16px; font-size: 0.7rem; cursor: pointer; font-weight: bold;
+  transition: 0.15s; margin-top: 4px;
+}
+.btn-manual:hover { background: #FFD84D; transform: translateY(-1px); }
+.history-badge {
+  font-size: 0.6rem; color: var(--muted); margin-top: 8px; text-align: right;
+}
+.history-badge span { color: var(--text); }
+
 .cap-toggle {
   width: 100%; background: var(--bg2); border: none; border-bottom: 2px solid var(--border);
   color: var(--text); font-size: 0.82rem;
@@ -521,7 +567,6 @@ body {
 .edit-save:hover { background: #FFD84D; }
 .edit-cancel { background: var(--bg3); color: var(--muted); border: 2px solid var(--border); border-radius: 10px; padding: 10px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
 .edit-cancel:hover { color: var(--text); }
-/* new button inside edit modal */
 .btn-set-current {
   background: rgba(245,200,66,0.2); border: 1px solid var(--yellow); border-radius: 6px;
   color: var(--yellow); font-size: 0.7rem; padding: 4px 8px; cursor: pointer; margin-top: 4px;
@@ -599,6 +644,8 @@ body {
   .gold-col { border-right: none; border-bottom: 2px solid var(--border); }
   .price-big { font-size: 1.6rem; }
   .cap-cards { grid-template-columns: 1fr; }
+  .summary-grid { flex-direction: column; gap: 8px; }
+  .manual-inputs { flex-direction: column; }
 }
 </style>
 </head>
@@ -680,6 +727,61 @@ body {
     <div class="fsb-right">
       <span class="fsb-ago" id="fsb-ago">—</span>
       <span class="fsb-status-txt" id="fetchStatusText">Connecting…</span>
+    </div>
+  </div>
+
+  <!-- MANUAL PORTFOLIO SUMMARY SECTION -->
+  <div class="portfolio-summary">
+    <div class="summary-grid" id="summaryGrid">
+      <div class="summary-item">
+        <div class="summary-label">Start Amount</div>
+        <div class="summary-value" id="startAmountDisplay">₹ —</div>
+        <div style="font-size:0.55rem; color:var(--muted);" id="startDateDisplay"></div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Live Amount (Today)</div>
+        <div class="summary-value" id="liveAmountDisplay">₹ —</div>
+        <div style="font-size:0.55rem; color:var(--muted);" id="liveDateDisplay"></div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Total P&L</div>
+        <div class="summary-value" id="totalPnL">—</div>
+        <div style="font-size:0.55rem;" id="totalPnLPercent">—</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">30-Day Change</div>
+        <div class="summary-value" id="pnl30d">—</div>
+        <div style="font-size:0.55rem;" id="pnl30dPercent">—</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">1-Year Change</div>
+        <div class="summary-value" id="pnl1y">—</div>
+        <div style="font-size:0.55rem;" id="pnl1yPercent">—</div>
+      </div>
+    </div>
+    <div class="manual-inputs">
+      <div class="manual-field">
+        <label>Start Capital (₹)</label>
+        <input type="number" id="manualStartAmount" placeholder="e.g. 100000" step="1000">
+      </div>
+      <div class="manual-field">
+        <label>Start Date</label>
+        <input type="date" id="manualStartDate">
+      </div>
+      <button class="btn-manual" onclick="saveStartAmount()">Save Start</button>
+      
+      <div class="manual-field">
+        <label>Today's Portfolio Value (₹)</label>
+        <input type="number" id="manualLiveAmount" placeholder="e.g. 125000" step="1000">
+      </div>
+      <div class="manual-field">
+        <label>Date (default today)</label>
+        <input type="date" id="manualLiveDate">
+      </div>
+      <button class="btn-manual" onclick="saveLiveAmount()">Save Today's Value</button>
+    </div>
+    <div class="history-badge" id="historyBadge">
+      📅 Last 30d entry: <span id="last30dInfo">—</span> &nbsp;|&nbsp; Last 1y entry: <span id="last1yInfo">—</span>
     </div>
   </div>
 
@@ -885,6 +987,135 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
+// ======================== MANUAL PORTFOLIO STORAGE ========================
+let manualStart = { amount: null, date: null };   // { amount, date (YYYY-MM-DD) }
+let manualSnapshots = []; // array of { date, amount } sorted descending
+
+function loadManualData() {
+  try {
+    const raw = localStorage.getItem('manual_portfolio_v1');
+    if (raw) {
+      const data = JSON.parse(raw);
+      manualStart = data.start || { amount: null, date: null };
+      manualSnapshots = data.snapshots || [];
+      manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
+    }
+  } catch(e) { console.warn(e); }
+  // populate inputs
+  if (manualStart.amount) document.getElementById('manualStartAmount').value = manualStart.amount;
+  if (manualStart.date) document.getElementById('manualStartDate').value = manualStart.date;
+  const latest = manualSnapshots.length ? manualSnapshots[0] : null;
+  if (latest) {
+    document.getElementById('manualLiveAmount').value = latest.amount;
+    document.getElementById('manualLiveDate').value = latest.date;
+  } else {
+    // set default today's date for convenience
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('manualLiveDate').value = today;
+  }
+  updateSummaryDisplay();
+}
+function saveManualToLocal() {
+  const data = { start: manualStart, snapshots: manualSnapshots };
+  localStorage.setItem('manual_portfolio_v1', JSON.stringify(data));
+  saveSt(); // also trigger overall save (includes this data via buildDataObj)
+}
+function saveStartAmount() {
+  let amount = parseFloat(document.getElementById('manualStartAmount').value);
+  let date = document.getElementById('manualStartDate').value;
+  if (isNaN(amount) || amount <= 0) { showToast('Please enter a valid start amount'); return; }
+  if (!date) { date = new Date().toISOString().slice(0,10); }
+  manualStart = { amount, date };
+  saveManualToLocal();
+  updateSummaryDisplay();
+  showToast(`Start capital saved: ₹${amount.toLocaleString()} as of ${date}`);
+}
+function saveLiveAmount() {
+  let amount = parseFloat(document.getElementById('manualLiveAmount').value);
+  let date = document.getElementById('manualLiveDate').value;
+  if (isNaN(amount) || amount <= 0) { showToast('Please enter a valid portfolio value'); return; }
+  if (!date) { date = new Date().toISOString().slice(0,10); }
+  // replace if same date exists, otherwise add
+  const existingIdx = manualSnapshots.findIndex(s => s.date === date);
+  if (existingIdx !== -1) {
+    manualSnapshots[existingIdx].amount = amount;
+  } else {
+    manualSnapshots.push({ date, amount });
+    manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
+  }
+  saveManualToLocal();
+  updateSummaryDisplay();
+  showToast(`Portfolio value saved: ₹${amount.toLocaleString()} on ${date}`);
+}
+function getAmountOnDate(targetDate) {
+  if (!targetDate) return null;
+  // find exact match or closest earlier date
+  let best = null;
+  for (let snap of manualSnapshots) {
+    if (snap.date <= targetDate) {
+      if (!best || snap.date > best.date) best = snap;
+    }
+  }
+  return best ? best.amount : null;
+}
+function updateSummaryDisplay() {
+  const startAmount = manualStart.amount;
+  const startDate = manualStart.date;
+  const latest = manualSnapshots.length ? manualSnapshots[0] : null;
+  const liveAmount = latest ? latest.amount : null;
+  const liveDate = latest ? latest.date : null;
+
+  document.getElementById('startAmountDisplay').innerHTML = startAmount ? `₹ ${startAmount.toLocaleString()}` : '₹ —';
+  document.getElementById('startDateDisplay').innerHTML = startDate ? `since ${startDate}` : '';
+  document.getElementById('liveAmountDisplay').innerHTML = liveAmount ? `₹ ${liveAmount.toLocaleString()}` : '₹ —';
+  document.getElementById('liveDateDisplay').innerHTML = liveDate ? `as on ${liveDate}` : '';
+
+  // Total P&L
+  if (startAmount && liveAmount) {
+    const diff = liveAmount - startAmount;
+    const pct = (diff / startAmount) * 100;
+    const diffAbs = `₹ ${diff.toLocaleString()}`;
+    const pctStr = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+    document.getElementById('totalPnL').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${diffAbs}</span>`;
+    document.getElementById('totalPnLPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pctStr}</span>`;
+  } else {
+    document.getElementById('totalPnL').innerHTML = '—';
+    document.getElementById('totalPnLPercent').innerHTML = '—';
+  }
+
+  // 30-day change
+  const today = new Date().toISOString().slice(0,10);
+  const thirtyDaysAgo = new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
+  const amount30d = getAmountOnDate(thirtyDaysAgo);
+  const last30dEntry = manualSnapshots.find(s => s.date <= thirtyDaysAgo) || null;
+  document.getElementById('last30dInfo').innerHTML = last30dEntry ? `${last30dEntry.date}: ₹${last30dEntry.amount.toLocaleString()}` : 'no data';
+  if (liveAmount && amount30d) {
+    const diff = liveAmount - amount30d;
+    const pct = (diff / amount30d) * 100;
+    document.getElementById('pnl30d').innerHTML = `<span class="${diff>=0?'positive':'negative'}">₹ ${diff.toLocaleString()}</span>`;
+    document.getElementById('pnl30dPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>`;
+  } else {
+    document.getElementById('pnl30d').innerHTML = '—';
+    document.getElementById('pnl30dPercent').innerHTML = '—';
+  }
+
+  // 1-year change
+  const oneYearAgo = new Date(Date.now() - 365*86400000).toISOString().slice(0,10);
+  const amount1y = getAmountOnDate(oneYearAgo);
+  const last1yEntry = manualSnapshots.find(s => s.date <= oneYearAgo) || null;
+  document.getElementById('last1yInfo').innerHTML = last1yEntry ? `${last1yEntry.date}: ₹${last1yEntry.amount.toLocaleString()}` : 'no data';
+  if (liveAmount && amount1y) {
+    const diff = liveAmount - amount1y;
+    const pct = (diff / amount1y) * 100;
+    document.getElementById('pnl1y').innerHTML = `<span class="${diff>=0?'positive':'negative'}">₹ ${diff.toLocaleString()}</span>`;
+    document.getElementById('pnl1yPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>`;
+  } else {
+    document.getElementById('pnl1y').innerHTML = '—';
+    document.getElementById('pnl1yPercent').innerHTML = '—';
+  }
+}
+
+// ======================== EXISTING APP CODE (truncated but complete) ========================
 let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
 
 function toggleApi() {
@@ -1018,7 +1249,6 @@ function calcBuyUnits(k) {
   if (!mult || mult <= 1) return baseUnits;
   const holdings = st.hold[k];
   if (holdings.length > 0) {
-    const lot1 = getSortedHoldings(k)[0];
     return Math.max(1, Math.round(baseUnits * mult));
   }
   return baseUnits;
@@ -1155,6 +1385,7 @@ window.onload = () => {
     document.getElementById('apiPausedBar').classList.add('show');
     document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
   }
+  loadManualData();
 };
 
 function startApp() {
@@ -1274,7 +1505,6 @@ function renderHold(k, p, bt) {
     const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0);
     let dateStr = h.date || null;
     let timeStr = h.time || null;
-    // if both missing, set placeholder "Not set"
     const dateDisplay = dateStr ? dateStr : 'Not set';
     const timeDisplay = timeStr ? timeStr : 'Not set';
     const days = dateStr ? calcDaysSince(dateStr) : null;
@@ -1322,7 +1552,6 @@ function openEditModal(k, idx) {
   document.getElementById('editUnits').value = h.units || '';
   let existingDate = h.date || '';
   let existingTime = h.time || '';
-  // if both missing, auto-fill with current date/time for convenience
   if (!existingDate && !existingTime) {
     existingDate = todayDateStr();
     existingTime = currentTimeStr();
@@ -1490,7 +1719,8 @@ function buildDataObj() {
     hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
     cfg:{buy:cfg.buy,sell:cfg.sell},
     apiEnabled: apiEnabled,
-    cap:{total:document.getElementById('cp-total').value, parts:document.getElementById('cp-parts').value, gord:document.getElementById('cp-gord').value, sord:document.getElementById('cp-sord').value}
+    cap:{total:document.getElementById('cp-total').value, parts:document.getElementById('cp-parts').value, gord:document.getElementById('cp-gord').value, sord:document.getElementById('cp-sord').value},
+    manual: { start: manualStart, snapshots: manualSnapshots }
   };
 }
 function saveSt() {
@@ -1508,6 +1738,7 @@ function loadSt() {
     if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
     if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
     if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
+    if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
     renderLog();
   } catch(e) { console.warn('load failed:',e); }
 }
@@ -1604,6 +1835,7 @@ function applyData(data) {
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
   if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
+  if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
   localStorage.setItem(LS_KEY,JSON.stringify(data)); renderLog(); updateAll();
 }
 function setSyncStatus(state, txt) {
