@@ -1022,7 +1022,7 @@ function calcBuyUnits(k) {
   const holdings = st.hold[k];
   if (holdings.length > 0) {
     const lot1 = getSortedHoldings(k)[0];
-    return Math.max(1, Math.round(lot1.units * mult));
+    return Math.max(1, Math.round(baseUnits * mult));
   }
   return baseUnits;
 }
