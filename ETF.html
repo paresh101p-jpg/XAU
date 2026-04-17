@@ -632,7 +632,7 @@ body {
 .h-cell .hcv.gd { color: var(--gold); }
 .h-cell .hcv.sv { color: var(--silver); }
 
-/* 3D Pipeline Progress Bar */
+/* Golden 3D Pipeline Progress Bar */
 .progress-wrapper {
   margin: 12px 12px 6px;
   position: relative;
@@ -640,11 +640,11 @@ body {
 .progress-bar-container {
   position: relative;
   height: 32px;
-  background: linear-gradient(145deg, #1a1a1f, #0d0d10);
+  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
+  border: 1px solid rgba(212,168,67,0.3);
 }
 .progress-fill-left {
   position: absolute;
@@ -652,11 +652,11 @@ body {
   left: 50%;
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #b71c1c, #ef5350, #e53935);
+  background: linear-gradient(90deg, #B8860B, #DAA520, #FFD700, #DAA520);
   border-radius: 20px 0 0 20px;
   transition: width 0.3s ease;
   transform: translateX(-100%);
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 2px rgba(255,215,0,0.5), 0 1px 4px rgba(0,0,0,0.4);
 }
 .progress-fill-right {
   position: absolute;
@@ -664,10 +664,10 @@ body {
   left: 50%;
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #1b5e20, #4caf50, #2e7d32);
+  background: linear-gradient(90deg, #DAA520, #FFD700, #FFC107, #DAA520);
   border-radius: 0 20px 20px 0;
   transition: width 0.3s ease;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 2px rgba(255,215,0,0.5), 0 1px 4px rgba(0,0,0,0.4);
 }
 .progress-center-line {
   position: absolute;
@@ -675,10 +675,10 @@ body {
   left: 50%;
   width: 2px;
   height: 100%;
-  background: rgba(255,255,255,0.9);
+  background: radial-gradient(circle, #FFD700, #B8860B);
   transform: translateX(-50%);
   z-index: 2;
-  box-shadow: 0 0 6px rgba(255,215,0,0.5);
+  box-shadow: 0 0 8px rgba(255,215,0,0.8);
 }
 .progress-center-label {
   position: absolute;
@@ -686,15 +686,16 @@ body {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.6rem;
-  background: #2a2a2f;
+  background: #1e1e1e;
   padding: 2px 8px;
   border-radius: 20px;
   white-space: nowrap;
-  color: var(--gold);
+  color: #FFD700;
   margin-bottom: 4px;
   font-weight: bold;
-  border: 1px solid rgba(212,168,67,0.4);
+  border: 1px solid rgba(255,215,0,0.5);
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 .progress-labels {
   display: flex;
@@ -704,10 +705,10 @@ body {
   padding: 0 4px;
 }
 .progress-label-buy {
-  color: #ff8a80;
+  color: #FFB74D;
 }
 .progress-label-sell {
-  color: #a5d6a7;
+  color: #FFE082;
 }
 .h-date-row {
   padding: 5px 12px 7px;
@@ -1014,9 +1015,9 @@ body {
     </div>
   </div>
 
-  <!-- Portfolio Summary -->
+  <!-- Portfolio Summary (closed by default) -->
   <div class="portfolio-summary">
-    <div class="ps-header open" id="psHeader" onclick="togglePsSection()">
+    <div class="ps-header" id="psHeader" onclick="togglePsSection()">
       <div class="ps-header-left">
         <span style="font-size:1rem;">📊</span>
         <span class="ps-header-title">Portfolio Summary &nbsp;<span>₹</span></span>
@@ -1026,7 +1027,7 @@ body {
         <span class="ps-toggle-arrow">▼</span>
       </div>
     </div>
-    <div class="ps-body open" id="psBody">
+    <div class="ps-body" id="psBody">
       <div class="ps-inner">
         <div class="ps-stats-row">
           <div class="ps-stat"><div class="ps-stat-label">📈 Latest Value</div><div class="ps-stat-value" id="liveAmountDisplay">₹ —</div><div class="ps-stat-sub" id="liveDateDisplay">—</div></div>
@@ -1202,8 +1203,8 @@ function toggleShowAllLots(k) {
   updateCard(k); // re-render holdings
 }
 
-// ======================== PORTFOLIO SUMMARY TOGGLE ========================
-let psSectionOpen = true;
+// ======================== PORTFOLIO SUMMARY TOGGLE (closed by default) ========================
+let psSectionOpen = false;
 function togglePsSection() {
   psSectionOpen = !psSectionOpen;
   const body = document.getElementById('psBody');
