@@ -843,9 +843,8 @@ body {
 }
 @keyframes pulseG { from{opacity:0.7} to{opacity:1} }
 
-/* ===================== FIX: Show More Button stays at bottom, doesn't move ===================== */
-/* The h-list-wrapper wraps both the h-list and the show-more-btn */
-/* h-list contains only lot cards; show-more is OUTSIDE h-list */
+/* ===================== FIX: Show More Button stays at bottom ===================== */
+/* The button is now inserted inside h-list after first lot, no extra styling needed */
 .show-more-btn {
   width: 100%;
   background: rgba(245,200,66,0.1);
@@ -856,7 +855,8 @@ body {
   color: var(--yellow);
   cursor: pointer;
   transition: all 0.2s;
-  /* NO margin-top — gap from wrapper handles spacing */
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 .show-more-btn:hover {
   background: rgba(245,200,66,0.2);
@@ -1229,10 +1229,8 @@ body {
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-G">—</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Live P&L</div><div class="holdings-stat-value" id="pnl-G">—</div></div>
       </div>
-      <!-- FIX: h-list-wrapper wraps both h-list and show-more-btn so button stays fixed -->
       <div class="h-list-wrapper" id="hlw-G">
         <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
-        <!-- show-more-btn rendered here via JS, outside h-list -->
       </div>
     </div>
 
@@ -1291,7 +1289,7 @@ function toggleHoldings(k) {
   }
 }
 
-// ======================== FIX: SHOW MORE LOTS — button stays fixed at bottom ========================
+// ======================== FIX: SHOW MORE LOTS — button stays fixed under Lot 1 ========================
 let showAllLotsG = false;
 let showAllLotsS = false;
 function toggleShowAllLots(k) {
@@ -1308,7 +1306,6 @@ function togglePsSection() {
   const ps = document.getElementById('portfolioSummary');
   const arrow = document.getElementById('psArrow');
   body.classList.toggle('open', psSectionOpen);
-  // FIX: Color change
   ps.classList.toggle('ps-open', psSectionOpen);
   arrow.style.transform = psSectionOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
 }
@@ -1509,14 +1506,12 @@ function toggleMonthEntries(monthKey) { const rowEl = document.getElementById('m
 function closeMonthlyHistory() { document.getElementById('mhistOverlay').classList.remove('show'); }
 
 // ======================== MAIN APP CODE ========================
-// FIX: apiEnabled — load from Firebase if user logged in, else from localStorage
 let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
 
 function toggleApi() {
   apiEnabled = !apiEnabled;
   localStorage.setItem('apiEnabled', String(apiEnabled));
   applyApiState();
-  // FIX: Save to Firebase immediately so all devices sync
   saveSt();
   if (apiEnabled) {
     if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
@@ -1624,15 +1619,11 @@ function updateCard(k) {
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
 
-// FIX: renderHold — puts show-more-btn OUTSIDE h-list so it stays fixed
+// FIX: renderHold — button always stays under Lot 1, inserted after first card
 function renderHold(k, p, buyTarget, overallAvg) {
   const listEl = document.getElementById('hl-' + k);
   const wrapperEl = document.getElementById('hlw-' + k);
   const sorted = getSortedHoldings(k);
-
-  // Remove any existing show-more-btn from wrapper (not from listEl)
-  const existingBtn = wrapperEl.querySelector('.show-more-btn');
-  if (existingBtn) existingBtn.remove();
 
   if (!sorted.length) {
     listEl.innerHTML = '<div class="no-h">No holdings yet</div>';
@@ -1640,12 +1631,14 @@ function renderHold(k, p, buyTarget, overallAvg) {
   }
 
   const showAll = (k === 'G') ? showAllLotsG : showAllLotsS;
-  const lotsToShow = showAll ? sorted : sorted.slice(0, 1);
   const lotCount = sorted.length;
   const hasMore = lotCount > 1;
 
-  let lotsHtml = lotsToShow.map((h) => {
-    const i = sorted.findIndex(s => s === h);
+  // Build array of card HTML strings
+  const cardHtmls = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (!showAll && i >= 1) break; // only show first lot if not expanded
+    const h = sorted[i];
     const bp = h.buyPrice || h.price;
     const pnl = p ? (p - bp) * h.units : 0;
     const pct = p ? ((p - bp) / bp * 100) : 0;
@@ -1661,7 +1654,6 @@ function renderHold(k, p, buyTarget, overallAvg) {
     let badgeHtml = '';
     if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : `<span class="lifo-badge">SELL NEXT</span>`;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
-
     const buyTargetLot = bp * (1 - cfg.buy / 100);
     const sellTargetLot = bp * (1 + cfg.sell / 100);
     let leftWidth = 0, rightWidth = 0;
@@ -1682,8 +1674,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
         leftWidth = 0;
       }
     }
-
-    return `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
+    const cardHtml = `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share ${badgeHtml}</span>
         <div style="display:flex;align-items:center;gap:6px;">
@@ -1717,18 +1708,23 @@ function renderHold(k, p, buyTarget, overallAvg) {
         <span class="h-pnl-big ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'} ₹${Math.abs(pnl).toFixed(2)}</span>
       </div>
     </div>`;
-  }).join('');
-
-  listEl.innerHTML = lotsHtml;
-
-  // FIX: Append show-more-btn to WRAPPER (not list), so it's always last and never moves
-  if (hasMore) {
-    const btn = document.createElement('button');
-    btn.className = 'show-more-btn';
-    btn.textContent = showAll ? `▲ Show Less (${lotCount - 1} hidden lots showing)` : `▼ Show More Lots (${lotCount - 1} more)`;
-    btn.onclick = () => toggleShowAllLots(k);
-    wrapperEl.appendChild(btn);
+    cardHtmls.push(cardHtml);
   }
+
+  // Build final HTML: first card, then (if hasMore) the button, then remaining cards
+  let finalHtml = '';
+  if (cardHtmls.length > 0) {
+    finalHtml += cardHtmls[0]; // Lot 1 always shown
+    if (hasMore) {
+      const showAllText = showAll ? `▲ Show Less (${lotCount - 1} hidden lots showing)` : `▼ Show More Lots (${lotCount - 1} more)`;
+      finalHtml += `<button class="show-more-btn" onclick="toggleShowAllLots('${k}')">${showAllText}</button>`;
+    }
+    // Add remaining cards (if showAll is true, there will be more; else none)
+    for (let idx = 1; idx < cardHtmls.length; idx++) {
+      finalHtml += cardHtmls[idx];
+    }
+  }
+  listEl.innerHTML = finalHtml;
 }
 
 function setCurrentDateTimeInEdit() { document.getElementById('editDate').value = todayDateStr(); document.getElementById('editTime').value = currentTimeStr(); showToast('✅ Current date & time set'); }
@@ -1747,12 +1743,11 @@ function confirmTrade() { const { k, type } = st.pend; const liveP = st.price[k]
 function addLog(e) { st.log.unshift(e); renderLog(); }
 function renderLog() { const el = document.getElementById('logBar'); if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; } el.innerHTML = st.log.slice(0, 25).map(l => `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units} Share @ ₹${l.price.toFixed(2)} ${l.pnl !== undefined ? (l.pnl >= 0 ? '+' : '') + '₹' + l.pnl.toFixed(2) : ''} · ${l.time}</div>`).join(''); }
 
-// FIX: buildDataObj now includes apiEnabled so it syncs to Firebase
 function buildDataObj() {
   return {
     hold: st.hold, log: st.log, real: st.real, alerted: st.alerted,
     cfg: { buy: cfg.buy, sell: cfg.sell },
-    apiEnabled: apiEnabled,  // FIX: included in sync payload
+    apiEnabled: apiEnabled,
     cap: {
       parts: document.getElementById('cp-parts').value,
       gord: document.getElementById('cp-gord').value,
@@ -1782,7 +1777,6 @@ function loadSt() {
     if (data.real !== undefined) st.real = data.real;
     if (data.alerted) st.alerted = data.alerted;
     if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
-    // FIX: restore apiEnabled from saved data
     if (data.apiEnabled !== undefined) {
       apiEnabled = data.apiEnabled;
       localStorage.setItem('apiEnabled', String(apiEnabled));
@@ -1796,7 +1790,6 @@ function loadSt() {
 
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
 
-// FIX: Capital Planner toggle color
 function toggleCap() {
   const p = document.getElementById('capPanel'), b = document.getElementById('capToggle');
   const o = p.classList.toggle('open');
@@ -1841,9 +1834,7 @@ window.signOutUser = async () => { if (!confirm('Logout karna chahte ho?')) retu
 window.saveToFirebase = (data) => { if (!currentUser || !dbRef) return; setSyncStatus('syncing', 'Saving…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => { set(dbRef, JSON.stringify(data)).then(() => setSyncStatus('ok', 'Synced ✓')).catch(e => { setSyncStatus('offline', 'Sync failed'); console.warn(e); }); }, 1500); };
 window.initFirebase = () => { onAuthStateChanged(auth, user => { if (user) { currentUser = user; document.getElementById('userAvatar').src = user.photoURL || ''; document.getElementById('userName').textContent = user.displayName || user.email; document.getElementById('userBar').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('hide'); document.getElementById('appShell').classList.add('visible'); dbRef = ref(db, 'users/' + user.uid + '/data'); if (!listenActive) { listenActive = true; setSyncStatus('syncing', 'Loading data…'); onValue(dbRef, snap => { const raw = snap.val(); if (raw) { try { const data = typeof raw === 'string' ? JSON.parse(raw) : raw; applyData(data); setSyncStatus('ok', 'Synced ✓'); showToast('☁️ Cloud data loaded!'); } catch (e) { console.warn('Firebase parse error:', e); setSyncStatus('ok', 'Synced ✓'); } } else { setSyncStatus('ok', 'New account'); const local = localStorage.getItem(LS_KEY); if (local) set(dbRef, local).then(() => setSyncStatus('ok', 'Synced ✓')); } if (!window._appStarted) { window._appStarted = true; startApp(); } }, { onlyOnce: true }); } } else { document.getElementById('fbLoginScreen').classList.remove('hide'); setTimeout(() => document.getElementById('fbLoginScreen').classList.add('visible'), 30); document.getElementById('appShell').classList.remove('visible'); } }); };
 
-// FIX: applyData now properly syncs apiEnabled from Firebase across all devices
 function applyData(data) {
-  // FIX: Apply apiEnabled from cloud data — this is the key cross-device sync fix
   if (data.apiEnabled !== undefined) {
     apiEnabled = data.apiEnabled;
     localStorage.setItem('apiEnabled', String(apiEnabled));
