@@ -389,7 +389,7 @@ body {
 }
 .mhist-no-data span { font-size: 2rem; display: block; margin-bottom: 8px; }
 
-/* Capital Planner (no separate total capital input) */
+/* Capital Planner */
 .cap-toggle {
   width: 100%; background: var(--bg2); border: none; border-bottom: 2px solid var(--border);
   color: var(--text); font-size: 0.82rem;
@@ -403,7 +403,6 @@ body {
 .cap-panel.open { max-height: 800px; }
 .cap-inner { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
 
-/* Start Capital section inside cap panel */
 .cap-start-section {
   background: var(--bg3); border: 2px solid rgba(212,168,67,0.3);
   border-radius: 12px; padding: 12px 14px;
@@ -436,7 +435,6 @@ body {
 .cap-start-display .csd-val { color: var(--gold); font-size: 0.82rem; }
 .cap-start-display .csd-date { color: var(--muted); }
 
-/* Capital allocation rows (ETF split, DCA) - removed total capital input */
 .cap-row1 {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
@@ -658,6 +656,78 @@ body {
   background: rgba(76,175,130,0.15) !important; color: var(--green) !important;
   border-color: rgba(76,175,130,0.5) !important; animation: pulseG 1s infinite alternate;
 }
+
+/* ===== OTHER LOTS TOGGLE BUTTON ===== */
+.other-lots-toggle {
+  width: 100%;
+  background: var(--bg3);
+  border: 2px dashed var(--border-mid);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  user-select: none;
+}
+.other-lots-toggle:hover {
+  border-color: rgba(212,168,67,0.5);
+  color: var(--text);
+  background: var(--bg4);
+}
+.gold-col .other-lots-toggle.lots-open {
+  border-color: rgba(212,168,67,0.55);
+  color: var(--gold);
+  background: rgba(212,168,67,0.05);
+}
+.silver-col .other-lots-toggle.lots-open {
+  border-color: rgba(139,175,196,0.5);
+  color: var(--silver);
+  background: rgba(139,175,196,0.05);
+}
+.other-lots-toggle .olt-arrow {
+  font-size: 0.6rem;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: inline-block;
+}
+.other-lots-toggle.lots-open .olt-arrow {
+  transform: rotate(180deg);
+}
+.other-lots-toggle .olt-count {
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 0.6rem;
+}
+.other-lots-toggle.lots-open .olt-count {
+  background: rgba(212,168,67,0.15);
+}
+.silver-col .other-lots-toggle.lots-open .olt-count {
+  background: rgba(139,175,196,0.15);
+}
+
+/* Other lots collapsible container */
+.other-lots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
+}
+.other-lots-container.lots-open {
+  max-height: 3000px;
+  opacity: 1;
+}
+/* ===== END OTHER LOTS TOGGLE ===== */
+
 .log-bar {
   position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2);
   border-top: 2px solid var(--border); padding: 5px 14px;
@@ -927,7 +997,6 @@ body {
 
     <div class="ps-body open" id="psBody">
       <div class="ps-inner">
-        <!-- 4 Stats Cards -->
         <div class="ps-stats-row">
           <div class="ps-stat">
             <div class="ps-stat-label">📈 Latest Value</div>
@@ -953,7 +1022,6 @@ body {
 
         <div class="ps-divider"></div>
 
-        <!-- Only Today's Value input -->
         <div class="ps-inputs-row">
           <div class="ps-input-group">
             <div class="ps-input-group-title">📈 Add Today's Value</div>
@@ -971,7 +1039,6 @@ body {
           </div>
         </div>
 
-        <!-- History badge -->
         <div class="ps-hist-badge">
           🗂 Last 30d ref: <span id="last30dInfo">—</span>
           &nbsp;·&nbsp;
@@ -1020,11 +1087,10 @@ body {
     </div>
   </div>
 
-  <!-- Capital Planner (Start Capital + DCA settings) -->
+  <!-- Capital Planner -->
   <button class="cap-toggle" id="capToggle" onclick="toggleCap()">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
   <div class="cap-panel" id="capPanel">
     <div class="cap-inner">
-      <!-- START CAPITAL -->
       <div class="cap-start-section">
         <div class="cap-start-title">📌 Start Capital</div>
         <div class="cap-start-fields">
@@ -1043,7 +1109,6 @@ body {
         </div>
       </div>
 
-      <!-- DCA Settings (no Total Capital input anymore) -->
       <div class="cap-row1">
         <div class="cap-ig"><label>ETF Split (Parts)</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
         <div class="cap-ig buy-inp"><label>Buy %</label><input type="number" id="c-buy" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
@@ -1148,13 +1213,35 @@ body {
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 </div>
 
-<!-- Modals (Trade, Edit, Alert) -->
+<!-- Modals -->
 <div class="overlay" id="overlay"><div class="modal" id="mBox"><div class="mtop"><div class="mic" id="mIco">🥇</div><h3 id="mTit" class="bh">Confirm BUY</h3><p id="mSub">Grid signal</p></div><div class="mrows" id="mRows"></div><div class="m-buy-price" id="mBuyPriceWrap"><label>Actual Buy Price (Dhan App Fill Price)</label><input type="number" id="mBuyPrice" step="0.01" placeholder="Actual fill price daalo"><div class="bp-hint">Live price default hai — apna actual fill price change kar sakte ho</div></div><div class="munits"><label id="mUnitsLabel">Share to Trade</label><input type="number" id="mUnits" value="10" min="1"></div><div class="mbtns"><button class="mcnl" onclick="closeModal()">Cancel</button><button id="mCfm" class="mcfb" onclick="confirmTrade()">Confirm BUY</button></div></div></div>
 <div class="edit-overlay" id="editOverlay"><div class="edit-modal"><h3>✏️ Holding Edit Karo</h3><div class="edit-field"><label>Buy Price (₹)</label><input type="number" id="editPrice" step="0.01" placeholder="Buy price daalo"></div><div class="edit-field"><label>Units (Share)</label><input type="number" id="editUnits" min="1" placeholder="Share count daalo"></div><div class="edit-field"><label>Date (DD-MM-YYYY)</label><input type="text" id="editDate" placeholder="e.g. 21-06-2024"><div style="display:flex; justify-content:flex-end; margin-top:4px;"><button type="button" class="btn-set-current" onclick="setCurrentDateTimeInEdit()">📅 Set Current Date & Time</button></div></div><div class="edit-field"><label>Time</label><input type="text" id="editTime" placeholder="e.g. 10:30 AM"></div><div class="edit-btns"><button class="edit-cancel" onclick="closeEditModal()">Cancel</button><button class="edit-save" onclick="saveEditHolding()">💾 Save</button></div></div></div>
 <div class="alert-overlay" id="alertOverlay"><div class="alert-box" id="alertBox"><div class="ap-head"><span class="ap-icon" id="apIcon">🥇</span><div class="ap-type" id="apType">BUY SIGNAL</div><div class="ap-title" id="apTitle">Target Hit!</div></div><div class="alert-rows" id="alertRows"></div><div class="alert-btns"><button class="btn-alert-trade" id="alertTradeBtn" onclick="alertDoTrade()">🛒 Trade Now</button><button class="btn-alert-dismiss" onclick="dismissAlert()">✕ Dismiss</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
+// ======================== OTHER LOTS TOGGLE STATE ========================
+const otherLotsOpen = { G: false, S: false };
+
+function toggleOtherLots(k) {
+  otherLotsOpen[k] = !otherLotsOpen[k];
+  const btn = document.getElementById('olt-btn-' + k);
+  const container = document.getElementById('olt-container-' + k);
+  if (!btn || !container) return;
+  const isOpen = otherLotsOpen[k];
+  btn.classList.toggle('lots-open', isOpen);
+  container.classList.toggle('lots-open', isOpen);
+  // update button text
+  const count = container.querySelectorAll('.h-card').length;
+  const arrow = btn.querySelector('.olt-arrow');
+  const countEl = btn.querySelector('.olt-count');
+  if (isOpen) {
+    btn.innerHTML = `<span class="olt-arrow lots-open" style="transform:rotate(180deg);display:inline-block;transition:transform 0.3s;">▼</span> Baaki Lots Chupaao &nbsp;<span class="olt-count">${count} lots</span>`;
+  } else {
+    btn.innerHTML = `<span class="olt-arrow" style="display:inline-block;transition:transform 0.3s;">▼</span> Baaki ${count} Lots Dikhao &nbsp;<span class="olt-count">${count} lots</span>`;
+  }
+}
+
 // ======================== PORTFOLIO SUMMARY SECTION TOGGLE ========================
 let psSectionOpen = true;
 function togglePsSection() {
@@ -1181,11 +1268,9 @@ function loadManualData() {
       manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
     }
   } catch(e) { console.warn(e); }
-  // Populate start capital inputs
   if (manualStart.amount) document.getElementById('manualStartAmount').value = manualStart.amount;
   if (manualStart.date) document.getElementById('manualStartDate').value = manualStart.date;
   updateCapStartDisplay();
-  // Populate today's value input
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
   if (latest) {
     document.getElementById('manualLiveAmount').value = latest.amount;
@@ -1194,7 +1279,7 @@ function loadManualData() {
     document.getElementById('manualLiveDate').value = new Date().toISOString().slice(0,10);
   }
   updateSummaryDisplay();
-  calcCapital(); // refresh DCA cards
+  calcCapital();
 }
 
 function saveManualToLocal() {
@@ -1244,8 +1329,8 @@ function saveLiveAmount() {
   }
   saveManualToLocal();
   updateSummaryDisplay();
-  calcCapital(); // refresh DCA cards
-  updateAll();   // refresh buy/sell hints (they depend on total capital via calcBuyUnits)
+  calcCapital();
+  updateAll();
   showToast(`✅ Portfolio value saved: ₹${amount.toLocaleString('en-IN')} on ${date}`);
 }
 function getAmountOnDate(targetDate) {
@@ -1314,6 +1399,7 @@ function fmtDateNice(isoDate) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
 }
+
 // ======================== MONTHLY HISTORY ========================
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function getMonthKey(isoDate) { return isoDate.slice(0, 7); }
@@ -1395,7 +1481,7 @@ function toggleMonthEntries(monthKey) {
 }
 function closeMonthlyHistory() { document.getElementById('mhistOverlay').classList.remove('show'); }
 
-// ======================== EXISTING APP CODE (modified to use latest snapshot as total capital) ========================
+// ======================== MAIN APP CODE ========================
 let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
 function toggleApi() {
   apiEnabled = !apiEnabled;
@@ -1439,7 +1525,6 @@ function todayDateStr() { const now=new Date(), d=String(now.getDate()).padStart
 function currentTimeStr() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
 function calcDaysSince(dateStr) { if (!dateStr) return null; const parts = dateStr.split('-'); if (parts.length !== 3) return null; const buyDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0])); const today = new Date(); today.setHours(0,0,0,0); const diff = Math.floor((today - buyDate) / (1000*60*60*24)); return diff >= 0 ? diff : null; }
 
-// getTotalCapitalFromSnapshot() - returns latest portfolio value or 0
 function getTotalCapitalFromSnapshot() {
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
   return latest ? latest.amount : 0;
@@ -1481,6 +1566,101 @@ window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000)
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
 function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 60; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
+
+// ======================== buildHoldingCard helper ========================
+function buildHoldingCard(k, h, i, lotNum, buySignalActive) {
+  const bp = h.buyPrice || h.price;
+  const p = st.price[k];
+  const pnl = p ? (p - bp) * h.units : 0;
+  const pct = (p - bp) / bp * 100;
+  const isP = pnl >= 0;
+  const curVal = (p * h.units).toFixed(2);
+  const invested = (bp * h.units).toFixed(2);
+  const isLot1 = (lotNum === 1);
+  const dateStr = h.date || null;
+  const timeStr = h.time || null;
+  const dateDisplay = dateStr ? dateStr : 'Not set';
+  const timeDisplay = timeStr ? timeStr : 'Not set';
+  const days = dateStr ? calcDaysSince(dateStr) : null;
+  const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : '');
+  let badgeHtml = '';
+  if (isLot1) badgeHtml = buySignalActive
+    ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>`
+    : `<span class="lifo-badge">SELL NEXT</span>`;
+  const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice||oh.price)===bp && oh.time===h.time && oh.units===h.units);
+  return `<div class="h-card ${isP?'pc':'lc'}">
+    <div class="h-card-top">
+      <span class="h-lot-lbl">Lot ${lotNum} · ${h.units} Share${badgeHtml}</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span>
+        <button class="btn-h-edit" onclick="openEditModal('${k}',${origIdx})">✏️</button>
+        <button class="btn-h-del" onclick="deleteHolding('${k}',${origIdx})">🗑</button>
+      </div>
+    </div>
+    <div class="h-card-body">
+      <div class="h-cell"><div class="hcl">Buy Price</div><div class="hcv ${ETF[k].cls}">₹ ${bp.toFixed(2)}</div></div>
+      <div class="h-cell"><div class="hcl">Live Price</div><div class="hcv">₹ ${p?p.toFixed(2):'—'}</div></div>
+      <div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
+      <div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div>
+    </div>
+    <div class="h-date-row">
+      <span class="h-date-txt">📅 ${dateDisplay} · ${timeDisplay}</span>
+      <span class="h-days-badge">${daysDisplay}</span>
+    </div>
+    <div class="h-card-footer">
+      <span class="h-pnl-big ${isP?'profit':'loss'}">${isP?'+':'-'} ₹${Math.abs(pnl).toFixed(2)}</span>
+      <span style="font-size:0.58rem;color:var(--muted);"></span>
+    </div>
+  </div>`;
+}
+
+// ======================== renderHold — modified ========================
+function renderHold(k, p, bt) {
+  const el = document.getElementById('hl-' + k);
+  const sorted = getSortedHoldings(k);
+
+  if (!sorted.length) {
+    el.innerHTML = '<div class="no-h">No holdings yet</div>';
+    return;
+  }
+
+  const buySignalActive = (p !== null && bt !== undefined && p <= bt);
+  const lot1 = sorted[0];
+  const otherLots = sorted.slice(1);
+  const otherCount = otherLots.length;
+  const isOpen = otherLotsOpen[k];
+
+  // Build Lot 1 card
+  let html = buildHoldingCard(k, lot1, 0, 1, buySignalActive);
+
+  // If there are more lots, add toggle button + collapsible container
+  if (otherCount > 0) {
+    const colClass = isOpen ? 'lots-open' : '';
+    const arrowStyle = isOpen ? 'transform:rotate(180deg);display:inline-block;transition:transform 0.3s;' : 'display:inline-block;transition:transform 0.3s;';
+    const btnLabel = isOpen
+      ? `Baaki Lots Chupaao`
+      : `Baaki ${otherCount} Lot${otherCount > 1 ? 's' : ''} Dikhao`;
+
+    html += `<button
+      class="other-lots-toggle ${colClass}"
+      id="olt-btn-${k}"
+      onclick="toggleOtherLots('${k}')"
+    >
+      <span class="olt-arrow" style="${arrowStyle}">▼</span>
+      ${btnLabel}
+      <span class="olt-count">${otherCount} lot${otherCount > 1 ? 's' : ''}</span>
+    </button>`;
+
+    html += `<div class="other-lots-container ${colClass}" id="olt-container-${k}">`;
+    otherLots.forEach((h, i) => {
+      html += buildHoldingCard(k, h, i + 1, i + 2, buySignalActive);
+    });
+    html += `</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
 function updateCard(k) {
   const p=st.price[k], pv=st.prev[k]; if (!p) return;
   const dir=getPriceDir(k), icon=ETF[k].icon, arrow=dir==='up'?'▲':dir==='down'?'▼':'';
@@ -1535,12 +1715,7 @@ function updateCard(k) {
   updateColSignal(k, signalType); updateBtnHints(k); renderHold(k, p, bt);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
-function renderHold(k, p, bt) {
-  const el=document.getElementById('hl-'+k), sorted=getSortedHoldings(k);
-  if (!sorted.length) { el.innerHTML='<div class="no-h">No holdings yet</div>'; return; }
-  const buySignalActive=(p!==null&&bt!==undefined&&p<=bt);
-  el.innerHTML=sorted.map((h,i)=>{ const bp=h.buyPrice||h.price, pnl=p?(p-bp)*h.units:0, pct=(p-bp)/bp*100, isP=pnl>=0; const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0); let dateStr = h.date || null, timeStr = h.time || null; const dateDisplay = dateStr ? dateStr : 'Not set', timeDisplay = timeStr ? timeStr : 'Not set'; const days = dateStr ? calcDaysSince(dateStr) : null; const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : ''); let badgeHtml=''; if (isLot1) badgeHtml=buySignalActive?`<span class="lifo-badge buy-now">🟢 BUY NOW</span>`:`<span class="lifo-badge">SELL NEXT</span>`; const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice||oh.price)===bp && oh.time===h.time && oh.units===h.units); return `<div class="h-card ${isP?'pc':'lc'}"><div class="h-card-top"><span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share${badgeHtml}</span><div style="display:flex;align-items:center;gap:6px;"><span class="h-pct ${isP?'up':'dn'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</span><button class="btn-h-edit" onclick="openEditModal('${k}',${origIdx})">✏️</button><button class="btn-h-del" onclick="deleteHolding('${k}',${origIdx})">🗑</button></div></div><div class="h-card-body"><div class="h-cell"><div class="hcl">Buy Price</div><div class="hcv ${ETF[k].cls}">₹ ${bp.toFixed(2)}</div></div><div class="h-cell"><div class="hcl">Live Price</div><div class="hcv">₹ ${p?p.toFixed(2):'—'}</div></div><div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div><div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div></div><div class="h-date-row"><span class="h-date-txt">📅 ${dateDisplay} · ${timeDisplay}</span><span class="h-days-badge">${daysDisplay}</span></div><div class="h-card-footer"><span class="h-pnl-big ${isP?'profit':'loss'}">${isP?'+':'-'} ₹${Math.abs(pnl).toFixed(2)}</span><span style="font-size:0.58rem;color:var(--muted);"></span></div></div>`; }).join('');
-}
+
 function setCurrentDateTimeInEdit() { document.getElementById('editDate').value=todayDateStr(); document.getElementById('editTime').value=currentTimeStr(); showToast('✅ Current date & time set'); }
 function openEditModal(k, idx) { const h = st.hold[k][idx]; if (!h) return; editState = { k, idx }; document.getElementById('editPrice').value = (h.buyPrice||h.price||''); document.getElementById('editUnits').value = h.units || ''; let existingDate = h.date || '', existingTime = h.time || ''; if (!existingDate && !existingTime) { existingDate=todayDateStr(); existingTime=currentTimeStr(); showToast('⏰ Date/Time missing — auto-filled.'); } document.getElementById('editDate').value = existingDate; document.getElementById('editTime').value = existingTime; document.getElementById('editOverlay').classList.add('show'); }
 function closeEditModal() { document.getElementById('editOverlay').classList.remove('show'); editState = { k: null, idx: null }; }
@@ -1567,8 +1742,8 @@ function calcCapital() {
   if (totalCapital <= 0) {
     document.getElementById('cp-gallot').textContent = '₹ — (No snapshot)';
     document.getElementById('cp-sallot').textContent = '₹ — (No snapshot)';
-    document.getElementById('cp-gres').querySelectorAll('.cap-rr .cv').forEach((el,idx)=>{ if(idx===0) el.textContent='—'; else if(idx===1) el.textContent='—'; else if(idx===2) el.textContent='—'; else el.textContent='—'; });
-    document.getElementById('cp-sres').querySelectorAll('.cap-rr .cv').forEach((el,idx)=>{ if(idx===0) el.textContent='—'; else if(idx===1) el.textContent='—'; else if(idx===2) el.textContent='—'; else el.textContent='—'; });
+    document.getElementById('cp-gres').querySelectorAll('.cap-rr .cv').forEach((el,idx)=>{ el.textContent='—'; });
+    document.getElementById('cp-sres').querySelectorAll('.cap-rr .cv').forEach((el,idx)=>{ el.textContent='—'; });
     return;
   }
   const parts = parseInt(document.getElementById('cp-parts').value) || 1;
