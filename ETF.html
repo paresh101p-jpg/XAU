@@ -303,7 +303,6 @@ body {
 .price-dir-icon.up   { color: var(--green); }
 .price-dir-icon.down { color: var(--red); }
 
-/* ── TOGGLE BUTTON ── */
 .section-toggle-btn {
   width: 100%; background: var(--bg3); border: 2px solid var(--border);
   border-radius: 10px; color: var(--muted); font-size: 0.65rem;
@@ -316,7 +315,6 @@ body {
 .section-toggle-btn .th-arrow { display: inline-block; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); font-size: 0.6rem; }
 .section-toggle-btn.collapsed .th-arrow { transform: rotate(-90deg); }
 
-/* ── COLLAPSIBLE: sirf info-grid + lsi bar ── */
 .collapsible-section {
   display: flex; flex-direction: column; gap: 14px; overflow: hidden;
   max-height: 600px; opacity: 1;
@@ -523,6 +521,13 @@ body {
 .edit-save:hover { background: #FFD84D; }
 .edit-cancel { background: var(--bg3); color: var(--muted); border: 2px solid var(--border); border-radius: 10px; padding: 10px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
 .edit-cancel:hover { color: var(--text); }
+/* new button inside edit modal */
+.btn-set-current {
+  background: rgba(245,200,66,0.2); border: 1px solid var(--yellow); border-radius: 6px;
+  color: var(--yellow); font-size: 0.7rem; padding: 4px 8px; cursor: pointer; margin-top: 4px;
+  transition: 0.15s; width: fit-content;
+}
+.btn-set-current:hover { background: rgba(245,200,66,0.4); }
 
 .alert-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
@@ -727,12 +732,10 @@ body {
         <div class="prev-label" id="prev-G">PREV CLOSE: —</div>
       </div>
 
-      <!-- TOGGLE BUTTON -->
       <button class="section-toggle-btn" id="toggleBtn-G" onclick="toggleSection('G')">
         <span class="th-arrow">▼</span> Stats Chupaao / Dikhao
       </button>
 
-      <!-- COLLAPSIBLE: sirf info-grid + lsi bar -->
       <div class="collapsible-section" id="sec-G">
         <div class="info-grid">
           <div class="ibox"><div class="il">Holdings</div><div class="iv gold" id="u-G">0 Share</div></div>
@@ -746,7 +749,6 @@ body {
         </div>
       </div>
 
-      <!-- HAMESHA VISIBLE: targets, trade buttons, holdings -->
       <div class="tgt-row">
         <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
         <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
@@ -775,12 +777,10 @@ body {
         <div class="prev-label" id="prev-S">PREV CLOSE: —</div>
       </div>
 
-      <!-- TOGGLE BUTTON -->
       <button class="section-toggle-btn" id="toggleBtn-S" onclick="toggleSection('S')">
         <span class="th-arrow">▼</span> Stats Chupaao / Dikhao
       </button>
 
-      <!-- COLLAPSIBLE: sirf info-grid + lsi bar -->
       <div class="collapsible-section" id="sec-S">
         <div class="info-grid">
           <div class="ibox"><div class="il">Holdings</div><div class="iv silver" id="u-S">0 Share</div></div>
@@ -794,7 +794,6 @@ body {
         </div>
       </div>
 
-      <!-- HAMESHA VISIBLE: targets, trade buttons, holdings -->
       <div class="tgt-row">
         <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
         <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
@@ -817,7 +816,6 @@ body {
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 </div>
 
-<!-- TRADE CONFIRM MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal" id="mBox">
     <div class="mtop">
@@ -842,7 +840,6 @@ body {
   </div>
 </div>
 
-<!-- EDIT HOLDING MODAL -->
 <div class="edit-overlay" id="editOverlay">
   <div class="edit-modal">
     <h3>✏️ Holding Edit Karo</h3>
@@ -857,6 +854,7 @@ body {
     <div class="edit-field">
       <label>Date (DD-MM-YYYY)</label>
       <input type="text" id="editDate" placeholder="e.g. 21-06-2024">
+      <div style="display:flex; justify-content:flex-end; margin-top:4px;"><button type="button" class="btn-set-current" onclick="setCurrentDateTimeInEdit()">📅 Set Current Date & Time</button></div>
     </div>
     <div class="edit-field">
       <label>Time</label>
@@ -869,7 +867,6 @@ body {
   </div>
 </div>
 
-<!-- ALERT OVERLAY -->
 <div class="alert-overlay" id="alertOverlay">
   <div class="alert-box" id="alertBox">
     <div class="ap-head">
@@ -945,8 +942,6 @@ function toggleSound() {
   showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF');
 }
 
-// ── TOGGLE: sirf info-grid + lsi bar collapse hoga ──
-// localStorage se restore karo
 const _sv = JSON.parse(localStorage.getItem('secVisible') || '{}');
 const sectionVisible = { G: _sv.G !== false, S: _sv.S !== false };
 
@@ -966,7 +961,6 @@ function applySectionState(k) {
 
 function toggleSection(k) {
   sectionVisible[k] = !sectionVisible[k];
-  // localStorage mein save karo
   localStorage.setItem('secVisible', JSON.stringify(sectionVisible));
   applySectionState(k);
 }
@@ -998,6 +992,9 @@ function todayDateStr() {
   const m = String(now.getMonth()+1).padStart(2,'0');
   const y = now.getFullYear();
   return `${d}-${m}-${y}`;
+}
+function currentTimeStr() {
+  return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 }
 function calcDaysSince(dateStr) {
   if (!dateStr) return null;
@@ -1150,7 +1147,6 @@ window.onload = () => {
   initFirebase();
   mktCheck();
   setInterval(mktCheck, 30000);
-  // Section visible state restore karo
   applySectionState('G');
   applySectionState('S');
   if (!apiEnabled) {
@@ -1276,11 +1272,13 @@ function renderHold(k, p, bt) {
   el.innerHTML=sorted.map((h,i)=>{
     const bp=h.buyPrice||h.price, pnl=p?(p-bp)*h.units:0, pct=(p-bp)/bp*100, isP=pnl>=0;
     const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0);
-    const dateStr = h.date || null;
+    let dateStr = h.date || null;
+    let timeStr = h.time || null;
+    // if both missing, set placeholder "Not set"
+    const dateDisplay = dateStr ? dateStr : 'Not set';
+    const timeDisplay = timeStr ? timeStr : 'Not set';
     const days = dateStr ? calcDaysSince(dateStr) : null;
-    const dateDisplay = dateStr ? dateStr : '—';
-    const daysDisplay = days !== null ? `Day ${days}` : '—';
-    const timeDisplay = h.time || '—';
+    const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : '');
     let badgeHtml='';
     if (isLot1) badgeHtml=buySignalActive?`<span class="lifo-badge buy-now">🟢 BUY NOW</span>`:`<span class="lifo-badge">SELL NEXT</span>`;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice||oh.price)===bp && oh.time===h.time && oh.units===h.units);
@@ -1311,13 +1309,27 @@ function renderHold(k, p, bt) {
   }).join('');
 }
 
+function setCurrentDateTimeInEdit() {
+  document.getElementById('editDate').value = todayDateStr();
+  document.getElementById('editTime').value = currentTimeStr();
+  showToast('✅ Current date & time set');
+}
+
 function openEditModal(k, idx) {
   const h = st.hold[k][idx]; if (!h) return;
   editState = { k, idx };
   document.getElementById('editPrice').value = (h.buyPrice||h.price||'');
   document.getElementById('editUnits').value = h.units || '';
-  document.getElementById('editDate').value  = h.date  || '';
-  document.getElementById('editTime').value  = h.time  || '';
+  let existingDate = h.date || '';
+  let existingTime = h.time || '';
+  // if both missing, auto-fill with current date/time for convenience
+  if (!existingDate && !existingTime) {
+    existingDate = todayDateStr();
+    existingTime = currentTimeStr();
+    showToast('⏰ Date/Time missing — auto-filled with current. Edit if needed.');
+  }
+  document.getElementById('editDate').value = existingDate;
+  document.getElementById('editTime').value = existingTime;
   document.getElementById('editOverlay').classList.add('show');
 }
 function closeEditModal() {
@@ -1328,13 +1340,15 @@ function saveEditHolding() {
   const { k, idx } = editState; if (k === null || idx === null) return;
   const newPrice = parseFloat(document.getElementById('editPrice').value);
   const newUnits = parseInt(document.getElementById('editUnits').value);
-  const newDate  = document.getElementById('editDate').value.trim();
-  const newTime  = document.getElementById('editTime').value.trim();
+  let newDate  = document.getElementById('editDate').value.trim();
+  let newTime  = document.getElementById('editTime').value.trim();
   if (!newPrice || newPrice <= 0 || !newUnits || newUnits < 1) { showToast('⚠️ Valid price aur units daalo'); return; }
+  if (!newDate) newDate = todayDateStr();
+  if (!newTime) newTime = currentTimeStr();
   st.hold[k][idx].buyPrice = newPrice; st.hold[k][idx].price = newPrice;
   st.hold[k][idx].units = newUnits;
-  if (newDate) st.hold[k][idx].date = newDate;
-  if (newTime) st.hold[k][idx].time = newTime;
+  st.hold[k][idx].date = newDate;
+  st.hold[k][idx].time = newTime;
   closeEditModal(); saveSt(); updateCard(k);
   showToast('✅ Holding updated!');
 }
@@ -1441,7 +1455,7 @@ function closeModal() { document.getElementById('overlay').classList.remove('sho
 
 function confirmTrade() {
   const {k,type}=st.pend, liveP=st.price[k];
-  const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const time=currentTimeStr();
   const date=todayDateStr();
   if (type==='buy') {
     const bpRaw=parseFloat(document.getElementById('mBuyPrice').value);
@@ -1475,7 +1489,7 @@ function buildDataObj() {
   return {
     hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
     cfg:{buy:cfg.buy,sell:cfg.sell},
-    apiEnabled: apiEnabled,   // ← YEH ADD KARO
+    apiEnabled: apiEnabled,
     cap:{total:document.getElementById('cp-total').value, parts:document.getElementById('cp-parts').value, gord:document.getElementById('cp-gord').value, sord:document.getElementById('cp-sord').value}
   };
 }
@@ -1585,7 +1599,7 @@ function applyData(data) {
       btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
       pausedBar.classList.add('show');
     }
-  }  // ← YEH BRACE ADD KARO
+  }
   if (data.hold) st.hold=data.hold; if (data.log) st.log=data.log;
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
