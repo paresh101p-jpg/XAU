@@ -187,52 +187,221 @@ body {
 }
 .api-paused-bar.show { display: flex; }
 
-/* Manual Portfolio Summary Styles */
+/* ===================== PORTFOLIO SUMMARY ===================== */
 .portfolio-summary {
-  background: var(--bg2); border-bottom: 2px solid var(--border);
-  padding: 12px 20px;
+  background: var(--bg2);
+  border-bottom: 2px solid var(--border);
 }
-.summary-grid {
-  display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
-  background: var(--bg3); border-radius: 16px; padding: 14px 18px;
-  margin-bottom: 12px;
-}
-.summary-item {
-  display: flex; flex-direction: column; gap: 4px; min-width: 100px;
-}
-.summary-label {
-  font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
-}
-.summary-value {
-  font-size: 1.1rem; font-weight: bold;
-}
-.summary-value.positive { color: var(--green); }
-.summary-value.negative { color: var(--red); }
-.manual-inputs {
-  display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;
-}
-.manual-field {
-  display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px;
-}
-.manual-field label {
-  font-size: 0.6rem; color: var(--muted); letter-spacing: 1px;
-}
-.manual-field input {
-  background: var(--bg4); border: 2px solid var(--border-mid); border-radius: 10px;
-  padding: 8px 10px; color: var(--text); font-size: 0.85rem;
-}
-.manual-field input:focus { border-color: var(--gold); outline: none; }
-.btn-manual {
-  background: var(--yellow); color: #111; border: none; border-radius: 10px;
-  padding: 8px 16px; font-size: 0.7rem; cursor: pointer; font-weight: bold;
-  transition: 0.15s; margin-top: 4px;
-}
-.btn-manual:hover { background: #FFD84D; transform: translateY(-1px); }
-.history-badge {
-  font-size: 0.6rem; color: var(--muted); margin-top: 8px; text-align: right;
-}
-.history-badge span { color: var(--text); }
 
+/* Section header bar */
+.ps-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.ps-header-left { display: flex; align-items: center; gap: 8px; }
+.ps-header-title { font-size: 0.82rem; color: var(--text); }
+.ps-header-title span { color: var(--gold); }
+.ps-toggle-arrow { font-size: 0.65rem; color: var(--muted); transition: transform 0.3s; }
+.ps-header.open .ps-toggle-arrow { transform: rotate(180deg); }
+.ps-header-right { display: flex; align-items: center; gap: 8px; }
+
+/* History button */
+.btn-monthly-hist {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(245,200,66,0.08); border: 2px solid rgba(245,200,66,0.35);
+  color: var(--yellow); border-radius: 20px; padding: 4px 12px;
+  font-size: 0.65rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.btn-monthly-hist:hover { background: rgba(245,200,66,0.18); border-color: var(--yellow); transform: translateY(-1px); }
+
+/* Collapsible body */
+.ps-body { overflow: hidden; max-height: 0; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1); }
+.ps-body.open { max-height: 700px; }
+.ps-inner { padding: 14px 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Stats row */
+.ps-stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.ps-stat {
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.2s;
+}
+.ps-stat:hover { border-color: rgba(212,168,67,0.3); }
+.ps-stat-label {
+  font-size: 0.56rem; color: var(--muted);
+  letter-spacing: 1.2px; text-transform: uppercase; white-space: nowrap;
+}
+.ps-stat-value {
+  font-size: 1.05rem; color: var(--text); line-height: 1.15;
+}
+.ps-stat-value.positive { color: var(--green); }
+.ps-stat-value.negative { color: var(--red); }
+.ps-stat-value.gold { color: var(--gold); }
+.ps-stat-sub {
+  font-size: 0.58rem; color: var(--muted); margin-top: 1px;
+}
+.ps-stat-sub.positive { color: rgba(76,175,130,0.8); }
+.ps-stat-sub.negative { color: rgba(224,82,82,0.8); }
+
+/* Divider between stats and inputs */
+.ps-divider {
+  height: 1px; background: var(--border); margin: 0 -0px;
+}
+
+/* Inputs section */
+.ps-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ps-input-group {
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ps-input-group-title {
+  font-size: 0.6rem; color: var(--muted);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.ps-fields {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.ps-field { display: flex; flex-direction: column; gap: 4px; }
+.ps-field label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.8px; }
+.ps-field input {
+  background: var(--bg4); border: 2px solid var(--border-mid);
+  border-radius: 8px; color: var(--text); font-size: 0.82rem;
+  padding: 7px 9px; outline: none; transition: border-color 0.15s; width: 100%;
+}
+.ps-field input:focus { border-color: var(--gold); box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+.ps-save-btn {
+  background: var(--yellow); color: #111; border: none;
+  border-radius: 8px; padding: 8px 14px; font-size: 0.72rem;
+  cursor: pointer; transition: 0.15s; align-self: flex-end; white-space: nowrap;
+}
+.ps-save-btn:hover { background: #FFD84D; transform: translateY(-1px); }
+
+/* History badge */
+.ps-hist-badge {
+  font-size: 0.58rem; color: var(--muted);
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 6px 0 0;
+}
+.ps-hist-badge span { color: var(--text); }
+
+/* ===================== MONTHLY HISTORY MODAL ===================== */
+.mhist-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(10px); z-index: 180;
+  display: none; align-items: center; justify-content: center; padding: 16px;
+}
+.mhist-overlay.show { display: flex; }
+.mhist-modal {
+  background: var(--bg2); border: 2px solid rgba(245,200,66,0.35);
+  border-radius: 20px; padding: 0; max-width: 480px; width: 100%;
+  max-height: 88vh; display: flex; flex-direction: column;
+  animation: pop 0.22s ease;
+  box-shadow: 0 0 60px rgba(245,200,66,0.06);
+}
+.mhist-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.mhist-head-left { display: flex; flex-direction: column; gap: 3px; }
+.mhist-title { font-size: 1rem; color: var(--yellow); }
+.mhist-sub { font-size: 0.62rem; color: var(--muted); }
+.mhist-close {
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--muted); border-radius: 8px; padding: 5px 12px;
+  font-size: 0.72rem; cursor: pointer; transition: 0.15s;
+}
+.mhist-close:hover { border-color: var(--red); color: var(--red); }
+
+.mhist-summary-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; padding: 14px 20px; border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.mhs-card {
+  background: var(--bg3); border-radius: 10px; padding: 10px 12px;
+  border: 2px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.mhs-label { font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.mhs-value { font-size: 0.9rem; }
+.mhs-value.positive { color: var(--green); }
+.mhs-value.negative { color: var(--red); }
+.mhs-value.gold { color: var(--gold); }
+
+.mhist-scroll {
+  overflow-y: auto; flex: 1; padding: 14px 20px;
+}
+.mhist-scroll::-webkit-scrollbar { width: 4px; }
+.mhist-scroll::-webkit-scrollbar-track { background: transparent; }
+.mhist-scroll::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+.mhist-year-group { margin-bottom: 18px; }
+.mhist-year-label {
+  font-size: 0.62rem; color: var(--muted); letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.mhist-year-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.mhist-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 90px 90px 30px;
+  align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--bg3);
+  margin-bottom: 6px; transition: border-color 0.15s;
+}
+.mhist-row:hover { border-color: rgba(245,200,66,0.3); }
+.mhist-row.profit-row { border-color: rgba(76,175,130,0.3); }
+.mhist-row.loss-row   { border-color: rgba(224,82,82,0.25); }
+.mhist-month { font-size: 0.78rem; color: var(--text); }
+.mhist-amount { font-size: 0.72rem; color: var(--muted); }
+.mhist-amount span { color: var(--text); font-size: 0.8rem; }
+.mhist-change { font-size: 0.75rem; text-align: right; }
+.mhist-change.positive { color: var(--green); }
+.mhist-change.negative { color: var(--red); }
+.mhist-change.muted    { color: var(--muted); }
+.mhist-pct { font-size: 0.7rem; text-align: right; padding: 2px 7px; border-radius: 6px; }
+.mhist-pct.positive { background: var(--green-dim); color: var(--green); }
+.mhist-pct.negative { background: var(--red-dim); color: var(--red); }
+.mhist-pct.muted    { background: rgba(255,255,255,0.05); color: var(--muted); }
+.mhist-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; grid-column: 1 / -1; display: none; }
+.mhist-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.mhist-bar.positive { background: var(--green); }
+.mhist-bar.negative { background: var(--red); }
+
+.mhist-row-entry {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 7px;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 4px; font-size: 0.68rem;
+}
+.mhist-entry-date { color: var(--muted); }
+.mhist-entry-amount { color: var(--text); }
+
+.mhist-no-data {
+  text-align: center; padding: 40px 20px;
+  color: var(--muted); font-size: 0.78rem; line-height: 2;
+}
+.mhist-no-data span { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+/* cap toggle & panel */
 .cap-toggle {
   width: 100%; background: var(--bg2); border: none; border-bottom: 2px solid var(--border);
   color: var(--text); font-size: 0.82rem;
@@ -639,13 +808,20 @@ body {
 .sound-toggle.on  { border-color: rgba(76,175,130,0.5); color: var(--green); }
 .sound-toggle.off { border-color: rgba(224,82,82,0.4); color: var(--red); }
 
+@media(max-width:700px){
+  .ps-stats-row { grid-template-columns: repeat(3,1fr); }
+  .ps-inputs-row { grid-template-columns: 1fr; }
+}
+@media(max-width:480px){
+  .ps-stats-row { grid-template-columns: 1fr 1fr; }
+  .mhist-row { grid-template-columns: 68px 1fr 80px 76px 24px; }
+}
 @media(max-width:580px){
   .split { grid-template-columns: 1fr; }
   .gold-col { border-right: none; border-bottom: 2px solid var(--border); }
   .price-big { font-size: 1.6rem; }
   .cap-cards { grid-template-columns: 1fr; }
-  .summary-grid { flex-direction: column; gap: 8px; }
-  .manual-inputs { flex-direction: column; }
+  .mhist-summary-row { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -730,60 +906,143 @@ body {
     </div>
   </div>
 
-  <!-- MANUAL PORTFOLIO SUMMARY SECTION -->
+  <!-- =================== PORTFOLIO SUMMARY =================== -->
   <div class="portfolio-summary">
-    <div class="summary-grid" id="summaryGrid">
-      <div class="summary-item">
-        <div class="summary-label">Start Amount</div>
-        <div class="summary-value" id="startAmountDisplay">₹ —</div>
-        <div style="font-size:0.55rem; color:var(--muted);" id="startDateDisplay"></div>
+    <!-- Header bar with toggle + history button -->
+    <div class="ps-header open" id="psHeader" onclick="togglePsSection()">
+      <div class="ps-header-left">
+        <span style="font-size:1rem;">📊</span>
+        <span class="ps-header-title">Portfolio Summary &nbsp;<span>₹</span></span>
       </div>
-      <div class="summary-item">
-        <div class="summary-label">Live Amount (Today)</div>
-        <div class="summary-value" id="liveAmountDisplay">₹ —</div>
-        <div style="font-size:0.55rem; color:var(--muted);" id="liveDateDisplay"></div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Total P&L</div>
-        <div class="summary-value" id="totalPnL">—</div>
-        <div style="font-size:0.55rem;" id="totalPnLPercent">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">30-Day Change</div>
-        <div class="summary-value" id="pnl30d">—</div>
-        <div style="font-size:0.55rem;" id="pnl30dPercent">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">1-Year Change</div>
-        <div class="summary-value" id="pnl1y">—</div>
-        <div style="font-size:0.55rem;" id="pnl1yPercent">—</div>
+      <div class="ps-header-right" onclick="event.stopPropagation()">
+        <button class="btn-monthly-hist" onclick="showMonthlyHistory()">
+          📅 Monthly History
+        </button>
+        <span class="ps-toggle-arrow">▼</span>
       </div>
     </div>
-    <div class="manual-inputs">
-      <div class="manual-field">
-        <label>Start Capital (₹)</label>
-        <input type="number" id="manualStartAmount" placeholder="e.g. 100000" step="1000">
+
+    <!-- Collapsible body -->
+    <div class="ps-body open" id="psBody">
+      <div class="ps-inner">
+
+        <!-- 5 Stats Cards -->
+        <div class="ps-stats-row">
+          <div class="ps-stat">
+            <div class="ps-stat-label">📌 Start Capital</div>
+            <div class="ps-stat-value gold" id="startAmountDisplay">₹ —</div>
+            <div class="ps-stat-sub" id="startDateDisplay">—</div>
+          </div>
+          <div class="ps-stat">
+            <div class="ps-stat-label">📈 Latest Value</div>
+            <div class="ps-stat-value" id="liveAmountDisplay">₹ —</div>
+            <div class="ps-stat-sub" id="liveDateDisplay">—</div>
+          </div>
+          <div class="ps-stat">
+            <div class="ps-stat-label">💰 Total P&amp;L</div>
+            <div class="ps-stat-value" id="totalPnL">—</div>
+            <div class="ps-stat-sub" id="totalPnLPercent">—</div>
+          </div>
+          <div class="ps-stat">
+            <div class="ps-stat-label">🗓 30-Day Change</div>
+            <div class="ps-stat-value" id="pnl30d">—</div>
+            <div class="ps-stat-sub" id="pnl30dPercent">—</div>
+          </div>
+          <div class="ps-stat">
+            <div class="ps-stat-label">📆 1-Year Change</div>
+            <div class="ps-stat-value" id="pnl1y">—</div>
+            <div class="ps-stat-sub" id="pnl1yPercent">—</div>
+          </div>
+        </div>
+
+        <div class="ps-divider"></div>
+
+        <!-- Input groups side by side -->
+        <div class="ps-inputs-row">
+          <!-- Start Capital Group -->
+          <div class="ps-input-group">
+            <div class="ps-input-group-title">📌 Set Start Capital</div>
+            <div class="ps-fields">
+              <div class="ps-field">
+                <label>Amount (₹)</label>
+                <input type="number" id="manualStartAmount" placeholder="e.g. 100000" step="1000">
+              </div>
+              <div class="ps-field">
+                <label>Start Date</label>
+                <input type="date" id="manualStartDate">
+              </div>
+            </div>
+            <button class="ps-save-btn" onclick="saveStartAmount()">💾 Save Start</button>
+          </div>
+
+          <!-- Today's Value Group -->
+          <div class="ps-input-group">
+            <div class="ps-input-group-title">📈 Add Today's Value</div>
+            <div class="ps-fields">
+              <div class="ps-field">
+                <label>Portfolio Value (₹)</label>
+                <input type="number" id="manualLiveAmount" placeholder="e.g. 125000" step="1000">
+              </div>
+              <div class="ps-field">
+                <label>Date</label>
+                <input type="date" id="manualLiveDate">
+              </div>
+            </div>
+            <button class="ps-save-btn" onclick="saveLiveAmount()">💾 Save Value</button>
+          </div>
+        </div>
+
+        <!-- History badge -->
+        <div class="ps-hist-badge">
+          🗂 Last 30d ref: <span id="last30dInfo">—</span>
+          &nbsp;·&nbsp;
+          Last 1y ref: <span id="last1yInfo">—</span>
+          &nbsp;·&nbsp;
+          <span id="totalSnapshotsInfo" style="color:var(--muted);">0 snapshots saved</span>
+        </div>
+
       </div>
-      <div class="manual-field">
-        <label>Start Date</label>
-        <input type="date" id="manualStartDate">
-      </div>
-      <button class="btn-manual" onclick="saveStartAmount()">Save Start</button>
-      
-      <div class="manual-field">
-        <label>Today's Portfolio Value (₹)</label>
-        <input type="number" id="manualLiveAmount" placeholder="e.g. 125000" step="1000">
-      </div>
-      <div class="manual-field">
-        <label>Date (default today)</label>
-        <input type="date" id="manualLiveDate">
-      </div>
-      <button class="btn-manual" onclick="saveLiveAmount()">Save Today's Value</button>
-    </div>
-    <div class="history-badge" id="historyBadge">
-      📅 Last 30d entry: <span id="last30dInfo">—</span> &nbsp;|&nbsp; Last 1y entry: <span id="last1yInfo">—</span>
     </div>
   </div>
+  <!-- =================== END PORTFOLIO SUMMARY =================== -->
+
+  <!-- =================== MONTHLY HISTORY MODAL =================== -->
+  <div class="mhist-overlay" id="mhistOverlay">
+    <div class="mhist-modal">
+      <div class="mhist-head">
+        <div class="mhist-head-left">
+          <div class="mhist-title">📅 Monthly History</div>
+          <div class="mhist-sub" id="mhistSubtitle">Month-wise portfolio performance</div>
+        </div>
+        <button class="mhist-close" onclick="closeMonthlyHistory()">✕ Close</button>
+      </div>
+
+      <!-- Quick summary -->
+      <div class="mhist-summary-row">
+        <div class="mhs-card">
+          <div class="mhs-label">Total Entries</div>
+          <div class="mhs-value gold" id="mhsTotalEntries">—</div>
+        </div>
+        <div class="mhs-card">
+          <div class="mhs-label">Best Month</div>
+          <div class="mhs-value positive" id="mhsBestMonth">—</div>
+        </div>
+        <div class="mhs-card">
+          <div class="mhs-label">Worst Month</div>
+          <div class="mhs-value negative" id="mhsWorstMonth">—</div>
+        </div>
+      </div>
+
+      <div class="mhist-scroll" id="mhistScroll">
+        <div class="mhist-no-data" id="mhistNoData">
+          <span>📊</span>
+          Abhi koi data nahi hai.<br>
+          Pehle "Add Today's Value" se<br>kuch snapshots save karo.
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- =================== END MONTHLY HISTORY MODAL =================== -->
 
   <button class="cap-toggle" id="capToggle" onclick="toggleCap()">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
   <div class="cap-panel" id="capPanel">
@@ -833,11 +1092,9 @@ body {
         <div><span class="chg-pill flat" id="pill-G">— —</span></div>
         <div class="prev-label" id="prev-G">PREV CLOSE: —</div>
       </div>
-
       <button class="section-toggle-btn" id="toggleBtn-G" onclick="toggleSection('G')">
         <span class="th-arrow">▼</span> Stats Chupaao / Dikhao
       </button>
-
       <div class="collapsible-section" id="sec-G">
         <div class="info-grid">
           <div class="ibox"><div class="il">Holdings</div><div class="iv gold" id="u-G">0 Share</div></div>
@@ -850,7 +1107,6 @@ body {
           <span id="lsi-val-G" class="lsi-val">No holdings — using live price as ref</span>
         </div>
       </div>
-
       <div class="tgt-row">
         <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
         <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
@@ -878,11 +1134,9 @@ body {
         <div><span class="chg-pill flat" id="pill-S">— —</span></div>
         <div class="prev-label" id="prev-S">PREV CLOSE: —</div>
       </div>
-
       <button class="section-toggle-btn" id="toggleBtn-S" onclick="toggleSection('S')">
         <span class="th-arrow">▼</span> Stats Chupaao / Dikhao
       </button>
-
       <div class="collapsible-section" id="sec-S">
         <div class="info-grid">
           <div class="ibox"><div class="il">Holdings</div><div class="iv silver" id="u-S">0 Share</div></div>
@@ -895,7 +1149,6 @@ body {
           <span id="lsi-val-S" class="lsi-val">No holdings — using live price as ref</span>
         </div>
       </div>
-
       <div class="tgt-row">
         <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
         <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
@@ -918,6 +1171,7 @@ body {
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 </div>
 
+<!-- Trade Modal -->
 <div class="overlay" id="overlay">
   <div class="modal" id="mBox">
     <div class="mtop">
@@ -942,6 +1196,7 @@ body {
   </div>
 </div>
 
+<!-- Edit Modal -->
 <div class="edit-overlay" id="editOverlay">
   <div class="edit-modal">
     <h3>✏️ Holding Edit Karo</h3>
@@ -969,6 +1224,7 @@ body {
   </div>
 </div>
 
+<!-- Alert Modal -->
 <div class="alert-overlay" id="alertOverlay">
   <div class="alert-box" id="alertBox">
     <div class="ap-head">
@@ -987,8 +1243,20 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
+// ======================== PORTFOLIO SUMMARY SECTION TOGGLE ========================
+let psSectionOpen = true;
+function togglePsSection() {
+  psSectionOpen = !psSectionOpen;
+  const body = document.getElementById('psBody');
+  const header = document.getElementById('psHeader');
+  const arrow = header.querySelector('.ps-toggle-arrow');
+  body.classList.toggle('open', psSectionOpen);
+  header.classList.toggle('open', psSectionOpen);
+  arrow.style.transform = psSectionOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
+
 // ======================== MANUAL PORTFOLIO STORAGE ========================
-let manualStart = { amount: null, date: null };   // { amount, date (YYYY-MM-DD) }
+let manualStart = { amount: null, date: null };
 let manualSnapshots = []; // array of { date, amount } sorted descending
 
 function loadManualData() {
@@ -1001,7 +1269,6 @@ function loadManualData() {
       manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
     }
   } catch(e) { console.warn(e); }
-  // populate inputs
   if (manualStart.amount) document.getElementById('manualStartAmount').value = manualStart.amount;
   if (manualStart.date) document.getElementById('manualStartDate').value = manualStart.date;
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
@@ -1009,33 +1276,33 @@ function loadManualData() {
     document.getElementById('manualLiveAmount').value = latest.amount;
     document.getElementById('manualLiveDate').value = latest.date;
   } else {
-    // set default today's date for convenience
-    const today = new Date().toISOString().slice(0,10);
-    document.getElementById('manualLiveDate').value = today;
+    document.getElementById('manualLiveDate').value = new Date().toISOString().slice(0,10);
   }
   updateSummaryDisplay();
 }
+
 function saveManualToLocal() {
   const data = { start: manualStart, snapshots: manualSnapshots };
   localStorage.setItem('manual_portfolio_v1', JSON.stringify(data));
-  saveSt(); // also trigger overall save (includes this data via buildDataObj)
+  saveSt();
 }
+
 function saveStartAmount() {
   let amount = parseFloat(document.getElementById('manualStartAmount').value);
   let date = document.getElementById('manualStartDate').value;
-  if (isNaN(amount) || amount <= 0) { showToast('Please enter a valid start amount'); return; }
-  if (!date) { date = new Date().toISOString().slice(0,10); }
+  if (isNaN(amount) || amount <= 0) { showToast('⚠️ Valid start amount daalo'); return; }
+  if (!date) date = new Date().toISOString().slice(0,10);
   manualStart = { amount, date };
   saveManualToLocal();
   updateSummaryDisplay();
-  showToast(`Start capital saved: ₹${amount.toLocaleString()} as of ${date}`);
+  showToast(`✅ Start capital saved: ₹${amount.toLocaleString('en-IN')} — ${date}`);
 }
+
 function saveLiveAmount() {
   let amount = parseFloat(document.getElementById('manualLiveAmount').value);
   let date = document.getElementById('manualLiveDate').value;
-  if (isNaN(amount) || amount <= 0) { showToast('Please enter a valid portfolio value'); return; }
-  if (!date) { date = new Date().toISOString().slice(0,10); }
-  // replace if same date exists, otherwise add
+  if (isNaN(amount) || amount <= 0) { showToast('⚠️ Valid portfolio value daalo'); return; }
+  if (!date) date = new Date().toISOString().slice(0,10);
   const existingIdx = manualSnapshots.findIndex(s => s.date === date);
   if (existingIdx !== -1) {
     manualSnapshots[existingIdx].amount = amount;
@@ -1045,11 +1312,11 @@ function saveLiveAmount() {
   }
   saveManualToLocal();
   updateSummaryDisplay();
-  showToast(`Portfolio value saved: ₹${amount.toLocaleString()} on ${date}`);
+  showToast(`✅ Portfolio value saved: ₹${amount.toLocaleString('en-IN')} on ${date}`);
 }
+
 function getAmountOnDate(targetDate) {
   if (!targetDate) return null;
-  // find exact match or closest earlier date
   let best = null;
   for (let snap of manualSnapshots) {
     if (snap.date <= targetDate) {
@@ -1058,64 +1325,226 @@ function getAmountOnDate(targetDate) {
   }
   return best ? best.amount : null;
 }
+
 function updateSummaryDisplay() {
   const startAmount = manualStart.amount;
-  const startDate = manualStart.date;
-  const latest = manualSnapshots.length ? manualSnapshots[0] : null;
-  const liveAmount = latest ? latest.amount : null;
-  const liveDate = latest ? latest.date : null;
+  const startDate   = manualStart.date;
+  const latest      = manualSnapshots.length ? manualSnapshots[0] : null;
+  const liveAmount  = latest ? latest.amount : null;
+  const liveDate    = latest ? latest.date : null;
 
-  document.getElementById('startAmountDisplay').innerHTML = startAmount ? `₹ ${startAmount.toLocaleString()}` : '₹ —';
-  document.getElementById('startDateDisplay').innerHTML = startDate ? `since ${startDate}` : '';
-  document.getElementById('liveAmountDisplay').innerHTML = liveAmount ? `₹ ${liveAmount.toLocaleString()}` : '₹ —';
-  document.getElementById('liveDateDisplay').innerHTML = liveDate ? `as on ${liveDate}` : '';
+  // Start card
+  document.getElementById('startAmountDisplay').textContent = startAmount ? `₹ ${startAmount.toLocaleString('en-IN')}` : '₹ —';
+  document.getElementById('startDateDisplay').textContent   = startDate ? `since ${fmtDateNice(startDate)}` : '—';
+
+  // Live card
+  document.getElementById('liveAmountDisplay').textContent = liveAmount ? `₹ ${liveAmount.toLocaleString('en-IN')}` : '₹ —';
+  document.getElementById('liveDateDisplay').textContent   = liveDate ? `as on ${fmtDateNice(liveDate)}` : '—';
 
   // Total P&L
   if (startAmount && liveAmount) {
-    const diff = liveAmount - startAmount;
-    const pct = (diff / startAmount) * 100;
-    const diffAbs = `₹ ${diff.toLocaleString()}`;
-    const pctStr = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
-    document.getElementById('totalPnL').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${diffAbs}</span>`;
-    document.getElementById('totalPnLPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pctStr}</span>`;
+    const diff = liveAmount - startAmount, pct = (diff / startAmount) * 100;
+    const cls = diff >= 0 ? 'positive' : 'negative';
+    document.getElementById('totalPnL').className = `ps-stat-value ${cls}`;
+    document.getElementById('totalPnL').textContent = (diff >= 0 ? '+' : '') + '₹ ' + Math.abs(diff).toLocaleString('en-IN');
+    document.getElementById('totalPnLPercent').className = `ps-stat-sub ${cls}`;
+    document.getElementById('totalPnLPercent').textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% overall`;
   } else {
-    document.getElementById('totalPnL').innerHTML = '—';
-    document.getElementById('totalPnLPercent').innerHTML = '—';
+    document.getElementById('totalPnL').className = 'ps-stat-value'; document.getElementById('totalPnL').textContent = '—';
+    document.getElementById('totalPnLPercent').className = 'ps-stat-sub'; document.getElementById('totalPnLPercent').textContent = 'Set start & value';
   }
 
-  // 30-day change
-  const today = new Date().toISOString().slice(0,10);
-  const thirtyDaysAgo = new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
-  const amount30d = getAmountOnDate(thirtyDaysAgo);
-  const last30dEntry = manualSnapshots.find(s => s.date <= thirtyDaysAgo) || null;
-  document.getElementById('last30dInfo').innerHTML = last30dEntry ? `${last30dEntry.date}: ₹${last30dEntry.amount.toLocaleString()}` : 'no data';
+  // 30-day
+  const thirtyAgo = new Date(Date.now() - 30*86400000).toISOString().slice(0,10);
+  const amount30d = getAmountOnDate(thirtyAgo);
+  const last30dEntry = manualSnapshots.find(s => s.date <= thirtyAgo) || null;
+  document.getElementById('last30dInfo').textContent = last30dEntry ? `${fmtDateNice(last30dEntry.date)}: ₹${last30dEntry.amount.toLocaleString('en-IN')}` : 'no data';
   if (liveAmount && amount30d) {
-    const diff = liveAmount - amount30d;
-    const pct = (diff / amount30d) * 100;
-    document.getElementById('pnl30d').innerHTML = `<span class="${diff>=0?'positive':'negative'}">₹ ${diff.toLocaleString()}</span>`;
-    document.getElementById('pnl30dPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>`;
+    const diff = liveAmount - amount30d, pct = (diff / amount30d) * 100;
+    const cls = diff >= 0 ? 'positive' : 'negative';
+    document.getElementById('pnl30d').className = `ps-stat-value ${cls}`;
+    document.getElementById('pnl30d').textContent = (diff >= 0 ? '+' : '') + '₹ ' + Math.abs(diff).toLocaleString('en-IN');
+    document.getElementById('pnl30dPercent').className = `ps-stat-sub ${cls}`;
+    document.getElementById('pnl30dPercent').textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% in 30d`;
   } else {
-    document.getElementById('pnl30d').innerHTML = '—';
-    document.getElementById('pnl30dPercent').innerHTML = '—';
+    document.getElementById('pnl30d').className = 'ps-stat-value'; document.getElementById('pnl30d').textContent = '—';
+    document.getElementById('pnl30dPercent').className = 'ps-stat-sub'; document.getElementById('pnl30dPercent').textContent = 'No 30d data';
   }
 
-  // 1-year change
+  // 1-year
   const oneYearAgo = new Date(Date.now() - 365*86400000).toISOString().slice(0,10);
   const amount1y = getAmountOnDate(oneYearAgo);
   const last1yEntry = manualSnapshots.find(s => s.date <= oneYearAgo) || null;
-  document.getElementById('last1yInfo').innerHTML = last1yEntry ? `${last1yEntry.date}: ₹${last1yEntry.amount.toLocaleString()}` : 'no data';
+  document.getElementById('last1yInfo').textContent = last1yEntry ? `${fmtDateNice(last1yEntry.date)}: ₹${last1yEntry.amount.toLocaleString('en-IN')}` : 'no data';
   if (liveAmount && amount1y) {
-    const diff = liveAmount - amount1y;
-    const pct = (diff / amount1y) * 100;
-    document.getElementById('pnl1y').innerHTML = `<span class="${diff>=0?'positive':'negative'}">₹ ${diff.toLocaleString()}</span>`;
-    document.getElementById('pnl1yPercent').innerHTML = `<span class="${diff>=0?'positive':'negative'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>`;
+    const diff = liveAmount - amount1y, pct = (diff / amount1y) * 100;
+    const cls = diff >= 0 ? 'positive' : 'negative';
+    document.getElementById('pnl1y').className = `ps-stat-value ${cls}`;
+    document.getElementById('pnl1y').textContent = (diff >= 0 ? '+' : '') + '₹ ' + Math.abs(diff).toLocaleString('en-IN');
+    document.getElementById('pnl1yPercent').className = `ps-stat-sub ${cls}`;
+    document.getElementById('pnl1yPercent').textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% in 1yr`;
   } else {
-    document.getElementById('pnl1y').innerHTML = '—';
-    document.getElementById('pnl1yPercent').innerHTML = '—';
+    document.getElementById('pnl1y').className = 'ps-stat-value'; document.getElementById('pnl1y').textContent = '—';
+    document.getElementById('pnl1yPercent').className = 'ps-stat-sub'; document.getElementById('pnl1yPercent').textContent = 'No 1y data';
   }
+
+  // Snapshot count
+  document.getElementById('totalSnapshotsInfo').textContent = `${manualSnapshots.length} snapshot${manualSnapshots.length !== 1 ? 's' : ''} saved`;
 }
 
-// ======================== EXISTING APP CODE (truncated but complete) ========================
+function fmtDateNice(isoDate) {
+  if (!isoDate) return '—';
+  const [y, m, d] = isoDate.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+// ======================== MONTHLY HISTORY ========================
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getMonthKey(isoDate) {
+  return isoDate.slice(0, 7); // "YYYY-MM"
+}
+function fmtMonthLabel(monthKey) {
+  const [y, m] = monthKey.split('-');
+  return `${MONTH_NAMES[parseInt(m)-1]} ${y}`;
+}
+
+function buildMonthlyData() {
+  // Group snapshots by month — use the LAST entry of each month as that month's value
+  if (!manualSnapshots.length) return [];
+
+  // Create a map: monthKey -> latest snapshot in that month
+  const monthMap = {};
+  for (const snap of manualSnapshots) {
+    const mk = getMonthKey(snap.date);
+    if (!monthMap[mk] || snap.date > monthMap[mk].date) {
+      monthMap[mk] = snap;
+    }
+  }
+
+  // Sort months ascending
+  const sortedMonths = Object.keys(monthMap).sort();
+
+  // Build rows with month-over-month change
+  const rows = [];
+  for (let i = 0; i < sortedMonths.length; i++) {
+    const mk = sortedMonths[i];
+    const current = monthMap[mk];
+    const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null;
+    // Also check if start capital is earlier than first month
+    let prevAmount = prev ? prev.amount : null;
+    if (!prevAmount && manualStart.amount && manualStart.date) {
+      // Use start capital if it's before this month
+      if (manualStart.date < mk + '-01') prevAmount = manualStart.amount;
+    }
+    const diff = prevAmount !== null ? current.amount - prevAmount : null;
+    const pct  = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null;
+    rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, date: current.date, diff, pct, entries: getEntriesInMonth(mk) });
+  }
+  return rows.reverse(); // newest first
+}
+
+function getEntriesInMonth(monthKey) {
+  return manualSnapshots.filter(s => getMonthKey(s.date) === monthKey)
+    .sort((a,b) => b.date.localeCompare(a.date));
+}
+
+function showMonthlyHistory() {
+  const rows = buildMonthlyData();
+  const noData = document.getElementById('mhistNoData');
+  const scroll = document.getElementById('mhistScroll');
+
+  document.getElementById('mhsTotalEntries').textContent = manualSnapshots.length + (manualSnapshots.length !== 1 ? ' entries' : ' entry');
+
+  if (!rows.length) {
+    noData.style.display = 'block';
+    scroll.innerHTML = '';
+    scroll.appendChild(noData);
+    document.getElementById('mhsBestMonth').textContent = '—';
+    document.getElementById('mhsWorstMonth').textContent = '—';
+    document.getElementById('mhistSubtitle').textContent = 'Koi data nahi';
+    document.getElementById('mhistOverlay').classList.add('show');
+    return;
+  }
+
+  noData.style.display = 'none';
+
+  // Best/worst
+  const withChange = rows.filter(r => r.diff !== null);
+  if (withChange.length) {
+    const best  = withChange.reduce((a,b) => (b.diff > a.diff ? b : a));
+    const worst = withChange.reduce((a,b) => (b.diff < a.diff ? b : a));
+    document.getElementById('mhsBestMonth').textContent  = `${best.label}: ${best.diff >= 0 ? '+' : ''}₹${Math.abs(best.diff).toLocaleString('en-IN')}`;
+    document.getElementById('mhsWorstMonth').textContent = `${worst.label}: ${worst.diff >= 0 ? '+' : '-'}₹${Math.abs(worst.diff).toLocaleString('en-IN')}`;
+  } else {
+    document.getElementById('mhsBestMonth').textContent  = '—';
+    document.getElementById('mhsWorstMonth').textContent = '—';
+  }
+
+  // Group by year
+  const yearMap = {};
+  for (const row of rows) {
+    const yr = row.monthKey.slice(0,4);
+    if (!yearMap[yr]) yearMap[yr] = [];
+    yearMap[yr].push(row);
+  }
+
+  const years = Object.keys(yearMap).sort().reverse();
+  let html = '';
+
+  for (const yr of years) {
+    const yearRows = yearMap[yr];
+    // Year total P&L
+    const yearRows_withChange = yearRows.filter(r => r.diff !== null);
+    const yearTotal = yearRows_withChange.reduce((s,r) => s + r.diff, 0);
+    const yearTotalStr = yearRows_withChange.length
+      ? ` &nbsp;·&nbsp; <span style="color:${yearTotal>=0?'var(--green)':'var(--red)'};">${yearTotal>=0?'+':'-'}₹${Math.abs(yearTotal).toLocaleString('en-IN')}</span>`
+      : '';
+    html += `<div class="mhist-year-group">
+      <div class="mhist-year-label">📅 ${yr}${yearTotalStr}</div>`;
+
+    for (const row of yearRows) {
+      const isProfit = row.diff !== null && row.diff >= 0;
+      const isLoss   = row.diff !== null && row.diff < 0;
+      const rowCls   = isProfit ? 'profit-row' : isLoss ? 'loss-row' : '';
+      const diffStr  = row.diff !== null ? `${row.diff >= 0 ? '+' : '-'}₹${Math.abs(row.diff).toLocaleString('en-IN')}` : '—';
+      const pctStr   = row.pct !== null ? `${row.pct >= 0 ? '+' : ''}${row.pct.toFixed(2)}%` : '—';
+      const diffCls  = row.diff === null ? 'muted' : isProfit ? 'positive' : 'negative';
+      const arrow    = row.diff === null ? '' : isProfit ? '▲ ' : '▼ ';
+
+      html += `<div class="mhist-row ${rowCls}">
+        <div class="mhist-month">${row.label}</div>
+        <div class="mhist-amount">₹ ${row.amount.toLocaleString('en-IN')}</div>
+        <div class="mhist-change ${diffCls}">${arrow}${diffStr}</div>
+        <div class="mhist-pct ${diffCls}">${pctStr}</div>
+        <div style="font-size:0.6rem;color:var(--muted);text-align:center;">${row.entries.length}×</div>
+      </div>`;
+
+      // Show individual entries if more than 1 in month
+      if (row.entries.length > 1) {
+        for (const e of row.entries) {
+          html += `<div class="mhist-row-entry">
+            <div class="mhist-entry-date">${fmtDateNice(e.date)}</div>
+            <div class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</div>
+          </div>`;
+        }
+      }
+    }
+
+    html += `</div>`;
+  }
+
+  document.getElementById('mhistSubtitle').textContent = `${manualSnapshots.length} snapshots · ${years.length} year${years.length !== 1 ? 's' : ''}`;
+  scroll.innerHTML = html;
+  document.getElementById('mhistOverlay').classList.add('show');
+}
+
+function closeMonthlyHistory() {
+  document.getElementById('mhistOverlay').classList.remove('show');
+}
+
+// ======================== EXISTING APP CODE ========================
 let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
 
 function toggleApi() {
@@ -1125,20 +1554,17 @@ function toggleApi() {
   const txt = document.getElementById('apiTxt');
   const pausedBar = document.getElementById('apiPausedBar');
   if (apiEnabled) {
-    btn.className = 'api-toggle on';
-    txt.textContent = 'API ON';
+    btn.className = 'api-toggle on'; txt.textContent = 'API ON';
     pausedBar.classList.remove('show');
     if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
     showToast('✅ API ON — Live price fetch shuru');
   } else {
-    btn.className = 'api-toggle off';
-    txt.textContent = 'API OFF';
+    btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
     pausedBar.classList.add('show');
     if (st.timer) clearInterval(st.timer);
     if (st.tickTimer) clearInterval(st.tickTimer);
     document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
-    saveSt();
-    showToast('⏸ API OFF — Price fetch band');
+    saveSt(); showToast('⏸ API OFF — Price fetch band');
   }
 }
 
@@ -1210,33 +1636,21 @@ let st = {
   alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}},
   workingProxy:null, fetchFailCount:0
 };
-
 let editState = { k: null, idx: null };
 
 function getSortedHoldings(k) { return [...st.hold[k]].sort((a,b) => (a.buyPrice||a.price) - (b.buyPrice||b.price)); }
 function getLot1Price(k) { const s = getSortedHoldings(k); return s.length ? (s[0].buyPrice||s[0].price) : null; }
 function getLot1Units(k) { const s = getSortedHoldings(k); return s.length ? s[0].units : 0; }
-
-function todayDateStr() {
-  const now = new Date();
-  const d = String(now.getDate()).padStart(2,'0');
-  const m = String(now.getMonth()+1).padStart(2,'0');
-  const y = now.getFullYear();
-  return `${d}-${m}-${y}`;
-}
-function currentTimeStr() {
-  return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-}
+function todayDateStr() { const now=new Date(), d=String(now.getDate()).padStart(2,'0'), m=String(now.getMonth()+1).padStart(2,'0'), y=now.getFullYear(); return `${d}-${m}-${y}`; }
+function currentTimeStr() { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
 function calcDaysSince(dateStr) {
   if (!dateStr) return null;
-  const parts = dateStr.split('-');
-  if (parts.length !== 3) return null;
+  const parts = dateStr.split('-'); if (parts.length !== 3) return null;
   const buyDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
   const today = new Date(); today.setHours(0,0,0,0);
   const diff = Math.floor((today - buyDate) / (1000*60*60*24));
   return diff >= 0 ? diff : null;
 }
-
 function calcBuyUnits(k) {
   const p = st.price[k]; if (!p || p <= 0) return 1;
   const total  = parseFloat(document.getElementById('cp-total').value) || 0;
@@ -1247,13 +1661,9 @@ function calcBuyUnits(k) {
   const baseUnits = Math.max(1, Math.floor(perOrder / p));
   const mult = parseFloat(document.getElementById('c-mult')?.value);
   if (!mult || mult <= 1) return baseUnits;
-  const holdings = st.hold[k];
-  if (holdings.length > 0) {
-    return Math.max(1, Math.round(baseUnits * mult));
-  }
+  if (st.hold[k].length > 0) return Math.max(1, Math.round(baseUnits * mult));
   return baseUnits;
 }
-
 function updateBtnHints(k) {
   const p = st.price[k];
   const buyU = calcBuyUnits(k), sellU = getLot1Units(k);
@@ -1262,14 +1672,12 @@ function updateBtnHints(k) {
   if (buyHint)  buyHint.textContent  = buyU + ' Share · ₹' + Math.round(actualAmt).toLocaleString('en-IN');
   if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings';
 }
-
 function updateColSignal(k, signalType) {
   const tradeBtnsEl = document.getElementById('tradeBtns-' + k);
   tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active');
   if (signalType === 'buy')  tradeBtnsEl.classList.add('signal-buy-active');
   if (signalType === 'sell') tradeBtnsEl.classList.add('signal-sell-active');
 }
-
 const PROX = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -1389,14 +1797,9 @@ window.onload = () => {
 };
 
 function startApp() {
-  if (!apiEnabled) {
-    setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye');
-    return;
-  }
+  if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; }
   setFetchStatus('loading','Connecting to price feed…');
-  fetchAll();
-  startLoop();
-  startTickLoop();
+  fetchAll(); startLoop(); startTickLoop();
   if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000);
 }
 
@@ -1415,7 +1818,6 @@ function applySettings() {
   st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}};
   saveSt(); updateAll(); updateTabTitle();
 }
-
 function updateCard(k) {
   const p=st.price[k], pv=st.prev[k]; if (!p) return;
   const dir=getPriceDir(k), icon=ETF[k].icon, arrow=dir==='up'?'▲':dir==='down'?'▼':'';
@@ -1427,7 +1829,6 @@ function updateCard(k) {
   pill.textContent=(chg>0?'▲':'▼')+' ₹'+Math.abs(chg).toFixed(2)+'  ('+(pct>=0?'+':'')+pct.toFixed(2)+'%)';
   pill.className='chg-pill '+(chg>0?'up':chg<0?'down':'flat');
   document.getElementById('prev-'+k).textContent='PREV CLOSE: ₹'+pv.toFixed(2);
-
   const hs=st.hold[k], tu=hs.reduce((s,h)=>s+h.units,0), tc=hs.reduce((s,h)=>s+(h.buyPrice||h.price)*h.units,0);
   const avg=tu>0?tc/tu:0, pnl=tu>0?(p-avg)*tu:0, pp=avg>0?(p-avg)/avg*100:0;
   document.getElementById('u-'+k).textContent=tu+' Share';
@@ -1435,21 +1836,17 @@ function updateCard(k) {
   const pel=document.getElementById('pnl-'+k);
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='iv '+(pnl>=0?'profit':'loss'); }
   else { pel.textContent='—'; pel.className='iv'; }
-
   const lot1Price=getLot1Price(k), ref=lot1Price||p;
   const bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
   document.getElementById('bt-'+k).textContent='₹ '+bt.toFixed(2);
   document.getElementById('st-'+k).textContent='₹ '+sv.toFixed(2);
   document.getElementById('bts-'+k).textContent='ref ₹'+ref.toFixed(2)+' −'+cfg.buy+'%';
   document.getElementById('sts-'+k).textContent='ref ₹'+ref.toFixed(2)+' +'+cfg.sell+'%';
-
   const lsiEl=document.getElementById('lsi-val-'+k);
   if (lot1Price) lsiEl.innerHTML=`Lot 1 ref: <span class="lsi-val">₹${lot1Price.toFixed(2)}</span> · Buy ≤ <span class="lsi-buy">₹${bt.toFixed(2)}</span> · Sell ≥ <span class="lsi-sell">₹${sv.toFixed(2)}</span>`;
   else lsiEl.textContent='No holdings — Live price se ref set hoga jab pehla buy hoga';
-
   const buyGap=(bt>0?(p-bt)/(ref-bt||1)*100:100), buyPct=Math.max(0,Math.min(100,buyGap)), buyDist=((p-bt)/p*100).toFixed(2);
   const sellGap=(sv>bt?(sv-p)/(sv-ref||1)*100:100), sellPct=Math.max(0,Math.min(100,100-sellGap)), sellDist=((sv-p)/p*100).toFixed(2);
-
   let buyClass='tbox buy-b';
   if (p<=bt) buyClass='tbox buy-b alert-buy';
   else if (buyPct<=25) buyClass='tbox buy-b close-buy';
@@ -1465,48 +1862,37 @@ function updateCard(k) {
   document.getElementById('spb-'+k).style.width=sellBarW+'%';
   document.getElementById('bpl-'+k).textContent=p<=bt?'🎯 HIT!':'▼ '+buyDist+'% door';
   document.getElementById('spl-'+k).textContent=p>=sv?'🎯 HIT!':'▲ '+(tu>0?sellDist+'% door':'No holdings');
-
   const sg=document.getElementById('sig-'+k), snx=document.getElementById('snx-'+k);
   const buyU=calcBuyUnits(k), sellU=getLot1Units(k);
   const nextLotNum=getSortedHoldings(k).length+1;
   const needAmt=(buyU*p).toFixed(0), potP=tu>0?((sv-avg)*tu).toFixed(2):null;
-
   let signalType = null;
   if (p<=bt) {
     sg.textContent='🟢 BUY NOW'; sg.className='iv profit';
     snx.textContent='Lot '+nextLotNum+' · '+buyU+' Share · ₹'+Number(needAmt).toLocaleString('en-IN')+' chahiye';
-    snx.className='sig-next nb';
-    signalType = 'buy';
+    snx.className='sig-next nb'; signalType = 'buy';
   } else if (p>=sv&&tu>0) {
     sg.textContent='🔴 SELL NOW'; sg.className='iv loss';
     snx.textContent='Lot 1 · '+sellU+' Share sell karo · Profit: +₹'+potP;
-    snx.className='sig-next ns';
-    signalType = 'sell';
+    snx.className='sig-next ns'; signalType = 'sell';
   } else {
     sg.textContent='⏳ WAIT'; sg.className='iv wait';
     if (tu>0) { const pp2=((sv-avg)*tu).toFixed(2); snx.innerHTML='BUY Lot '+nextLotNum+' ▼₹'+bt.toFixed(2)+' ('+buyU+' Share · ₹'+Number(needAmt).toLocaleString('en-IN')+')<br>SELL Lot 1 ▲₹'+sv.toFixed(2)+' (+₹'+pp2+')'; }
     else snx.innerHTML='BUY ▼₹'+bt.toFixed(2)+' · '+buyU+' Share · ₹'+Number(needAmt).toLocaleString('en-IN');
     snx.className='sig-next';
   }
-
-  updateColSignal(k, signalType);
-  updateBtnHints(k);
-  renderHold(k, p, bt);
+  updateColSignal(k, signalType); updateBtnHints(k); renderHold(k, p, bt);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
-
 function renderHold(k, p, bt) {
   const el=document.getElementById('hl-'+k), sorted=getSortedHoldings(k);
   if (!sorted.length) { el.innerHTML='<div class="no-h">No holdings yet</div>'; return; }
   const buySignalActive=(p!==null&&bt!==undefined&&p<=bt);
-
   el.innerHTML=sorted.map((h,i)=>{
     const bp=h.buyPrice||h.price, pnl=p?(p-bp)*h.units:0, pct=(p-bp)/bp*100, isP=pnl>=0;
     const curVal=(p*h.units).toFixed(2), invested=(bp*h.units).toFixed(2), isLot1=(i===0);
-    let dateStr = h.date || null;
-    let timeStr = h.time || null;
-    const dateDisplay = dateStr ? dateStr : 'Not set';
-    const timeDisplay = timeStr ? timeStr : 'Not set';
+    let dateStr = h.date || null, timeStr = h.time || null;
+    const dateDisplay = dateStr ? dateStr : 'Not set', timeDisplay = timeStr ? timeStr : 'Not set';
     const days = dateStr ? calcDaysSince(dateStr) : null;
     const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : '');
     let badgeHtml='';
@@ -1538,58 +1924,38 @@ function renderHold(k, p, bt) {
     </div>`;
   }).join('');
 }
-
-function setCurrentDateTimeInEdit() {
-  document.getElementById('editDate').value = todayDateStr();
-  document.getElementById('editTime').value = currentTimeStr();
-  showToast('✅ Current date & time set');
-}
-
+function setCurrentDateTimeInEdit() { document.getElementById('editDate').value=todayDateStr(); document.getElementById('editTime').value=currentTimeStr(); showToast('✅ Current date & time set'); }
 function openEditModal(k, idx) {
   const h = st.hold[k][idx]; if (!h) return;
   editState = { k, idx };
   document.getElementById('editPrice').value = (h.buyPrice||h.price||'');
   document.getElementById('editUnits').value = h.units || '';
-  let existingDate = h.date || '';
-  let existingTime = h.time || '';
-  if (!existingDate && !existingTime) {
-    existingDate = todayDateStr();
-    existingTime = currentTimeStr();
-    showToast('⏰ Date/Time missing — auto-filled with current. Edit if needed.');
-  }
+  let existingDate = h.date || '', existingTime = h.time || '';
+  if (!existingDate && !existingTime) { existingDate=todayDateStr(); existingTime=currentTimeStr(); showToast('⏰ Date/Time missing — auto-filled.'); }
   document.getElementById('editDate').value = existingDate;
   document.getElementById('editTime').value = existingTime;
   document.getElementById('editOverlay').classList.add('show');
 }
-function closeEditModal() {
-  document.getElementById('editOverlay').classList.remove('show');
-  editState = { k: null, idx: null };
-}
+function closeEditModal() { document.getElementById('editOverlay').classList.remove('show'); editState = { k: null, idx: null }; }
 function saveEditHolding() {
   const { k, idx } = editState; if (k === null || idx === null) return;
   const newPrice = parseFloat(document.getElementById('editPrice').value);
   const newUnits = parseInt(document.getElementById('editUnits').value);
-  let newDate  = document.getElementById('editDate').value.trim();
-  let newTime  = document.getElementById('editTime').value.trim();
+  let newDate = document.getElementById('editDate').value.trim();
+  let newTime = document.getElementById('editTime').value.trim();
   if (!newPrice || newPrice <= 0 || !newUnits || newUnits < 1) { showToast('⚠️ Valid price aur units daalo'); return; }
   if (!newDate) newDate = todayDateStr();
   if (!newTime) newTime = currentTimeStr();
   st.hold[k][idx].buyPrice = newPrice; st.hold[k][idx].price = newPrice;
-  st.hold[k][idx].units = newUnits;
-  st.hold[k][idx].date = newDate;
-  st.hold[k][idx].time = newTime;
-  closeEditModal(); saveSt(); updateCard(k);
-  showToast('✅ Holding updated!');
+  st.hold[k][idx].units = newUnits; st.hold[k][idx].date = newDate; st.hold[k][idx].time = newTime;
+  closeEditModal(); saveSt(); updateCard(k); showToast('✅ Holding updated!');
 }
 function deleteHolding(k, idx) {
   const h = st.hold[k][idx]; if (!h) return;
   if (!confirm(`Lot delete karna chahte ho? Qty: ${h.units} Share @ ₹${(h.buyPrice||h.price).toFixed(2)}`)) return;
-  st.hold[k].splice(idx, 1); saveSt(); updateCard(k);
-  showToast('🗑 Holding deleted');
+  st.hold[k].splice(idx, 1); saveSt(); updateCard(k); showToast('🗑 Holding deleted');
 }
-
 function updateAll() { ['G','S'].forEach(k=>updateCard(k)); }
-
 function alertCheck(k) {
   const p=st.price[k]; if (!p) return;
   const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
@@ -1598,7 +1964,6 @@ function alertCheck(k) {
   else if (p>=sv&&tu>0&&!st.alerted[k].sell) { st.alerted[k].sell=true; st.alerted[k].buy=false; playBeep('sell'); showAlertPopup(k,'sell',bt,sv,tu); }
   else if (p>bt&&p<sv) { st.alerted[k].buy=false; st.alerted[k].sell=false; }
 }
-
 function showAlertPopup(k, type, bt, sv, tu) {
   const isBuy=type==='buy', p=st.price[k];
   const avg=tu>0?st.hold[k].reduce((s,h)=>s+(h.buyPrice||h.price)*h.units,0)/tu:0;
@@ -1616,10 +1981,7 @@ function showAlertPopup(k, type, bt, sv, tu) {
   document.getElementById('apIcon').textContent=ETF[k].icon;
   document.getElementById('apType').textContent=isBuy?'🟢 BUY SIGNAL':'🔴 SELL SIGNAL';
   document.getElementById('apTitle').textContent=isBuy?'Buy Target Hit! 🎯':'Sell Target Hit! 💰';
-  let rows=`
-    <div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div>
-    <div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div>
-    <div class="alert-row"><span class="ark">${isBuy?'Buy':'Sell'} Target</span><span class="arv">₹ ${isBuy?bt.toFixed(2):sv.toFixed(2)}</span></div>`;
+  let rows=`<div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div><div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div><div class="alert-row"><span class="ark">${isBuy?'Buy':'Sell'} Target</span><span class="arv">₹ ${isBuy?bt.toFixed(2):sv.toFixed(2)}</span></div>`;
   if (lot1P) rows+=`<div class="alert-row"><span class="ark">Lot 1 Ref Price</span><span class="arv">₹ ${lot1P.toFixed(2)}</span></div>`;
   if (isBuy) rows+=`<div class="alert-row"><span class="ark">New Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`;
   rows+=`<div class="alert-divider"></div><div class="alert-row"><span class="ark">Share to ${isBuy?'Buy':'Sell'}</span><span class="arv big">${isBuy?buyU:sellU} Share</span></div>`;
@@ -1629,10 +1991,8 @@ function showAlertPopup(k, type, bt, sv, tu) {
   document.getElementById('alertTradeBtn').textContent=isBuy?'🛒 BUY Now':'💰 SELL Now';
   document.getElementById('alertOverlay').classList.add('show');
 }
-
 function alertDoTrade() { const {k,type}=st.alertPend; dismissAlert(); openModal(k,type,true); }
-function dismissAlert()  { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
-
+function dismissAlert() { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend=null; }
 function openModal(k, type, auto=false) {
   const p=st.price[k]; if (!p) { showToast('Price not loaded!'); return; }
   const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
@@ -1653,22 +2013,14 @@ function openModal(k, type, auto=false) {
   const bpWrap=document.getElementById('mBuyPriceWrap'), bpInp=document.getElementById('mBuyPrice');
   if (isBuy) { bpWrap.style.display='block'; bpInp.value=p.toFixed(2); }
   else bpWrap.style.display='none';
-  let rows=`
-    <div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div>
-    <div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div>
-    <div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div>
-    <div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div>
-    <div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`;
+  let rows=`<div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div><div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div><div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div><div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div><div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`;
   if (isBuy) {
     rows+=`<div class="mr"><span class="mk">This will be</span><span class="mv profit">Lot ${nextLot}</span></div>`;
   } else {
     const sorted=getSortedHoldings(k), lot1=sorted[0];
     if (lot1) {
       const lotBp=lot1.buyPrice||lot1.price, lotPnl=(p-lotBp)*lot1.units, lotPct=((p-lotBp)/lotBp*100).toFixed(2), isProfit=lotPnl>=0;
-      rows+=`<div class="mr-divider"></div>
-        <div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div>
-        <div class="mr"><span class="mk">Lot 1 Share</span><span class="mv">${lot1.units} Share</span></div>
-        <div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit?'profit':'loss'}">${isProfit?'+':'-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit?'+':''}${lotPct}%)</span></div>`;
+      rows+=`<div class="mr-divider"></div><div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div><div class="mr"><span class="mk">Lot 1 Share</span><span class="mv">${lot1.units} Share</span></div><div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit?'profit':'loss'}">${isProfit?'+':'-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit?'+':''}${lotPct}%)</span></div>`;
     }
     rows+=`<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} Share (all lots)</span></div>`;
     if (avg>0) rows+=`<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`;
@@ -1681,11 +2033,9 @@ function openModal(k, type, auto=false) {
   document.getElementById('overlay').classList.add('show');
 }
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend=null; }
-
 function confirmTrade() {
   const {k,type}=st.pend, liveP=st.price[k];
-  const time=currentTimeStr();
-  const date=todayDateStr();
+  const time=currentTimeStr(), date=todayDateStr();
   if (type==='buy') {
     const bpRaw=parseFloat(document.getElementById('mBuyPrice').value);
     const buyPrice=(bpRaw&&bpRaw>0)?bpRaw:liveP;
@@ -1706,19 +2056,16 @@ function confirmTrade() {
   }
   closeModal(); updateCard(k); saveSt(); updateTabTitle();
 }
-
 function addLog(e) { st.log.unshift(e); renderLog(); }
 function renderLog() {
   const el=document.getElementById('logBar');
   if (!st.log.length) { el.innerHTML='<span class="log-empty-txt">Trades will appear here…</span>'; return; }
   el.innerHTML=st.log.slice(0,25).map(l=>`<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units} Share @ ₹${l.price.toFixed(2)} ${l.pnl!==undefined?(l.pnl>=0?'+':'')+'₹'+l.pnl.toFixed(2):''} · ${l.time}</div>`).join('');
 }
-
 function buildDataObj() {
   return {
     hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
-    cfg:{buy:cfg.buy,sell:cfg.sell},
-    apiEnabled: apiEnabled,
+    cfg:{buy:cfg.buy,sell:cfg.sell}, apiEnabled,
     cap:{total:document.getElementById('cp-total').value, parts:document.getElementById('cp-parts').value, gord:document.getElementById('cp-gord').value, sord:document.getElementById('cp-sord').value},
     manual: { start: manualStart, snapshots: manualSnapshots }
   };
@@ -1738,7 +2085,7 @@ function loadSt() {
     if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
     if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
     if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
-    if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
+    if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
     renderLog();
   } catch(e) { console.warn('load failed:',e); }
 }
@@ -1762,6 +2109,7 @@ function renderCapCard(k, allot, orders) {
 document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeModal(); });
 document.getElementById('alertOverlay').addEventListener('click',e=>{ if(e.target.id==='alertOverlay') dismissAlert(); });
 document.getElementById('editOverlay').addEventListener('click',e=>{ if(e.target.id==='editOverlay') closeEditModal(); });
+document.getElementById('mhistOverlay').addEventListener('click',e=>{ if(e.target.id==='mhistOverlay') closeMonthlyHistory(); });
 </script>
 
 <script type="module">
@@ -1818,24 +2166,16 @@ window.initFirebase = () => {
 };
 function applyData(data) {
   if (data.apiEnabled !== undefined && data.apiEnabled !== apiEnabled) {
-    apiEnabled = data.apiEnabled;
-    localStorage.setItem('apiEnabled', String(apiEnabled));
-    const btn = document.getElementById('apiToggle');
-    const txt = document.getElementById('apiTxt');
-    const pausedBar = document.getElementById('apiPausedBar');
-    if (apiEnabled) {
-      btn.className = 'api-toggle on'; txt.textContent = 'API ON';
-      pausedBar.classList.remove('show');
-    } else {
-      btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
-      pausedBar.classList.add('show');
-    }
+    apiEnabled = data.apiEnabled; localStorage.setItem('apiEnabled', String(apiEnabled));
+    const btn=document.getElementById('apiToggle'), txt=document.getElementById('apiTxt'), pausedBar=document.getElementById('apiPausedBar');
+    if (apiEnabled) { btn.className='api-toggle on'; txt.textContent='API ON'; pausedBar.classList.remove('show'); }
+    else { btn.className='api-toggle off'; txt.textContent='API OFF'; pausedBar.classList.add('show'); }
   }
   if (data.hold) st.hold=data.hold; if (data.log) st.log=data.log;
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
   if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
-  if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
+  if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
   localStorage.setItem(LS_KEY,JSON.stringify(data)); renderLog(); updateAll();
 }
 function setSyncStatus(state, txt) {
