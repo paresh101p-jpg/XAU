@@ -801,11 +801,11 @@ body {
       </div>
       <div class="trade-btns" id="tradeBtns-S">
         <button class="btn-buy" id="buyBtn-S" onclick="openModal('S','buy')">
-          <span>＋ BUY</span>
+          <span>BUY</span>
           <span class="btn-units-hint" id="buyHint-S">— Share</span>
         </button>
         <button class="btn-sell" id="sellBtn-S" onclick="openModal('S','sell')">
-          <span>－ SELL</span>
+          <span>SELL</span>
           <span class="btn-units-hint" id="sellHint-S">— Share</span>
         </button>
       </div>
@@ -909,6 +909,7 @@ function toggleApi() {
     if (st.timer) clearInterval(st.timer);
     if (st.tickTimer) clearInterval(st.tickTimer);
     document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
+    saveSt();
     showToast('⏸ API OFF — Price fetch band');
   }
 }
@@ -1474,7 +1475,8 @@ function buildDataObj() {
   return {
     hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
     cfg:{buy:cfg.buy,sell:cfg.sell},
-    cap:{total:document.getElementById('cp-total').value,parts:document.getElementById('cp-parts').value,gord:document.getElementById('cp-gord').value,sord:document.getElementById('cp-sord').value}
+    apiEnabled: apiEnabled,   // ← YEH ADD KARO
+    cap:{total:document.getElementById('cp-total').value,...}
   };
 }
 function saveSt() {
@@ -1570,6 +1572,19 @@ window.initFirebase = () => {
   });
 };
 function applyData(data) {
+  if (data.apiEnabled !== undefined && data.apiEnabled !== apiEnabled) {
+    apiEnabled = data.apiEnabled;
+    localStorage.setItem('apiEnabled', String(apiEnabled));
+    const btn = document.getElementById('apiToggle');
+    const txt = document.getElementById('apiTxt');
+    const pausedBar = document.getElementById('apiPausedBar');
+    if (apiEnabled) {
+      btn.className = 'api-toggle on'; txt.textContent = 'API ON';
+      pausedBar.classList.remove('show');
+    } else {
+      btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
+      pausedBar.classList.add('show');
+    }
   if (data.hold) st.hold=data.hold; if (data.log) st.log=data.log;
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
