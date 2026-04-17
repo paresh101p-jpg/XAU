@@ -535,7 +535,9 @@ body {
 .price-dir-icon.up   { color: var(--green); }
 .price-dir-icon.down { color: var(--red); }
 
-/* Removed toggle button styles, no longer needed */
+/* Hidden target boxes */
+.tgt-row { display: none; }
+
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn-buy, .btn-sell {
   border: none; border-radius: 10px; padding: 10px;
@@ -554,9 +556,20 @@ body {
 @keyframes btnPulseG { to { box-shadow: 0 0 28px rgba(76,175,130,0.9); transform: translateY(-2px); } }
 @keyframes btnPulseR { to { box-shadow: 0 0 28px rgba(224,82,82,0.9);  transform: translateY(-2px); } }
 .btn-units-hint { font-size: 0.6rem; opacity: 0.75; }
-.sec-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.sec-label { 
+  font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; 
+  margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sec-toggle {
+  background: transparent; border: none; color: var(--yellow);
+  font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 12px;
+  transition: 0.15s;
+}
+.sec-toggle:hover { background: rgba(245,200,66,0.15); }
 
-/* New summary cards inside Open Holdings */
+/* Holdings summary cards */
 .holdings-summary {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -581,7 +594,8 @@ body {
 .holdings-stat-value.silver { color: var(--silver); }
 
 /* Lot cards */
-.h-list { display: flex; flex-direction: column; gap: 12px; }
+.h-list { display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; }
+.h-list.collapsed { display: none; }
 .no-h { color: var(--muted); font-size: 0.72rem; text-align: center; padding: 20px; }
 .h-card {
   background: var(--bg2); border-radius: 14px; overflow: hidden;
@@ -618,52 +632,75 @@ body {
 }
 .h-cell .hcv.gd { color: var(--gold); }
 .h-cell .hcv.sv { color: var(--silver); }
-.h-cell .hcv.profit { color: var(--green); }
-.h-cell .hcv.loss   { color: var(--red); }
 
-/* Progress bar inside lot card */
-.progress-container {
-  margin: 6px 12px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
-  height: 6px;
+/* New progress bar with center line */
+.progress-wrapper {
+  margin: 12px 12px 6px;
   position: relative;
-  overflow: hidden;
 }
-.progress-bar {
+.progress-bar-container {
+  position: relative;
+  height: 24px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  overflow: visible;
+}
+.progress-fill-left {
+  position: absolute;
+  top: 0;
+  left: 50%;
   height: 100%;
-  width: 50%;
-  background: var(--green);
-  border-radius: 10px;
-  transition: width 0.4s ease, background 0.2s;
-}
-.progress-bar.left {
+  width: 0%;
   background: var(--red);
-  transform: translateX(-50%);
+  border-radius: 12px 0 0 12px;
+  transition: width 0.3s ease;
+  transform: translateX(-100%);
 }
-.progress-bar.right {
+.progress-fill-right {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  width: 0%;
   background: var(--green);
-  transform: translateX(0);
+  border-radius: 0 12px 12px 0;
+  transition: width 0.3s ease;
+}
+.progress-center-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: var(--text);
+  transform: translateX(-50%);
+  z-index: 2;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+.progress-center-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  background: var(--bg2);
+  padding: 0 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+  color: var(--gold);
+  margin-bottom: 2px;
+  font-weight: bold;
 }
 .progress-labels {
   display: flex;
   justify-content: space-between;
   font-size: 0.55rem;
   color: var(--muted);
-  padding: 0 12px 6px;
-}
-.progress-label-left { text-align: left; }
-.progress-label-right { text-align: right; }
-.progress-label-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.55rem;
-  color: var(--text);
-  background: var(--bg2);
+  margin-top: 4px;
   padding: 0 4px;
-  white-space: nowrap;
 }
+.progress-label-buy { color: var(--red); }
+.progress-label-sell { color: var(--green); }
 
 .h-date-row {
   padding: 5px 12px 7px;
@@ -1048,17 +1085,16 @@ body {
         <div><span class="chg-pill flat" id="pill-G">— —</span></div>
         <div class="prev-label" id="prev-G">PREV CLOSE: —</div>
       </div>
-      <!-- removed toggle button and collapsible stats section -->
-      <div class="tgt-row">
-        <div class="tbox buy-b" id="bb-G"><div class="tl">Buy Target</div><div class="tv" id="bt-G">₹ —</div><div class="ts" id="bts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-G">—</span><span>TARGET</span></div></div>
-        <div class="tbox sell-b" id="sb-G"><div class="tl">Sell Target</div><div class="tv" id="st-G">₹ —</div><div class="ts" id="sts-G">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-G" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-G">—</span><span>TARGET</span></div></div>
-      </div>
+      <!-- target boxes are hidden via CSS -->
       <div class="trade-btns" id="tradeBtns-G">
         <button class="btn-buy" id="buyBtn-G" onclick="openModal('G','buy')"><span>BUY</span><span class="btn-units-hint" id="buyHint-G">— Share</span></button>
         <button class="btn-sell" id="sellBtn-G" onclick="openModal('G','sell')"><span>SELL</span><span class="btn-units-hint" id="sellHint-G">— Share</span></button>
       </div>
-      <div class="sec-label">Open Holdings</div>
-      <!-- Three summary cards moved inside Open Holdings -->
+      <div class="sec-label">
+        Open Holdings
+        <button class="sec-toggle" id="toggleHoldingsG" onclick="toggleHoldings('G')">▼ Hide</button>
+      </div>
+      <!-- Three summary cards inside Open Holdings -->
       <div class="holdings-summary">
         <div class="holdings-stat"><div class="holdings-stat-label">Holdings</div><div class="holdings-stat-value gold" id="u-G">0 Share</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-G">—</div></div>
@@ -1076,15 +1112,14 @@ body {
         <div><span class="chg-pill flat" id="pill-S">— —</span></div>
         <div class="prev-label" id="prev-S">PREV CLOSE: —</div>
       </div>
-      <div class="tgt-row">
-        <div class="tbox buy-b" id="bb-S"><div class="tl">Buy Target</div><div class="tv" id="bt-S">₹ —</div><div class="ts" id="bts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="bpb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="bpl-S">—</span><span>TARGET</span></div></div>
-        <div class="tbox sell-b" id="sb-S"><div class="tl">Sell Target</div><div class="tv" id="st-S">₹ —</div><div class="ts" id="sts-S">—</div><div class="tprog-wrap"><div class="tprog-bar" id="spb-S" style="width:0%"></div></div><div class="tprog-lbl"><span id="spl-S">—</span><span>TARGET</span></div></div>
-      </div>
       <div class="trade-btns" id="tradeBtns-S">
         <button class="btn-buy" id="buyBtn-S" onclick="openModal('S','buy')"><span>BUY</span><span class="btn-units-hint" id="buyHint-S">— Share</span></button>
         <button class="btn-sell" id="sellBtn-S" onclick="openModal('S','sell')"><span>SELL</span><span class="btn-units-hint" id="sellHint-S">— Share</span></button>
       </div>
-      <div class="sec-label">Open Holdings</div>
+      <div class="sec-label">
+        Open Holdings
+        <button class="sec-toggle" id="toggleHoldingsS" onclick="toggleHoldings('S')">▼ Hide</button>
+      </div>
       <div class="holdings-summary">
         <div class="holdings-stat"><div class="holdings-stat-label">Holdings</div><div class="holdings-stat-value silver" id="u-S">0 Share</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-S">—</div></div>
@@ -1104,7 +1139,34 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================== PORTFOLIO SUMMARY SECTION TOGGLE ========================
+// ======================== TOGGLE HOLDINGS ========================
+let holdingsVisibleG = true;
+let holdingsVisibleS = true;
+function toggleHoldings(k) {
+  const el = document.getElementById('hl-' + k);
+  const btn = document.getElementById('toggleHoldings' + k);
+  if (k === 'G') {
+    holdingsVisibleG = !holdingsVisibleG;
+    if (holdingsVisibleG) {
+      el.classList.remove('collapsed');
+      btn.innerHTML = '▼ Hide';
+    } else {
+      el.classList.add('collapsed');
+      btn.innerHTML = '▶ Show';
+    }
+  } else {
+    holdingsVisibleS = !holdingsVisibleS;
+    if (holdingsVisibleS) {
+      el.classList.remove('collapsed');
+      btn.innerHTML = '▼ Hide';
+    } else {
+      el.classList.add('collapsed');
+      btn.innerHTML = '▶ Show';
+    }
+  }
+}
+
+// ======================== PORTFOLIO SUMMARY TOGGLE ========================
 let psSectionOpen = true;
 function togglePsSection() {
   psSectionOpen = !psSectionOpen;
@@ -1265,7 +1327,7 @@ function fmtDateNice(isoDate) {
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function getMonthKey(isoDate) { return isoDate.slice(0, 7); }
 function fmtMonthLabel(monthKey) { const [y, m] = monthKey.split('-'); return `${MONTH_NAMES[parseInt(m)-1]} ${y}`; }
-function buildMonthlyData() { /* same as before but keep for completeness */ if (!manualSnapshots.length) return []; const monthMap = {}; for (const snap of manualSnapshots) { const mk = getMonthKey(snap.date); if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap; } const sortedMonths = Object.keys(monthMap).sort(); const rows = []; for (let i = 0; i < sortedMonths.length; i++) { const mk = sortedMonths[i]; const current = monthMap[mk]; const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null; let prevAmount = prev ? prev.amount : null; if (!prevAmount && manualStart.amount && manualStart.date && manualStart.date < mk + '-01') prevAmount = manualStart.amount; const diff = prevAmount !== null ? current.amount - prevAmount : null; const pct = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null; const entries = manualSnapshots.filter(s => getMonthKey(s.date) === mk).sort((a,b) => b.date.localeCompare(a.date)); rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries }); } return rows.reverse(); }
+function buildMonthlyData() { if (!manualSnapshots.length) return []; const monthMap = {}; for (const snap of manualSnapshots) { const mk = getMonthKey(snap.date); if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap; } const sortedMonths = Object.keys(monthMap).sort(); const rows = []; for (let i = 0; i < sortedMonths.length; i++) { const mk = sortedMonths[i]; const current = monthMap[mk]; const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null; let prevAmount = prev ? prev.amount : null; if (!prevAmount && manualStart.amount && manualStart.date && manualStart.date < mk + '-01') prevAmount = manualStart.amount; const diff = prevAmount !== null ? current.amount - prevAmount : null; const pct = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null; const entries = manualSnapshots.filter(s => getMonthKey(s.date) === mk).sort((a,b) => b.date.localeCompare(a.date)); rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries }); } return rows.reverse(); }
 function showMonthlyHistory() {
   const rows = buildMonthlyData();
   const noData = document.getElementById('mhistNoData');
@@ -1338,10 +1400,6 @@ document.addEventListener('click', () => { const ctx = getAudioCtx(); if (ctx &&
 function playBeep(type) { if (!soundEnabled) return; const ctx = getAudioCtx(); if (!ctx) return; try { if (type === 'buy') { playTone(ctx,523.25,0,0.18,'sine',0.55); playTone(ctx,659.25,0.18,0.22,'sine',0.55); playTone(ctx,783.99,0.38,0.32,'sine',0.6); } else { playTone(ctx,783.99,0,0.18,'sine',0.55); playTone(ctx,523.25,0.18,0.22,'sine',0.55); playTone(ctx,392.00,0.38,0.32,'sine',0.5); } } catch(e) {} }
 function playTone(ctx, freq, startDelay, dur, wave, vol) { const osc = ctx.createOscillator(), gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = wave; osc.frequency.setValueAtTime(freq, ctx.currentTime + startDelay); gain.gain.setValueAtTime(0, ctx.currentTime + startDelay); gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + startDelay + 0.03); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startDelay + dur); osc.start(ctx.currentTime + startDelay); osc.stop(ctx.currentTime + startDelay + dur + 0.05); }
 function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getElementById('soundToggle'), icon = document.getElementById('soundIcon'), txt = document.getElementById('soundTxt'); if (soundEnabled) { btn.className='sound-toggle on'; icon.textContent='🔔'; txt.textContent='Sound ON'; playBeep('buy'); } else { btn.className='sound-toggle off'; icon.textContent='🔕'; txt.textContent='Sound OFF'; } showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF'); }
-const _sv = JSON.parse(localStorage.getItem('secVisible') || '{}');
-const sectionVisible = { G: _sv.G !== false, S: _sv.S !== false };
-function applySectionState(k) { /* not used anymore, but keep */ }
-function toggleSection(k) { /* not used */ }
 const ETF = { G:{sym:'GOLDBEES.NS', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
 let cfg = { buy: 2, sell: 3, ref: 60 };
@@ -1409,27 +1467,7 @@ function updateCard(k) {
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='holdings-stat-value '+(pnl>=0?'profit':'loss'); } else { pel.textContent='—'; pel.className='holdings-stat-value'; }
   const lot1Price=getLot1Price(k), ref=lot1Price||p;
   const bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
-  document.getElementById('bt-'+k).textContent='₹ '+bt.toFixed(2);
-  document.getElementById('st-'+k).textContent='₹ '+sv.toFixed(2);
-  document.getElementById('bts-'+k).textContent='ref ₹'+ref.toFixed(2)+' −'+cfg.buy+'%';
-  document.getElementById('sts-'+k).textContent='ref ₹'+ref.toFixed(2)+' +'+cfg.sell+'%';
-  const buyGap=(bt>0?(p-bt)/(ref-bt||1)*100:100), buyPct=Math.max(0,Math.min(100,buyGap)), buyDist=((p-bt)/p*100).toFixed(2);
-  const sellGap=(sv>bt?(sv-p)/(sv-ref||1)*100:100), sellPct=Math.max(0,Math.min(100,100-sellGap)), sellDist=((sv-p)/p*100).toFixed(2);
-  let buyClass='tbox buy-b';
-  if (p<=bt) buyClass='tbox buy-b alert-buy';
-  else if (buyPct<=25) buyClass='tbox buy-b close-buy';
-  else if (buyPct<=50) buyClass='tbox buy-b near-buy';
-  let sellClass='tbox sell-b';
-  if (p>=sv&&tu>0) sellClass='tbox sell-b alert-sell';
-  else if (sellPct>=75&&tu>0) sellClass='tbox sell-b close-sell';
-  else if (sellPct>=50&&tu>0) sellClass='tbox sell-b near-sell';
-  document.getElementById('bb-'+k).className=buyClass;
-  document.getElementById('sb-'+k).className=sellClass;
-  const buyBarW=p<=bt?100:Math.max(2,100-buyPct), sellBarW=p>=sv?100:Math.max(2,sellPct);
-  document.getElementById('bpb-'+k).style.width=buyBarW+'%';
-  document.getElementById('spb-'+k).style.width=sellBarW+'%';
-  document.getElementById('bpl-'+k).textContent=p<=bt?'🎯 HIT!':'▼ '+buyDist+'% door';
-  document.getElementById('spl-'+k).textContent=p>=sv?'🎯 HIT!':'▲ '+(tu>0?sellDist+'% door':'No holdings');
+  // no target boxes to update, but we keep for reference
   const buyU=calcBuyUnits(k), sellU=getLot1Units(k);
   const nextLotNum=getSortedHoldings(k).length+1;
   const needAmt=(buyU*p).toFixed(0), potP=tu>0?((sv-avg)*tu).toFixed(2):null;
@@ -1440,11 +1478,10 @@ function updateCard(k) {
   renderHold(k, p, bt, avg);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
-function renderHold(k, p, bt, overallAvg) {
+function renderHold(k, p, buyTarget, overallAvg) {
   const el = document.getElementById('hl-'+k);
   const sorted = getSortedHoldings(k);
   if (!sorted.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
-  const buySignalActive = (p !== null && bt !== undefined && p <= bt);
   el.innerHTML = sorted.map((h, i) => {
     const bp = h.buyPrice || h.price;
     const pnl = p ? (p - bp) * h.units : 0;
@@ -1459,36 +1496,30 @@ function renderHold(k, p, bt, overallAvg) {
     const days = dateStr ? calcDaysSince(dateStr) : null;
     const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : '');
     let badgeHtml = '';
-    if (isLot1) badgeHtml = buySignalActive ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : `<span class="lifo-badge">SELL NEXT</span>`;
+    if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : `<span class="lifo-badge">SELL NEXT</span>`;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
     
-    // Calculate progress bar: from center (buy price) towards right if price above, left if below
-    // We'll use percentage of distance to next target
-    let progressWidth = 50; // start at center (50%)
-    let progressClass = ''; // 'left' or 'right'
-    let progressLabel = '';
-    if (p) {
-      const ref = getLot1Price(k) || p;
-      const buyTarget = ref * (1 - cfg.buy / 100);
-      const sellTarget = ref * (1 + cfg.sell / 100);
+    // Progress bar: from center (buy price) to left/right
+    const sellTarget = overallAvg ? (overallAvg * (1 + cfg.sell/100)) : (bp * (1 + cfg.sell/100));
+    const buyTargetLot = overallAvg ? (overallAvg * (1 - cfg.buy/100)) : (bp * (1 - cfg.buy/100));
+    let leftWidth = 0, rightWidth = 0;
+    if (p !== null && p !== undefined) {
       if (p <= bp) {
-        // Moving towards buy target (left side)
-        const range = bp - buyTarget;
+        // moving left towards buy target
+        const range = bp - buyTargetLot;
         if (range > 0) {
-          const downPct = (bp - p) / range;
-          progressWidth = 50 * (1 - Math.min(1, downPct));
-          progressClass = 'left';
-          progressLabel = '↓ Buy Zone';
-        } else { progressWidth = 0; progressClass = 'left'; progressLabel = 'BUY HIT'; }
+          const progress = (bp - p) / range;
+          leftWidth = Math.min(50, progress * 50);
+        } else { leftWidth = 50; }
+        rightWidth = 0;
       } else {
-        // Moving towards sell target (right side)
+        // moving right towards sell target
         const range = sellTarget - bp;
         if (range > 0) {
-          const upPct = (p - bp) / range;
-          progressWidth = 50 + 50 * Math.min(1, upPct);
-          progressClass = 'right';
-          progressLabel = '↑ Sell Zone';
-        } else { progressWidth = 100; progressClass = 'right'; progressLabel = 'SELL HIT'; }
+          const progress = (p - bp) / range;
+          rightWidth = Math.min(50, progress * 50);
+        } else { rightWidth = 50; }
+        leftWidth = 0;
       }
     }
     return `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
@@ -1502,16 +1533,19 @@ function renderHold(k, p, bt, overallAvg) {
       </div>
       <div class="h-card-body">
         <div class="h-cell"><div class="hcl">Buy Price</div><div class="hcv ${ETF[k].cls}">₹ ${bp.toFixed(2)}</div></div>
-        <div class="h-cell"><div class="hcl">Live Price</div><div class="hcv">₹ ${p ? p.toFixed(2) : '—'}</div></div>
         <div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
         <div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div>
       </div>
-      <div class="progress-container">
-        <div class="progress-bar ${progressClass}" style="width: ${progressWidth}%;"></div>
+      <div class="progress-wrapper">
+        <div class="progress-bar-container">
+          <div class="progress-fill-left" style="width: ${leftWidth}%;"></div>
+          <div class="progress-fill-right" style="width: ${rightWidth}%;"></div>
+          <div class="progress-center-line"></div>
+          <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
+        </div>
         <div class="progress-labels">
-          <span class="progress-label-left">📉 Buy</span>
-          <span class="progress-label-center">${progressLabel}</span>
-          <span class="progress-label-right">📈 Sell</span>
+          <span class="progress-label-buy">▼ Buy ₹${buyTargetLot.toFixed(2)}</span>
+          <span class="progress-label-sell">▲ Sell ₹${sellTarget.toFixed(2)}</span>
         </div>
       </div>
       <div class="h-date-row">
@@ -1520,7 +1554,6 @@ function renderHold(k, p, bt, overallAvg) {
       </div>
       <div class="h-card-footer">
         <span class="h-pnl-big ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'} ₹${Math.abs(pnl).toFixed(2)}</span>
-        <span style="font-size:0.58rem;color:var(--muted);"></span>
       </div>
     </div>`;
   }).join('');
