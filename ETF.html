@@ -1476,7 +1476,7 @@ function buildDataObj() {
     hold:st.hold, log:st.log, real:st.real, alerted:st.alerted,
     cfg:{buy:cfg.buy,sell:cfg.sell},
     apiEnabled: apiEnabled,   // ← YEH ADD KARO
-    cap:{total:document.getElementById('cp-total').value,...}
+    cap:{total:document.getElementById('cp-total').value, parts:document.getElementById('cp-parts').value, gord:document.getElementById('cp-gord').value, sord:document.getElementById('cp-sord').value}
   };
 }
 function saveSt() {
@@ -1585,6 +1585,7 @@ function applyData(data) {
       btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
       pausedBar.classList.add('show');
     }
+  }  // ← YEH BRACE ADD KARO
   if (data.hold) st.hold=data.hold; if (data.log) st.log=data.log;
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
