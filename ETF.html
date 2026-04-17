@@ -187,22 +187,31 @@ body {
 }
 .api-paused-bar.show { display: flex; }
 
-/* Portfolio Summary Styles */
+/* ===================== PORTFOLIO SUMMARY ===================== */
 .portfolio-summary {
   background: var(--bg2);
   border-bottom: 2px solid var(--border);
+  transition: background 0.3s;
+}
+/* FIX: Color changes when open vs closed */
+.portfolio-summary.ps-open {
+  background: linear-gradient(135deg, rgba(212,168,67,0.07) 0%, rgba(17,17,20,1) 60%);
+  border-bottom-color: rgba(212,168,67,0.35);
 }
 .ps-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 20px;
   border-bottom: 1px solid var(--border);
   cursor: pointer; user-select: none;
+  transition: background 0.2s;
 }
+.ps-header:hover { background: rgba(255,255,255,0.02); }
+.portfolio-summary.ps-open .ps-header { border-bottom-color: rgba(212,168,67,0.3); }
 .ps-header-left { display: flex; align-items: center; gap: 8px; }
 .ps-header-title { font-size: 0.82rem; color: var(--text); }
 .ps-header-title span { color: var(--gold); }
 .ps-toggle-arrow { font-size: 0.65rem; color: var(--muted); transition: transform 0.3s; }
-.ps-header.open .ps-toggle-arrow { transform: rotate(180deg); }
+.ps-header.open .ps-toggle-arrow { transform: rotate(0deg); }
 .ps-header-right { display: flex; align-items: center; gap: 8px; }
 .btn-monthly-hist {
   display: flex; align-items: center; gap: 5px;
@@ -389,18 +398,31 @@ body {
 }
 .mhist-no-data span { font-size: 2rem; display: block; margin-bottom: 8px; }
 
-/* Capital Planner */
+/* ===================== CAPITAL PLANNER ===================== */
 .cap-toggle {
   width: 100%; background: var(--bg2); border: none; border-bottom: 2px solid var(--border);
   color: var(--text); font-size: 0.82rem;
   padding: 11px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-  letter-spacing: -0.2px; transition: 0.15s;
+  letter-spacing: -0.2px; transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
+/* FIX: Capital Planner toggle color when open */
 .cap-toggle:hover { background: var(--bg3); }
+.cap-toggle.open {
+  background: linear-gradient(135deg, rgba(76,175,130,0.12) 0%, rgba(17,17,20,1) 80%);
+  border-bottom-color: rgba(76,175,130,0.4);
+  color: var(--green);
+}
 .cap-toggle .cta { transition: transform 0.3s; font-size: 0.7rem; color: var(--muted); }
-.cap-toggle.open .cta { transform: rotate(180deg); }
-.cap-panel { background: var(--bg2); border-bottom: 2px solid var(--border); overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
-.cap-panel.open { max-height: 800px; }
+.cap-toggle.open .cta { transform: rotate(180deg); color: var(--green); }
+.cap-panel {
+  background: var(--bg2); border-bottom: 2px solid var(--border);
+  overflow: hidden; max-height: 0; transition: max-height 0.35s ease, background 0.3s, border-color 0.3s;
+}
+.cap-panel.open {
+  max-height: 800px;
+  background: linear-gradient(180deg, rgba(76,175,130,0.04) 0%, var(--bg2) 40%);
+  border-bottom-color: rgba(76,175,130,0.3);
+}
 .cap-inner { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
 .cap-start-section {
   background: var(--bg3); border: 2px solid rgba(212,168,67,0.3);
@@ -535,7 +557,6 @@ body {
 .price-dir-icon.up   { color: var(--green); }
 .price-dir-icon.down { color: var(--red); }
 
-/* Hidden target boxes */
 .tgt-row { display: none; }
 
 .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -593,16 +614,25 @@ body {
 .holdings-stat-value.gold   { color: var(--gold); }
 .holdings-stat-value.silver { color: var(--silver); }
 
-/* Lot cards */
-.h-list { display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; }
-.no-h { color: var(--muted); font-size: 0.72rem; text-align: center; padding: 20px; }
+/* ===================== LOT CARDS — FIX: 3px bold border ===================== */
+/* FIX: h-list uses flex-column with gap, show-more-btn always at bottom via wrapper */
+.h-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.h-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .h-card {
   background: var(--bg2); border-radius: 14px; overflow: hidden;
-  border: 2px solid var(--border);
+  border: 3px solid var(--border);  /* FIX: was 2px, now 3px bold */
   transition: border-color 0.2s;
 }
-.h-card.pc { border-color: rgba(76,175,130,0.5); }
-.h-card.lc { border-color: rgba(224,82,82,0.5); }
+.h-card.pc { border-color: rgba(76,175,130,0.65); box-shadow: 0 0 10px rgba(76,175,130,0.08); }
+.h-card.lc { border-color: rgba(224,82,82,0.6);   box-shadow: 0 0 10px rgba(224,82,82,0.07); }
 .h-card-top {
   display: flex; justify-content: space-between; align-items: center;
   padding: 8px 12px; background: rgba(255,255,255,0.02);
@@ -632,84 +662,155 @@ body {
 .h-cell .hcv.gd { color: var(--gold); }
 .h-cell .hcv.sv { color: var(--silver); }
 
-/* Golden 3D Pipeline Progress Bar */
+/* ===================== GOLDEN 3D PIPELINE PROGRESS BAR — NEW LOOK ===================== */
 .progress-wrapper {
-  margin: 12px 12px 6px;
+  margin: 12px 12px 10px;
   position: relative;
 }
+/* Outer container: inset shadow, dark groove */
 .progress-bar-container {
   position: relative;
-  height: 32px;
-  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
-  border: 1px solid rgba(212,168,67,0.3);
+  height: 28px;
+  background: linear-gradient(180deg, #0a0a0a 0%, #141414 40%, #0f0f0f 100%);
+  border-radius: 14px;
+  overflow: visible;
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,0.85),
+    inset 0 1px 3px rgba(0,0,0,0.6),
+    0 1px 0 rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(100,80,20,0.5);
 }
+/* Inner track inset */
+.progress-bar-container::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #050505 0%, #111 100%);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  z-index: 0;
+}
+/* Left fill (price going down toward buy) — gold glow left */
 .progress-fill-left {
   position: absolute;
-  top: 0;
-  left: 50%;
-  height: 100%;
+  top: 2px; bottom: 2px;
+  right: 50%;
+  left: 2px;
   width: 0%;
-  background: linear-gradient(90deg, #B8860B, #DAA520, #FFD700, #DAA520);
-  border-radius: 20px 0 0 20px;
-  transition: width 0.3s ease;
-  transform: translateX(-100%);
-  box-shadow: inset 0 1px 2px rgba(255,215,0,0.5), 0 1px 4px rgba(0,0,0,0.4);
+  background: linear-gradient(90deg,
+    #7a5200 0%,
+    #B8860B 25%,
+    #DAA520 55%,
+    #FFD700 75%,
+    #FFF176 88%,
+    #FFD700 100%
+  );
+  border-radius: 12px 0 0 12px;
+  transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 1;
+  box-shadow:
+    0 0 12px rgba(255,200,0,0.7),
+    0 0 24px rgba(255,180,0,0.4),
+    inset 0 1px 2px rgba(255,240,100,0.5),
+    inset 0 -1px 2px rgba(100,60,0,0.4);
+  /* 3D top shine */
+  position: absolute;
+  top: 2px; bottom: 2px; right: 50%;
+  transform: translateX(0);
+  /* Override: we'll use JS set inline width */
 }
+/* Right fill (price going up toward sell) */
 .progress-fill-right {
   position: absolute;
-  top: 0;
+  top: 2px; bottom: 2px;
   left: 50%;
-  height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #DAA520, #FFD700, #FFC107, #DAA520);
-  border-radius: 0 20px 20px 0;
-  transition: width 0.3s ease;
-  box-shadow: inset 0 1px 2px rgba(255,215,0,0.5), 0 1px 4px rgba(0,0,0,0.4);
+  background: linear-gradient(90deg,
+    #FFD700 0%,
+    #FFF176 12%,
+    #FFD700 30%,
+    #DAA520 60%,
+    #B8860B 80%,
+    #7a5200 100%
+  );
+  border-radius: 0 12px 12px 0;
+  transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 1;
+  box-shadow:
+    0 0 12px rgba(255,200,0,0.7),
+    0 0 24px rgba(255,180,0,0.4),
+    inset 0 1px 2px rgba(255,240,100,0.5),
+    inset 0 -1px 2px rgba(100,60,0,0.4);
 }
+/* Center divider line with glow */
 .progress-center-line {
   position: absolute;
-  top: 0;
+  top: -2px; bottom: -2px;
   left: 50%;
-  width: 2px;
-  height: 100%;
-  background: radial-gradient(circle, #FFD700, #B8860B);
+  width: 3px;
+  background: linear-gradient(180deg, #FFF9C4, #FFD700, #FFA000, #FFD700, #FFF9C4);
   transform: translateX(-50%);
-  z-index: 2;
-  box-shadow: 0 0 8px rgba(255,215,0,0.8);
+  z-index: 3;
+  border-radius: 2px;
+  box-shadow:
+    0 0 6px #FFD700,
+    0 0 14px rgba(255,215,0,0.8),
+    0 0 28px rgba(255,180,0,0.5);
 }
+/* Sparkling highlight on center */
+.progress-center-line::after {
+  content: '✦';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  color: #FFF9C4;
+  text-shadow: 0 0 8px #FFD700, 0 0 16px #FFA000;
+  animation: sparkCenter 2s infinite alternate;
+}
+@keyframes sparkCenter {
+  0%   { opacity: 0.6; transform: translate(-50%, -50%) scale(0.85); }
+  100% { opacity: 1;   transform: translate(-50%, -50%) scale(1.15); }
+}
+/* Floating label above center */
 .progress-center-label {
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.6rem;
-  background: #1e1e1e;
-  padding: 2px 8px;
+  font-size: 0.58rem;
+  background: linear-gradient(135deg, #1a1500, #2a2000);
+  padding: 3px 9px;
   border-radius: 20px;
   white-space: nowrap;
   color: #FFD700;
-  margin-bottom: 4px;
-  font-weight: bold;
-  border: 1px solid rgba(255,215,0,0.5);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  border: 1.5px solid rgba(255,215,0,0.55);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 10px rgba(255,180,0,0.2);
+  text-shadow: 0 0 6px rgba(255,200,0,0.6);
+  z-index: 10;
+  pointer-events: none;
+}
+/* Progress bar top shine stripe */
+.progress-bar-container::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 3px; right: 3px;
+  height: 6px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%);
+  z-index: 4;
+  pointer-events: none;
 }
 .progress-labels {
   display: flex;
   justify-content: space-between;
   font-size: 0.55rem;
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 0 4px;
 }
-.progress-label-buy {
-  color: #FFB74D;
-}
-.progress-label-sell {
-  color: #FFE082;
-}
+.progress-label-buy  { color: #FFB74D; }
+.progress-label-sell { color: #FFE082; }
+
 .h-date-row {
   padding: 5px 12px 7px;
   display: flex; align-items: center; justify-content: space-between;
@@ -740,8 +841,11 @@ body {
   background: rgba(76,175,130,0.15) !important; color: var(--green) !important;
   border-color: rgba(76,175,130,0.5) !important; animation: pulseG 1s infinite alternate;
 }
+@keyframes pulseG { from{opacity:0.7} to{opacity:1} }
 
-/* Show More button */
+/* ===================== FIX: Show More Button stays at bottom, doesn't move ===================== */
+/* The h-list-wrapper wraps both the h-list and the show-more-btn */
+/* h-list contains only lot cards; show-more is OUTSIDE h-list */
 .show-more-btn {
   width: 100%;
   background: rgba(245,200,66,0.1);
@@ -752,7 +856,7 @@ body {
   color: var(--yellow);
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 4px;
+  /* NO margin-top — gap from wrapper handles spacing */
 }
 .show-more-btn:hover {
   background: rgba(245,200,66,0.2);
@@ -1015,8 +1119,8 @@ body {
     </div>
   </div>
 
-  <!-- Portfolio Summary (closed by default) -->
-  <div class="portfolio-summary">
+  <!-- Portfolio Summary -->
+  <div class="portfolio-summary" id="portfolioSummary">
     <div class="ps-header" id="psHeader" onclick="togglePsSection()">
       <div class="ps-header-left">
         <span style="font-size:1rem;">📊</span>
@@ -1024,7 +1128,7 @@ body {
       </div>
       <div class="ps-header-right" onclick="event.stopPropagation()">
         <button class="btn-monthly-hist" onclick="showMonthlyHistory()">📅 Monthly History</button>
-        <span class="ps-toggle-arrow">▼</span>
+        <span class="ps-toggle-arrow" id="psArrow" style="transform:rotate(-90deg);">▼</span>
       </div>
     </div>
     <div class="ps-body" id="psBody">
@@ -1125,7 +1229,11 @@ body {
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-G">—</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Live P&L</div><div class="holdings-stat-value" id="pnl-G">—</div></div>
       </div>
-      <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
+      <!-- FIX: h-list-wrapper wraps both h-list and show-more-btn so button stays fixed -->
+      <div class="h-list-wrapper" id="hlw-G">
+        <div class="h-list" id="hl-G"><div class="no-h">No holdings yet</div></div>
+        <!-- show-more-btn rendered here via JS, outside h-list -->
+      </div>
     </div>
 
     <!-- SILVER COLUMN -->
@@ -1150,21 +1258,23 @@ body {
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-S">—</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Live P&L</div><div class="holdings-stat-value" id="pnl-S">—</div></div>
       </div>
-      <div class="h-list" id="hl-S"><div class="no-h">No holdings yet</div></div>
+      <div class="h-list-wrapper" id="hlw-S">
+        <div class="h-list" id="hl-S"><div class="no-h">No holdings yet</div></div>
+      </div>
     </div>
   </div>
 
   <div class="log-bar" id="logBar"><span class="log-empty-txt">Trades will appear here…</span></div>
 </div>
 
-<!-- Modals (Trade, Edit, Alert) -->
+<!-- Modals -->
 <div class="overlay" id="overlay"><div class="modal" id="mBox"><div class="mtop"><div class="mic" id="mIco">🥇</div><h3 id="mTit" class="bh">Confirm BUY</h3><p id="mSub">Grid signal</p></div><div class="mrows" id="mRows"></div><div class="m-buy-price" id="mBuyPriceWrap"><label>Actual Buy Price (Dhan App Fill Price)</label><input type="number" id="mBuyPrice" step="0.01" placeholder="Actual fill price daalo"><div class="bp-hint">Live price default hai — apna actual fill price change kar sakte ho</div></div><div class="munits"><label id="mUnitsLabel">Share to Trade</label><input type="number" id="mUnits" value="10" min="1"></div><div class="mbtns"><button class="mcnl" onclick="closeModal()">Cancel</button><button id="mCfm" class="mcfb" onclick="confirmTrade()">Confirm BUY</button></div></div></div>
 <div class="edit-overlay" id="editOverlay"><div class="edit-modal"><h3>✏️ Holding Edit Karo</h3><div class="edit-field"><label>Buy Price (₹)</label><input type="number" id="editPrice" step="0.01" placeholder="Buy price daalo"></div><div class="edit-field"><label>Units (Share)</label><input type="number" id="editUnits" min="1" placeholder="Share count daalo"></div><div class="edit-field"><label>Date (DD-MM-YYYY)</label><input type="text" id="editDate" placeholder="e.g. 21-06-2024"><div style="display:flex; justify-content:flex-end; margin-top:4px;"><button type="button" class="btn-set-current" onclick="setCurrentDateTimeInEdit()">📅 Set Current Date & Time</button></div></div><div class="edit-field"><label>Time</label><input type="text" id="editTime" placeholder="e.g. 10:30 AM"></div><div class="edit-btns"><button class="edit-cancel" onclick="closeEditModal()">Cancel</button><button class="edit-save" onclick="saveEditHolding()">💾 Save</button></div></div></div>
 <div class="alert-overlay" id="alertOverlay"><div class="alert-box" id="alertBox"><div class="ap-head"><span class="ap-icon" id="apIcon">🥇</span><div class="ap-type" id="apType">BUY SIGNAL</div><div class="ap-title" id="apTitle">Target Hit!</div></div><div class="alert-rows" id="alertRows"></div><div class="alert-btns"><button class="btn-alert-trade" id="alertTradeBtn" onclick="alertDoTrade()">🛒 Trade Now</button><button class="btn-alert-dismiss" onclick="dismissAlert()">✕ Dismiss</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================== TOGGLE HOLDINGS (expand/collapse all lots) ========================
+// ======================== TOGGLE HOLDINGS ========================
 let holdingsVisibleG = true;
 let holdingsVisibleS = true;
 function toggleHoldings(k) {
@@ -1172,46 +1282,34 @@ function toggleHoldings(k) {
   const btn = document.getElementById('toggleHoldings' + k);
   if (k === 'G') {
     holdingsVisibleG = !holdingsVisibleG;
-    if (holdingsVisibleG) {
-      el.classList.remove('collapsed');
-      btn.innerHTML = '▼ Hide';
-    } else {
-      el.classList.add('collapsed');
-      btn.innerHTML = '▶ Show';
-    }
+    el.style.display = holdingsVisibleG ? '' : 'none';
+    btn.innerHTML = holdingsVisibleG ? '▼ Hide' : '▶ Show';
   } else {
     holdingsVisibleS = !holdingsVisibleS;
-    if (holdingsVisibleS) {
-      el.classList.remove('collapsed');
-      btn.innerHTML = '▼ Hide';
-    } else {
-      el.classList.add('collapsed');
-      btn.innerHTML = '▶ Show';
-    }
+    el.style.display = holdingsVisibleS ? '' : 'none';
+    btn.innerHTML = holdingsVisibleS ? '▼ Hide' : '▶ Show';
   }
 }
 
-// ======================== SHOW MORE LOTS (lot1 only by default) ========================
-let showAllLotsG = false;  // false = only lot1 visible
+// ======================== FIX: SHOW MORE LOTS — button stays fixed at bottom ========================
+let showAllLotsG = false;
 let showAllLotsS = false;
 function toggleShowAllLots(k) {
-  if (k === 'G') {
-    showAllLotsG = !showAllLotsG;
-  } else {
-    showAllLotsS = !showAllLotsS;
-  }
-  updateCard(k); // re-render holdings
+  if (k === 'G') showAllLotsG = !showAllLotsG;
+  else showAllLotsS = !showAllLotsS;
+  updateCard(k);
 }
 
-// ======================== PORTFOLIO SUMMARY TOGGLE (closed by default) ========================
+// ======================== PORTFOLIO SUMMARY TOGGLE ========================
 let psSectionOpen = false;
 function togglePsSection() {
   psSectionOpen = !psSectionOpen;
   const body = document.getElementById('psBody');
-  const header = document.getElementById('psHeader');
-  const arrow = header.querySelector('.ps-toggle-arrow');
+  const ps = document.getElementById('portfolioSummary');
+  const arrow = document.getElementById('psArrow');
   body.classList.toggle('open', psSectionOpen);
-  header.classList.toggle('open', psSectionOpen);
+  // FIX: Color change
+  ps.classList.toggle('ps-open', psSectionOpen);
   arrow.style.transform = psSectionOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
 }
 
@@ -1360,7 +1458,8 @@ function fmtDateNice(isoDate) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
 }
-// Monthly History (simplified - keep existing functions but not fully repeated for brevity)
+
+// Monthly History
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function getMonthKey(isoDate) { return isoDate.slice(0, 7); }
 function fmtMonthLabel(monthKey) { const [y, m] = monthKey.split('-'); return `${MONTH_NAMES[parseInt(m)-1]} ${y}`; }
@@ -1409,28 +1508,40 @@ function showMonthlyHistory() {
 function toggleMonthEntries(monthKey) { const rowEl = document.getElementById('mr-' + monthKey); const panelEl = document.getElementById('ep-' + monthKey); if (!panelEl) return; const isOpen = panelEl.classList.contains('open'); panelEl.classList.toggle('open', !isOpen); rowEl.classList.toggle('expanded', !isOpen); }
 function closeMonthlyHistory() { document.getElementById('mhistOverlay').classList.remove('show'); }
 
-// ======================== EXISTING APP CODE (modified) ========================
+// ======================== MAIN APP CODE ========================
+// FIX: apiEnabled — load from Firebase if user logged in, else from localStorage
 let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
+
 function toggleApi() {
   apiEnabled = !apiEnabled;
   localStorage.setItem('apiEnabled', String(apiEnabled));
+  applyApiState();
+  // FIX: Save to Firebase immediately so all devices sync
+  saveSt();
+  if (apiEnabled) {
+    if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
+    showToast('✅ API ON — Live price fetch shuru');
+  } else {
+    if (st.timer) clearInterval(st.timer);
+    if (st.tickTimer) clearInterval(st.tickTimer);
+    document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
+    showToast('⏸ API OFF — Price fetch band');
+  }
+}
+
+function applyApiState() {
   const btn = document.getElementById('apiToggle');
   const txt = document.getElementById('apiTxt');
   const pausedBar = document.getElementById('apiPausedBar');
   if (apiEnabled) {
     btn.className = 'api-toggle on'; txt.textContent = 'API ON';
     pausedBar.classList.remove('show');
-    if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
-    showToast('✅ API ON — Live price fetch shuru');
   } else {
     btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
     pausedBar.classList.add('show');
-    if (st.timer) clearInterval(st.timer);
-    if (st.tickTimer) clearInterval(st.tickTimer);
-    document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
-    saveSt(); showToast('⏸ API OFF — Price fetch band');
   }
 }
+
 let audioCtx = null, soundEnabled = true;
 function getAudioCtx() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} } return audioCtx; }
 document.addEventListener('click', () => { const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume(); }, { once: false });
@@ -1481,7 +1592,7 @@ function showTick(k, oldP, newP) { if (!oldP||oldP===newP) return; const pb=docu
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
 function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
 async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
-window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000); if (!apiEnabled) { document.getElementById('apiToggle').className = 'api-toggle off'; document.getElementById('apiTxt').textContent = 'API OFF'; document.getElementById('apiPausedBar').classList.add('show'); document.getElementById('fetchStatusText').textContent = '⏸ API Paused'; } loadManualData(); };
+window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000); applyApiState(); if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); } loadManualData(); };
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
 function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 60; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
@@ -1504,10 +1615,7 @@ function updateCard(k) {
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='holdings-stat-value '+(pnl>=0?'profit':'loss'); } else { pel.textContent='—'; pel.className='holdings-stat-value'; }
   const lot1Price=getLot1Price(k), ref=lot1Price||p;
   const bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
-  // no target boxes to update, but we keep for reference
   const buyU=calcBuyUnits(k), sellU=getLot1Units(k);
-  const nextLotNum=getSortedHoldings(k).length+1;
-  const needAmt=(buyU*p).toFixed(0), potP=tu>0?((sv-avg)*tu).toFixed(2):null;
   let signalType = null;
   if (p<=bt) { signalType = 'buy'; } else if (p>=sv&&tu>0) { signalType = 'sell'; } else { signalType = null; }
   updateColSignal(k, signalType);
@@ -1515,19 +1623,29 @@ function updateCard(k) {
   renderHold(k, p, bt, avg);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
 }
+
+// FIX: renderHold — puts show-more-btn OUTSIDE h-list so it stays fixed
 function renderHold(k, p, buyTarget, overallAvg) {
-  const el = document.getElementById('hl-'+k);
+  const listEl = document.getElementById('hl-' + k);
+  const wrapperEl = document.getElementById('hlw-' + k);
   const sorted = getSortedHoldings(k);
-  if (!sorted.length) { el.innerHTML = '<div class="no-h">No holdings yet</div>'; return; }
-  // Determine whether to show all lots or only lot1
+
+  // Remove any existing show-more-btn from wrapper (not from listEl)
+  const existingBtn = wrapperEl.querySelector('.show-more-btn');
+  if (existingBtn) existingBtn.remove();
+
+  if (!sorted.length) {
+    listEl.innerHTML = '<div class="no-h">No holdings yet</div>';
+    return;
+  }
+
   const showAll = (k === 'G') ? showAllLotsG : showAllLotsS;
   const lotsToShow = showAll ? sorted : sorted.slice(0, 1);
   const lotCount = sorted.length;
   const hasMore = lotCount > 1;
-  const moreButtonText = showAll ? '▲ Show Less' : '▼ Show More Lots';
-  
-  let lotsHtml = lotsToShow.map((h, idxInFull) => {
-    const i = sorted.findIndex(s => s === h); // actual index
+
+  let lotsHtml = lotsToShow.map((h) => {
+    const i = sorted.findIndex(s => s === h);
     const bp = h.buyPrice || h.price;
     const pnl = p ? (p - bp) * h.units : 0;
     const pct = p ? ((p - bp) / bp * 100) : 0;
@@ -1543,8 +1661,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
     let badgeHtml = '';
     if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : `<span class="lifo-badge">SELL NEXT</span>`;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
-    
-    // PROGRESS BAR: center = bp, left = buy target (bp * (1 - buy%)), right = sell target (bp * (1 + sell%))
+
     const buyTargetLot = bp * (1 - cfg.buy / 100);
     const sellTargetLot = bp * (1 + cfg.sell / 100);
     let leftWidth = 0, rightWidth = 0;
@@ -1565,6 +1682,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
         leftWidth = 0;
       }
     }
+
     return `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share ${badgeHtml}</span>
@@ -1581,8 +1699,8 @@ function renderHold(k, p, buyTarget, overallAvg) {
       </div>
       <div class="progress-wrapper">
         <div class="progress-bar-container">
-          <div class="progress-fill-left" style="width: ${leftWidth}%;"></div>
-          <div class="progress-fill-right" style="width: ${rightWidth}%;"></div>
+          <div class="progress-fill-left" style="width:${leftWidth}%;"></div>
+          <div class="progress-fill-right" style="width:${rightWidth}%;"></div>
           <div class="progress-center-line"></div>
           <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
         </div>
@@ -1600,12 +1718,19 @@ function renderHold(k, p, buyTarget, overallAvg) {
       </div>
     </div>`;
   }).join('');
-  
+
+  listEl.innerHTML = lotsHtml;
+
+  // FIX: Append show-more-btn to WRAPPER (not list), so it's always last and never moves
   if (hasMore) {
-    lotsHtml += `<button class="show-more-btn" onclick="toggleShowAllLots('${k}')">${moreButtonText}</button>`;
+    const btn = document.createElement('button');
+    btn.className = 'show-more-btn';
+    btn.textContent = showAll ? `▲ Show Less (${lotCount - 1} hidden lots showing)` : `▼ Show More Lots (${lotCount - 1} more)`;
+    btn.onclick = () => toggleShowAllLots(k);
+    wrapperEl.appendChild(btn);
   }
-  el.innerHTML = lotsHtml;
 }
+
 function setCurrentDateTimeInEdit() { document.getElementById('editDate').value = todayDateStr(); document.getElementById('editTime').value = currentTimeStr(); showToast('✅ Current date & time set'); }
 function openEditModal(k, idx) { const h = st.hold[k][idx]; if (!h) return; editState = { k, idx }; document.getElementById('editPrice').value = (h.buyPrice || h.price || ''); document.getElementById('editUnits').value = h.units || ''; let existingDate = h.date || '', existingTime = h.time || ''; if (!existingDate && !existingTime) { existingDate = todayDateStr(); existingTime = currentTimeStr(); showToast('⏰ Date/Time missing — auto-filled.'); } document.getElementById('editDate').value = existingDate; document.getElementById('editTime').value = existingTime; document.getElementById('editOverlay').classList.add('show'); }
 function closeEditModal() { document.getElementById('editOverlay').classList.remove('show'); editState = { k: null, idx: null }; }
@@ -1621,19 +1746,70 @@ function closeModal() { document.getElementById('overlay').classList.remove('sho
 function confirmTrade() { const { k, type } = st.pend; const liveP = st.price[k]; const time = currentTimeStr(); const date = todayDateStr(); if (type === 'buy') { const bpRaw = parseFloat(document.getElementById('mBuyPrice').value); const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP; const units = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k); st.hold[k].push({ price: buyPrice, buyPrice, units, time, date }); st.alerted[k].buy = false; st.alerted[k].sell = false; addLog({ type: 'buy', k, price: buyPrice, units, time }); showToast('✅ BOUGHT ' + units + ' Share ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2)); } else { const sorted = getSortedHoldings(k); if (!sorted.length) { showToast('No holdings!'); closeModal(); return; } const lot1 = sorted[0]; const lot1Bp = lot1.buyPrice || lot1.price; const sellU = lot1.units; const pnl = (liveP - lot1Bp) * sellU; st.real += pnl; const idx = st.hold[k].findIndex(h => (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time); if (idx !== -1) st.hold[k].splice(idx, 1); st.alerted[k].sell = false; addLog({ type: 'sell', k, price: liveP, units: sellU, pnl, time }); showToast('✅ SOLD Lot 1 · ' + sellU + ' Share ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl >= 0 ? '+' : '') + '₹' + pnl.toFixed(2)); } closeModal(); updateCard(k); saveSt(); updateTabTitle(); }
 function addLog(e) { st.log.unshift(e); renderLog(); }
 function renderLog() { const el = document.getElementById('logBar'); if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; } el.innerHTML = st.log.slice(0, 25).map(l => `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units} Share @ ₹${l.price.toFixed(2)} ${l.pnl !== undefined ? (l.pnl >= 0 ? '+' : '') + '₹' + l.pnl.toFixed(2) : ''} · ${l.time}</div>`).join(''); }
-function buildDataObj() { return { hold: st.hold, log: st.log, real: st.real, alerted: st.alerted, cfg: { buy: cfg.buy, sell: cfg.sell }, apiEnabled, cap: { parts: document.getElementById('cp-parts').value, gord: document.getElementById('cp-gord').value, sord: document.getElementById('cp-sord').value }, manual: { start: manualStart, snapshots: manualSnapshots } }; }
-function saveSt() { try { const data = buildDataObj(); localStorage.setItem(LS_KEY, JSON.stringify(data)); const dot = document.getElementById('saveDot'); if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; } saveToFirebase(data); } catch (e) { console.warn('save failed:', e); } }
-function loadSt() { try { const raw = localStorage.getItem(LS_KEY); if (!raw) return; const data = JSON.parse(raw); if (data.hold) st.hold = data.hold; if (data.log) st.log = data.log; if (data.real !== undefined) st.real = data.real; if (data.alerted) st.alerted = data.alerted; if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; } if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; } if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); } renderLog(); } catch (e) { console.warn('load failed:', e); } }
+
+// FIX: buildDataObj now includes apiEnabled so it syncs to Firebase
+function buildDataObj() {
+  return {
+    hold: st.hold, log: st.log, real: st.real, alerted: st.alerted,
+    cfg: { buy: cfg.buy, sell: cfg.sell },
+    apiEnabled: apiEnabled,  // FIX: included in sync payload
+    cap: {
+      parts: document.getElementById('cp-parts').value,
+      gord: document.getElementById('cp-gord').value,
+      sord: document.getElementById('cp-sord').value
+    },
+    manual: { start: manualStart, snapshots: manualSnapshots }
+  };
+}
+
+function saveSt() {
+  try {
+    const data = buildDataObj();
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    const dot = document.getElementById('saveDot');
+    if (dot) { dot.className = 'save-dot'; void dot.offsetWidth; dot.className = 'save-dot show'; }
+    saveToFirebase(data);
+  } catch (e) { console.warn('save failed:', e); }
+}
+
+function loadSt() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.hold) st.hold = data.hold;
+    if (data.log) st.log = data.log;
+    if (data.real !== undefined) st.real = data.real;
+    if (data.alerted) st.alerted = data.alerted;
+    if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
+    // FIX: restore apiEnabled from saved data
+    if (data.apiEnabled !== undefined) {
+      apiEnabled = data.apiEnabled;
+      localStorage.setItem('apiEnabled', String(apiEnabled));
+      applyApiState();
+    }
+    if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
+    if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
+    renderLog();
+  } catch (e) { console.warn('load failed:', e); }
+}
+
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
-function toggleCap() { const p = document.getElementById('capPanel'), b = document.getElementById('capToggle'); const o = p.classList.toggle('open'); b.classList.toggle('open', o); if (o) calcCapital(); }
+
+// FIX: Capital Planner toggle color
+function toggleCap() {
+  const p = document.getElementById('capPanel'), b = document.getElementById('capToggle');
+  const o = p.classList.toggle('open');
+  b.classList.toggle('open', o);
+  if (o) calcCapital();
+}
+
 function fmt(n) { return '₹ ' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
 function calcCapital() {
   const totalCapital = getTotalCapitalFromSnapshot();
   if (totalCapital <= 0) {
     document.getElementById('cp-gallot').textContent = '₹ — (No snapshot)';
     document.getElementById('cp-sallot').textContent = '₹ — (No snapshot)';
-    document.getElementById('cp-gres').querySelectorAll('.cap-rr .cv').forEach((el, idx) => { if (idx === 0) el.textContent = '—'; else if (idx === 1) el.textContent = '—'; else if (idx === 2) el.textContent = '—'; else el.textContent = '—'; });
-    document.getElementById('cp-sres').querySelectorAll('.cap-rr .cv').forEach((el, idx) => { if (idx === 0) el.textContent = '—'; else if (idx === 1) el.textContent = '—'; else if (idx === 2) el.textContent = '—'; else el.textContent = '—'; });
     return;
   }
   const parts = parseInt(document.getElementById('cp-parts').value) || 1;
@@ -1646,6 +1822,7 @@ function calcCapital() {
   renderCapCard('S', pp, sOrd);
 }
 function renderCapCard(k, allot, orders) { const po = allot / orders; const price = st.price[k]; const resEl = document.getElementById('cp-' + (k === 'G' ? 'g' : 's') + 'res'); const rows = resEl.querySelectorAll('.cap-rr .cv'); rows[0].textContent = fmt(po); if (price && price > 0) { const u = Math.floor(po / price); const used = u * price; rows[1].textContent = u + ' Share'; rows[2].textContent = fmt(used); rows[3].textContent = '₹ ' + (po - used).toFixed(2) + ' leftover'; } else { rows[1].textContent = '— (loading)'; rows[2].textContent = '—'; rows[3].textContent = '—'; } }
+
 document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
 document.getElementById('alertOverlay').addEventListener('click', e => { if (e.target.id === 'alertOverlay') dismissAlert(); });
 document.getElementById('editOverlay').addEventListener('click', e => { if (e.target.id === 'editOverlay') closeEditModal(); });
@@ -1663,9 +1840,24 @@ window.signInWithGoogle = async () => { try { await signInWithPopup(auth, gProv)
 window.signOutUser = async () => { if (!confirm('Logout karna chahte ho?')) return; if (dbRef) off(dbRef); listenActive = false; await signOut(auth); currentUser = null; dbRef = null; document.getElementById('appShell').classList.remove('visible'); document.getElementById('userBar').classList.add('hide'); document.getElementById('fbLoginScreen').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('visible'); showToast('👋 Logged out!'); };
 window.saveToFirebase = (data) => { if (!currentUser || !dbRef) return; setSyncStatus('syncing', 'Saving…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => { set(dbRef, JSON.stringify(data)).then(() => setSyncStatus('ok', 'Synced ✓')).catch(e => { setSyncStatus('offline', 'Sync failed'); console.warn(e); }); }, 1500); };
 window.initFirebase = () => { onAuthStateChanged(auth, user => { if (user) { currentUser = user; document.getElementById('userAvatar').src = user.photoURL || ''; document.getElementById('userName').textContent = user.displayName || user.email; document.getElementById('userBar').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('hide'); document.getElementById('appShell').classList.add('visible'); dbRef = ref(db, 'users/' + user.uid + '/data'); if (!listenActive) { listenActive = true; setSyncStatus('syncing', 'Loading data…'); onValue(dbRef, snap => { const raw = snap.val(); if (raw) { try { const data = typeof raw === 'string' ? JSON.parse(raw) : raw; applyData(data); setSyncStatus('ok', 'Synced ✓'); showToast('☁️ Cloud data loaded!'); } catch (e) { console.warn('Firebase parse error:', e); setSyncStatus('ok', 'Synced ✓'); } } else { setSyncStatus('ok', 'New account'); const local = localStorage.getItem(LS_KEY); if (local) set(dbRef, local).then(() => setSyncStatus('ok', 'Synced ✓')); } if (!window._appStarted) { window._appStarted = true; startApp(); } }, { onlyOnce: true }); } } else { document.getElementById('fbLoginScreen').classList.remove('hide'); setTimeout(() => document.getElementById('fbLoginScreen').classList.add('visible'), 30); document.getElementById('appShell').classList.remove('visible'); } }); };
+
+// FIX: applyData now properly syncs apiEnabled from Firebase across all devices
 function applyData(data) {
-  if (data.apiEnabled !== undefined && data.apiEnabled !== apiEnabled) { apiEnabled = data.apiEnabled; localStorage.setItem('apiEnabled', String(apiEnabled)); const btn = document.getElementById('apiToggle'), txt = document.getElementById('apiTxt'), pausedBar = document.getElementById('apiPausedBar'); if (apiEnabled) { btn.className = 'api-toggle on'; txt.textContent = 'API ON'; pausedBar.classList.remove('show'); } else { btn.className = 'api-toggle off'; txt.textContent = 'API OFF'; pausedBar.classList.add('show'); } }
-  if (data.hold) st.hold = data.hold; if (data.log) st.log = data.log; if (data.real !== undefined) st.real = data.real; if (data.alerted) st.alerted = data.alerted;
+  // FIX: Apply apiEnabled from cloud data — this is the key cross-device sync fix
+  if (data.apiEnabled !== undefined) {
+    apiEnabled = data.apiEnabled;
+    localStorage.setItem('apiEnabled', String(apiEnabled));
+    applyApiState();
+    if (!apiEnabled && window._appStarted) {
+      if (st.timer) clearInterval(st.timer);
+      if (st.tickTimer) clearInterval(st.tickTimer);
+      document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
+    }
+  }
+  if (data.hold) st.hold = data.hold;
+  if (data.log) st.log = data.log;
+  if (data.real !== undefined) st.real = data.real;
+  if (data.alerted) st.alerted = data.alerted;
   if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
   if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
   if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
