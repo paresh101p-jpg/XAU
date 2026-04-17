@@ -193,7 +193,6 @@ body {
   border-bottom: 2px solid var(--border);
 }
 
-/* Section header bar */
 .ps-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 20px;
@@ -207,7 +206,6 @@ body {
 .ps-header.open .ps-toggle-arrow { transform: rotate(180deg); }
 .ps-header-right { display: flex; align-items: center; gap: 8px; }
 
-/* History button */
 .btn-monthly-hist {
   display: flex; align-items: center; gap: 5px;
   background: rgba(245,200,66,0.08); border: 2px solid rgba(245,200,66,0.35);
@@ -216,15 +214,14 @@ body {
 }
 .btn-monthly-hist:hover { background: rgba(245,200,66,0.18); border-color: var(--yellow); transform: translateY(-1px); }
 
-/* Collapsible body */
 .ps-body { overflow: hidden; max-height: 0; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1); }
-.ps-body.open { max-height: 700px; }
+.ps-body.open { max-height: 500px; }
 .ps-inner { padding: 14px 20px 16px; display: flex; flex-direction: column; gap: 14px; }
 
-/* Stats row */
+/* 4 stats (removed start capital card) */
 .ps-stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 .ps-stat {
@@ -250,15 +247,14 @@ body {
 .ps-stat-sub.positive { color: rgba(76,175,130,0.8); }
 .ps-stat-sub.negative { color: rgba(224,82,82,0.8); }
 
-/* Divider between stats and inputs */
 .ps-divider {
-  height: 1px; background: var(--border); margin: 0 -0px;
+  height: 1px; background: var(--border);
 }
 
-/* Inputs section */
+/* Only Today's Value input now */
 .ps-inputs-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
 }
 .ps-input-group {
@@ -289,7 +285,6 @@ body {
 }
 .ps-save-btn:hover { background: #FFD84D; transform: translateY(-1px); }
 
-/* History badge */
 .ps-hist-badge {
   font-size: 0.58rem; color: var(--muted);
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -306,8 +301,8 @@ body {
 .mhist-overlay.show { display: flex; }
 .mhist-modal {
   background: var(--bg2); border: 2px solid rgba(245,200,66,0.35);
-  border-radius: 20px; padding: 0; max-width: 480px; width: 100%;
-  max-height: 88vh; display: flex; flex-direction: column;
+  border-radius: 20px; padding: 0; max-width: 500px; width: 100%;
+  max-height: 90vh; display: flex; flex-direction: column;
   animation: pop 0.22s ease;
   box-shadow: 0 0 60px rgba(245,200,66,0.06);
 }
@@ -326,6 +321,7 @@ body {
 }
 .mhist-close:hover { border-color: var(--red); color: var(--red); }
 
+/* Summary cards */
 .mhist-summary-row {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 10px; padding: 14px 20px; border-bottom: 2px solid var(--border);
@@ -341,6 +337,7 @@ body {
 .mhs-value.positive { color: var(--green); }
 .mhs-value.negative { color: var(--red); }
 .mhs-value.gold { color: var(--gold); }
+.mhs-sub { font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
 
 .mhist-scroll {
   overflow-y: auto; flex: 1; padding: 14px 20px;
@@ -356,19 +353,27 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .mhist-year-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.yr-badge { font-size: 0.62rem; padding: 2px 9px; border-radius: 20px; }
+.yr-badge.pos { background: rgba(76,175,130,0.15); color: var(--green); }
+.yr-badge.neg { background: rgba(224,82,82,0.12); color: var(--red); }
 
+/* Month row — clickable */
+.mhist-month-wrap { margin-bottom: 7px; }
 .mhist-row {
   display: grid;
-  grid-template-columns: 80px 1fr 90px 90px 30px;
+  grid-template-columns: 80px 1fr 90px 80px;
   align-items: center; gap: 8px;
-  padding: 9px 12px; border-radius: 10px;
+  padding: 10px 12px; border-radius: 10px;
   border: 2px solid var(--border); background: var(--bg3);
-  margin-bottom: 6px; transition: border-color 0.15s;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none;
 }
-.mhist-row:hover { border-color: rgba(245,200,66,0.3); }
-.mhist-row.profit-row { border-color: rgba(76,175,130,0.3); }
-.mhist-row.loss-row   { border-color: rgba(224,82,82,0.25); }
-.mhist-month { font-size: 0.78rem; color: var(--text); }
+.mhist-row:hover { border-color: rgba(245,200,66,0.3); background: var(--bg4); }
+.mhist-row.profit-row { border-color: rgba(76,175,130,0.3); border-left: 3px solid var(--green); }
+.mhist-row.loss-row   { border-color: rgba(224,82,82,0.25); border-left: 3px solid var(--red); }
+.mhist-row.expanded { border-radius: 10px 10px 0 0; border-bottom: none; }
+.mhist-month { font-size: 0.78rem; color: var(--text); display: flex; align-items: center; gap: 5px; }
+.mhist-expand-arrow { font-size: 0.55rem; color: var(--muted); transition: transform 0.25s; }
+.mhist-row.expanded .mhist-expand-arrow { transform: rotate(180deg); }
 .mhist-amount { font-size: 0.72rem; color: var(--muted); }
 .mhist-amount span { color: var(--text); font-size: 0.8rem; }
 .mhist-change { font-size: 0.75rem; text-align: right; }
@@ -379,21 +384,23 @@ body {
 .mhist-pct.positive { background: var(--green-dim); color: var(--green); }
 .mhist-pct.negative { background: var(--red-dim); color: var(--red); }
 .mhist-pct.muted    { background: rgba(255,255,255,0.05); color: var(--muted); }
-.mhist-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; grid-column: 1 / -1; display: none; }
-.mhist-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.mhist-bar.positive { background: var(--green); }
-.mhist-bar.negative { background: var(--red); }
 
-.mhist-row-entry {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  align-items: center; gap: 8px;
-  padding: 6px 10px; border-radius: 7px;
-  background: rgba(255,255,255,0.02);
-  margin-bottom: 4px; font-size: 0.68rem;
+/* Sub-entries panel */
+.mhist-entries-panel {
+  background: var(--bg4); border: 2px solid var(--border);
+  border-top: none; border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  max-height: 0; transition: max-height 0.3s ease;
 }
+.mhist-entries-panel.open { max-height: 400px; }
+.mhist-entry-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.68rem;
+}
+.mhist-entry-row:last-child { border-bottom: none; }
 .mhist-entry-date { color: var(--muted); }
-.mhist-entry-amount { color: var(--text); }
+.mhist-entry-amount { color: var(--text); font-size: 0.75rem; }
 
 .mhist-no-data {
   text-align: center; padding: 40px 20px;
@@ -412,7 +419,7 @@ body {
 .cap-toggle .cta { transition: transform 0.3s; font-size: 0.7rem; color: var(--muted); }
 .cap-toggle.open .cta { transform: rotate(180deg); }
 .cap-panel { background: var(--bg2); border-bottom: 2px solid var(--border); overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
-.cap-panel.open { max-height: 700px; }
+.cap-panel.open { max-height: 900px; }
 .cap-inner { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
 .cap-row1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .cap-ig { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; }
@@ -430,6 +437,40 @@ body {
 .cap-ig.sell-inp input:focus { border-color: var(--red); box-shadow: 0 0 8px rgba(224,82,82,0.3); }
 .cap-ig.mult-inp input       { border-color: rgba(245,200,66,0.5); background: rgba(245,200,66,0.06); }
 .cap-ig.mult-inp input:focus { border-color: var(--yellow); box-shadow: 0 0 8px rgba(245,200,66,0.35); }
+
+/* Start Capital section inside cap panel */
+.cap-start-section {
+  background: var(--bg3); border: 2px solid rgba(212,168,67,0.3);
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cap-start-title {
+  font-size: 0.6rem; color: var(--gold);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(212,168,67,0.2); padding-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.cap-start-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cap-start-field { display: flex; flex-direction: column; gap: 4px; }
+.cap-start-field label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.8px; }
+.cap-start-field input {
+  background: var(--bg4); border: 2px solid rgba(212,168,67,0.3);
+  border-radius: 8px; color: var(--text); font-size: 0.82rem;
+  padding: 7px 9px; outline: none; transition: border-color 0.15s; width: 100%;
+}
+.cap-start-field input:focus { border-color: var(--gold); box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+.cap-start-save {
+  background: var(--gold); color: #111; border: none;
+  border-radius: 8px; padding: 8px 14px; font-size: 0.72rem;
+  cursor: pointer; transition: 0.15s; align-self: flex-end; white-space: nowrap;
+}
+.cap-start-save:hover { background: #E8BB55; transform: translateY(-1px); }
+.cap-start-display {
+  font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.cap-start-display .csd-val { color: var(--gold); font-size: 0.82rem; }
+.cap-start-display .csd-date { color: var(--muted); }
+
 .cap-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .cap-card { border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 .cap-card.gc { background: var(--bg3); border: 3px solid rgba(212,168,67,0.78); }
@@ -809,12 +850,12 @@ body {
 .sound-toggle.off { border-color: rgba(224,82,82,0.4); color: var(--red); }
 
 @media(max-width:700px){
-  .ps-stats-row { grid-template-columns: repeat(3,1fr); }
-  .ps-inputs-row { grid-template-columns: 1fr; }
+  .ps-stats-row { grid-template-columns: repeat(2,1fr); }
+  .cap-start-fields { grid-template-columns: 1fr; }
 }
 @media(max-width:480px){
   .ps-stats-row { grid-template-columns: 1fr 1fr; }
-  .mhist-row { grid-template-columns: 68px 1fr 80px 76px 24px; }
+  .mhist-row { grid-template-columns: 68px 1fr 80px 70px; }
 }
 @media(max-width:580px){
   .split { grid-template-columns: 1fr; }
@@ -908,7 +949,6 @@ body {
 
   <!-- =================== PORTFOLIO SUMMARY =================== -->
   <div class="portfolio-summary">
-    <!-- Header bar with toggle + history button -->
     <div class="ps-header open" id="psHeader" onclick="togglePsSection()">
       <div class="ps-header-left">
         <span style="font-size:1rem;">📊</span>
@@ -922,17 +962,11 @@ body {
       </div>
     </div>
 
-    <!-- Collapsible body -->
     <div class="ps-body open" id="psBody">
       <div class="ps-inner">
 
-        <!-- 5 Stats Cards -->
+        <!-- 4 Stats Cards (start capital removed) -->
         <div class="ps-stats-row">
-          <div class="ps-stat">
-            <div class="ps-stat-label">📌 Start Capital</div>
-            <div class="ps-stat-value gold" id="startAmountDisplay">₹ —</div>
-            <div class="ps-stat-sub" id="startDateDisplay">—</div>
-          </div>
           <div class="ps-stat">
             <div class="ps-stat-label">📈 Latest Value</div>
             <div class="ps-stat-value" id="liveAmountDisplay">₹ —</div>
@@ -957,25 +991,8 @@ body {
 
         <div class="ps-divider"></div>
 
-        <!-- Input groups side by side -->
+        <!-- Only Today's Value input -->
         <div class="ps-inputs-row">
-          <!-- Start Capital Group -->
-          <div class="ps-input-group">
-            <div class="ps-input-group-title">📌 Set Start Capital</div>
-            <div class="ps-fields">
-              <div class="ps-field">
-                <label>Amount (₹)</label>
-                <input type="number" id="manualStartAmount" placeholder="e.g. 100000" step="1000">
-              </div>
-              <div class="ps-field">
-                <label>Start Date</label>
-                <input type="date" id="manualStartDate">
-              </div>
-            </div>
-            <button class="ps-save-btn" onclick="saveStartAmount()">💾 Save Start</button>
-          </div>
-
-          <!-- Today's Value Group -->
           <div class="ps-input-group">
             <div class="ps-input-group-title">📈 Add Today's Value</div>
             <div class="ps-fields">
@@ -1017,19 +1034,22 @@ body {
         <button class="mhist-close" onclick="closeMonthlyHistory()">✕ Close</button>
       </div>
 
-      <!-- Quick summary -->
+      <!-- 3-card summary: Start, Latest, Total P&L -->
       <div class="mhist-summary-row">
         <div class="mhs-card">
-          <div class="mhs-label">Total Entries</div>
-          <div class="mhs-value gold" id="mhsTotalEntries">—</div>
+          <div class="mhs-label">📌 Start Capital</div>
+          <div class="mhs-value gold" id="mhsStart">—</div>
+          <div class="mhs-sub" id="mhsStartDate">—</div>
         </div>
         <div class="mhs-card">
-          <div class="mhs-label">Best Month</div>
-          <div class="mhs-value positive" id="mhsBestMonth">—</div>
+          <div class="mhs-label">📈 Latest Value</div>
+          <div class="mhs-value" id="mhsLive">—</div>
+          <div class="mhs-sub" id="mhsLiveDate">—</div>
         </div>
         <div class="mhs-card">
-          <div class="mhs-label">Worst Month</div>
-          <div class="mhs-value negative" id="mhsWorstMonth">—</div>
+          <div class="mhs-label">💰 Total P&amp;L</div>
+          <div class="mhs-value" id="mhsPnl">—</div>
+          <div class="mhs-sub" id="mhsPnlPct">—</div>
         </div>
       </div>
 
@@ -1044,9 +1064,32 @@ body {
   </div>
   <!-- =================== END MONTHLY HISTORY MODAL =================== -->
 
+  <!-- Capital Planner (now includes Start Capital) -->
   <button class="cap-toggle" id="capToggle" onclick="toggleCap()">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
   <div class="cap-panel" id="capPanel">
     <div class="cap-inner">
+
+      <!-- START CAPITAL — moved here from Portfolio Summary -->
+      <div class="cap-start-section">
+        <div class="cap-start-title">📌 Start Capital</div>
+        <div class="cap-start-fields">
+          <div class="cap-start-field">
+            <label>Amount (₹)</label>
+            <input type="number" id="manualStartAmount" placeholder="e.g. 100000" step="1000" oninput="onStartCapitalChange()">
+          </div>
+          <div class="cap-start-field">
+            <label>Start Date</label>
+            <input type="date" id="manualStartDate" onchange="onStartCapitalChange()">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div class="cap-start-display" id="capStartDisplay">
+            <span>Not set</span>
+          </div>
+          <button class="cap-start-save" onclick="saveStartAmount()">💾 Save Start Capital</button>
+        </div>
+      </div>
+
       <div class="cap-row1">
         <div class="cap-ig"><label>Total Capital ₹</label><input type="number" id="cp-total" value="100000" min="1000" step="1000" oninput="calcCapital()"></div>
         <div class="cap-ig"><label>ETF</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
@@ -1257,7 +1300,7 @@ function togglePsSection() {
 
 // ======================== MANUAL PORTFOLIO STORAGE ========================
 let manualStart = { amount: null, date: null };
-let manualSnapshots = []; // array of { date, amount } sorted descending
+let manualSnapshots = [];
 
 function loadManualData() {
   try {
@@ -1269,8 +1312,11 @@ function loadManualData() {
       manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
     }
   } catch(e) { console.warn(e); }
+  // Populate Capital Planner start capital inputs
   if (manualStart.amount) document.getElementById('manualStartAmount').value = manualStart.amount;
   if (manualStart.date) document.getElementById('manualStartDate').value = manualStart.date;
+  updateCapStartDisplay();
+  // Populate today's value input
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
   if (latest) {
     document.getElementById('manualLiveAmount').value = latest.amount;
@@ -1287,6 +1333,27 @@ function saveManualToLocal() {
   saveSt();
 }
 
+function onStartCapitalChange() {
+  // Live update display as user types
+  const amt = parseFloat(document.getElementById('manualStartAmount').value);
+  const dt = document.getElementById('manualStartDate').value;
+  if (!isNaN(amt) && amt > 0 && dt) {
+    document.getElementById('capStartDisplay').innerHTML =
+      `<span class="csd-val">₹${amt.toLocaleString('en-IN')}</span> <span class="csd-date">since ${fmtDateNice(dt)}</span>`;
+  } else {
+    document.getElementById('capStartDisplay').innerHTML = '<span>Not set</span>';
+  }
+}
+
+function updateCapStartDisplay() {
+  if (manualStart.amount && manualStart.date) {
+    document.getElementById('capStartDisplay').innerHTML =
+      `<span class="csd-val">₹${manualStart.amount.toLocaleString('en-IN')}</span> <span class="csd-date">since ${fmtDateNice(manualStart.date)}</span>`;
+  } else {
+    document.getElementById('capStartDisplay').innerHTML = '<span>Not set</span>';
+  }
+}
+
 function saveStartAmount() {
   let amount = parseFloat(document.getElementById('manualStartAmount').value);
   let date = document.getElementById('manualStartDate').value;
@@ -1294,6 +1361,7 @@ function saveStartAmount() {
   if (!date) date = new Date().toISOString().slice(0,10);
   manualStart = { amount, date };
   saveManualToLocal();
+  updateCapStartDisplay();
   updateSummaryDisplay();
   showToast(`✅ Start capital saved: ₹${amount.toLocaleString('en-IN')} — ${date}`);
 }
@@ -1328,14 +1396,9 @@ function getAmountOnDate(targetDate) {
 
 function updateSummaryDisplay() {
   const startAmount = manualStart.amount;
-  const startDate   = manualStart.date;
   const latest      = manualSnapshots.length ? manualSnapshots[0] : null;
   const liveAmount  = latest ? latest.amount : null;
   const liveDate    = latest ? latest.date : null;
-
-  // Start card
-  document.getElementById('startAmountDisplay').textContent = startAmount ? `₹ ${startAmount.toLocaleString('en-IN')}` : '₹ —';
-  document.getElementById('startDateDisplay').textContent   = startDate ? `since ${fmtDateNice(startDate)}` : '—';
 
   // Live card
   document.getElementById('liveAmountDisplay').textContent = liveAmount ? `₹ ${liveAmount.toLocaleString('en-IN')}` : '₹ —';
@@ -1351,7 +1414,7 @@ function updateSummaryDisplay() {
     document.getElementById('totalPnLPercent').textContent = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% overall`;
   } else {
     document.getElementById('totalPnL').className = 'ps-stat-value'; document.getElementById('totalPnL').textContent = '—';
-    document.getElementById('totalPnLPercent').className = 'ps-stat-sub'; document.getElementById('totalPnLPercent').textContent = 'Set start & value';
+    document.getElementById('totalPnLPercent').className = 'ps-stat-sub'; document.getElementById('totalPnLPercent').textContent = 'Capital Planner mein set karo';
   }
 
   // 30-day
@@ -1399,55 +1462,41 @@ function fmtDateNice(isoDate) {
   return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
 }
 
-// ======================== MONTHLY HISTORY ========================
+// ======================== MONTHLY HISTORY — CLICK TO EXPAND ========================
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function getMonthKey(isoDate) {
-  return isoDate.slice(0, 7); // "YYYY-MM"
-}
+function getMonthKey(isoDate) { return isoDate.slice(0, 7); }
 function fmtMonthLabel(monthKey) {
   const [y, m] = monthKey.split('-');
   return `${MONTH_NAMES[parseInt(m)-1]} ${y}`;
 }
 
 function buildMonthlyData() {
-  // Group snapshots by month — use the LAST entry of each month as that month's value
   if (!manualSnapshots.length) return [];
-
-  // Create a map: monthKey -> latest snapshot in that month
   const monthMap = {};
   for (const snap of manualSnapshots) {
     const mk = getMonthKey(snap.date);
-    if (!monthMap[mk] || snap.date > monthMap[mk].date) {
-      monthMap[mk] = snap;
-    }
+    if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap;
   }
-
-  // Sort months ascending
   const sortedMonths = Object.keys(monthMap).sort();
-
-  // Build rows with month-over-month change
   const rows = [];
   for (let i = 0; i < sortedMonths.length; i++) {
     const mk = sortedMonths[i];
     const current = monthMap[mk];
     const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null;
-    // Also check if start capital is earlier than first month
     let prevAmount = prev ? prev.amount : null;
     if (!prevAmount && manualStart.amount && manualStart.date) {
-      // Use start capital if it's before this month
       if (manualStart.date < mk + '-01') prevAmount = manualStart.amount;
     }
     const diff = prevAmount !== null ? current.amount - prevAmount : null;
     const pct  = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null;
-    rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, date: current.date, diff, pct, entries: getEntriesInMonth(mk) });
+    // All entries in this month
+    const entries = manualSnapshots
+      .filter(s => getMonthKey(s.date) === mk)
+      .sort((a,b) => b.date.localeCompare(a.date));
+    rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries });
   }
-  return rows.reverse(); // newest first
-}
-
-function getEntriesInMonth(monthKey) {
-  return manualSnapshots.filter(s => getMonthKey(s.date) === monthKey)
-    .sort((a,b) => b.date.localeCompare(a.date));
+  return rows.reverse();
 }
 
 function showMonthlyHistory() {
@@ -1455,89 +1504,100 @@ function showMonthlyHistory() {
   const noData = document.getElementById('mhistNoData');
   const scroll = document.getElementById('mhistScroll');
 
-  document.getElementById('mhsTotalEntries').textContent = manualSnapshots.length + (manualSnapshots.length !== 1 ? ' entries' : ' entry');
+  // Populate summary cards
+  const latest = manualSnapshots.length ? manualSnapshots[0] : null;
+  document.getElementById('mhsStart').textContent  = manualStart.amount ? `₹ ${manualStart.amount.toLocaleString('en-IN')}` : '—';
+  document.getElementById('mhsStartDate').textContent = manualStart.date ? `since ${fmtDateNice(manualStart.date)}` : '—';
+  document.getElementById('mhsLive').textContent   = latest ? `₹ ${latest.amount.toLocaleString('en-IN')}` : '—';
+  document.getElementById('mhsLiveDate').textContent = latest ? `as on ${fmtDateNice(latest.date)}` : '—';
+  if (manualStart.amount && latest) {
+    const d = latest.amount - manualStart.amount, p = (d / manualStart.amount * 100);
+    const el = document.getElementById('mhsPnl');
+    el.className = 'mhs-value ' + (d >= 0 ? 'positive' : 'negative');
+    el.textContent = (d >= 0 ? '+' : '-') + '₹ ' + Math.abs(d).toLocaleString('en-IN');
+    document.getElementById('mhsPnlPct').textContent = (p >= 0 ? '+' : '') + p.toFixed(2) + '% overall';
+  } else {
+    document.getElementById('mhsPnl').className = 'mhs-value'; document.getElementById('mhsPnl').textContent = '—';
+    document.getElementById('mhsPnlPct').textContent = '—';
+  }
 
   if (!rows.length) {
     noData.style.display = 'block';
-    scroll.innerHTML = '';
-    scroll.appendChild(noData);
-    document.getElementById('mhsBestMonth').textContent = '—';
-    document.getElementById('mhsWorstMonth').textContent = '—';
+    scroll.innerHTML = ''; scroll.appendChild(noData);
     document.getElementById('mhistSubtitle').textContent = 'Koi data nahi';
     document.getElementById('mhistOverlay').classList.add('show');
     return;
   }
-
   noData.style.display = 'none';
 
-  // Best/worst
-  const withChange = rows.filter(r => r.diff !== null);
-  if (withChange.length) {
-    const best  = withChange.reduce((a,b) => (b.diff > a.diff ? b : a));
-    const worst = withChange.reduce((a,b) => (b.diff < a.diff ? b : a));
-    document.getElementById('mhsBestMonth').textContent  = `${best.label}: ${best.diff >= 0 ? '+' : ''}₹${Math.abs(best.diff).toLocaleString('en-IN')}`;
-    document.getElementById('mhsWorstMonth').textContent = `${worst.label}: ${worst.diff >= 0 ? '+' : '-'}₹${Math.abs(worst.diff).toLocaleString('en-IN')}`;
-  } else {
-    document.getElementById('mhsBestMonth').textContent  = '—';
-    document.getElementById('mhsWorstMonth').textContent = '—';
-  }
-
-  // Group by year
+  const years = [...new Set(rows.map(r => r.monthKey.slice(0,4)))];
   const yearMap = {};
-  for (const row of rows) {
-    const yr = row.monthKey.slice(0,4);
+  for (const r of rows) {
+    const yr = r.monthKey.slice(0,4);
     if (!yearMap[yr]) yearMap[yr] = [];
-    yearMap[yr].push(row);
+    yearMap[yr].push(r);
   }
 
-  const years = Object.keys(yearMap).sort().reverse();
+  document.getElementById('mhistSubtitle').textContent = `${manualSnapshots.length} snapshot${manualSnapshots.length !== 1 ? 's' : ''} · ${years.length} year${years.length !== 1 ? 's' : ''}`;
+
   let html = '';
-
   for (const yr of years) {
-    const yearRows = yearMap[yr];
-    // Year total P&L
-    const yearRows_withChange = yearRows.filter(r => r.diff !== null);
-    const yearTotal = yearRows_withChange.reduce((s,r) => s + r.diff, 0);
-    const yearTotalStr = yearRows_withChange.length
-      ? ` &nbsp;·&nbsp; <span style="color:${yearTotal>=0?'var(--green)':'var(--red)'};">${yearTotal>=0?'+':'-'}₹${Math.abs(yearTotal).toLocaleString('en-IN')}</span>`
-      : '';
-    html += `<div class="mhist-year-group">
-      <div class="mhist-year-label">📅 ${yr}${yearTotalStr}</div>`;
+    const yrows = yearMap[yr];
+    const yTotal = yrows.filter(r => r.diff !== null).reduce((s,r) => s + r.diff, 0);
+    const yHas   = yrows.some(r => r.diff !== null);
+    const ybadge = yHas ? `<span class="yr-badge ${yTotal >= 0 ? 'pos' : 'neg'}">${yTotal >= 0 ? '+' : '-'}₹${Math.abs(yTotal).toLocaleString('en-IN')}</span>` : '';
 
-    for (const row of yearRows) {
-      const isProfit = row.diff !== null && row.diff >= 0;
-      const isLoss   = row.diff !== null && row.diff < 0;
+    const rowsHtml = yrows.map(r => {
+      const isProfit = r.diff !== null && r.diff >= 0;
+      const isLoss   = r.diff !== null && r.diff < 0;
       const rowCls   = isProfit ? 'profit-row' : isLoss ? 'loss-row' : '';
-      const diffStr  = row.diff !== null ? `${row.diff >= 0 ? '+' : '-'}₹${Math.abs(row.diff).toLocaleString('en-IN')}` : '—';
-      const pctStr   = row.pct !== null ? `${row.pct >= 0 ? '+' : ''}${row.pct.toFixed(2)}%` : '—';
-      const diffCls  = row.diff === null ? 'muted' : isProfit ? 'positive' : 'negative';
-      const arrow    = row.diff === null ? '' : isProfit ? '▲ ' : '▼ ';
+      const diffStr  = r.diff !== null ? `${r.diff >= 0 ? '+' : '-'}₹${Math.abs(r.diff).toLocaleString('en-IN')}` : '—';
+      const pctStr   = r.pct !== null ? `${r.pct >= 0 ? '+' : ''}${r.pct.toFixed(2)}%` : '—';
+      const diffCls  = r.diff === null ? 'muted' : isProfit ? 'positive' : 'negative';
+      const arrow    = r.diff === null ? '' : isProfit ? '▲ ' : '▼ ';
+      const hasMultiple = r.entries.length > 1;
+      const expandArrow = hasMultiple ? `<span class="mhist-expand-arrow">▼</span>` : '';
 
-      html += `<div class="mhist-row ${rowCls}">
-        <div class="mhist-month">${row.label}</div>
-        <div class="mhist-amount">₹ ${row.amount.toLocaleString('en-IN')}</div>
-        <div class="mhist-change ${diffCls}">${arrow}${diffStr}</div>
-        <div class="mhist-pct ${diffCls}">${pctStr}</div>
-        <div style="font-size:0.6rem;color:var(--muted);text-align:center;">${row.entries.length}×</div>
-      </div>`;
-
-      // Show individual entries if more than 1 in month
-      if (row.entries.length > 1) {
-        for (const e of row.entries) {
-          html += `<div class="mhist-row-entry">
-            <div class="mhist-entry-date">${fmtDateNice(e.date)}</div>
-            <div class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</div>
-          </div>`;
-        }
+      // Sub-entries html (hidden by default)
+      let entriesHtml = '';
+      if (hasMultiple) {
+        entriesHtml = `<div class="mhist-entries-panel" id="ep-${r.monthKey}">
+          ${r.entries.map(e => `
+            <div class="mhist-entry-row">
+              <span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>
+              <span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span>
+            </div>`).join('')}
+        </div>`;
       }
-    }
 
-    html += `</div>`;
+      const onclick = hasMultiple ? `onclick="toggleMonthEntries('${r.monthKey}')"` : '';
+      return `<div class="mhist-month-wrap">
+        <div class="mhist-row ${rowCls}" id="mr-${r.monthKey}" ${onclick}>
+          <div class="mhist-month">${r.label} ${expandArrow}</div>
+          <div class="mhist-amount">₹ ${r.amount.toLocaleString('en-IN')}</div>
+          <div class="mhist-change ${diffCls}">${arrow}${diffStr}</div>
+          <div class="mhist-pct ${diffCls}">${pctStr}</div>
+        </div>${entriesHtml}
+      </div>`;
+    }).join('');
+
+    html += `<div class="mhist-year-group">
+      <div class="mhist-year-label">📅 ${yr} ${ybadge}</div>
+      ${rowsHtml}
+    </div>`;
   }
 
-  document.getElementById('mhistSubtitle').textContent = `${manualSnapshots.length} snapshots · ${years.length} year${years.length !== 1 ? 's' : ''}`;
   scroll.innerHTML = html;
   document.getElementById('mhistOverlay').classList.add('show');
+}
+
+function toggleMonthEntries(monthKey) {
+  const rowEl = document.getElementById('mr-' + monthKey);
+  const panelEl = document.getElementById('ep-' + monthKey);
+  if (!panelEl) return;
+  const isOpen = panelEl.classList.contains('open');
+  panelEl.classList.toggle('open', !isOpen);
+  rowEl.classList.toggle('expanded', !isOpen);
 }
 
 function closeMonthlyHistory() {
@@ -2085,7 +2145,7 @@ function loadSt() {
     if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
     if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
     if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
-    if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
+    if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
     renderLog();
   } catch(e) { console.warn('load failed:',e); }
 }
@@ -2175,7 +2235,7 @@ function applyData(data) {
   if (data.real!==undefined) st.real=data.real; if (data.alerted) st.alerted=data.alerted;
   if (data.cfg) { cfg.buy=data.cfg.buy||2; cfg.sell=data.cfg.sell||3; document.getElementById('c-buy').value=cfg.buy; document.getElementById('c-sell').value=cfg.sell; }
   if (data.cap) { if(data.cap.total) document.getElementById('cp-total').value=data.cap.total; if(data.cap.parts) document.getElementById('cp-parts').value=data.cap.parts; if(data.cap.gord) document.getElementById('cp-gord').value=data.cap.gord; if(data.cap.sord) document.getElementById('cp-sord').value=data.cap.sord; }
-  if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); }
+  if (data.manual) { manualStart=data.manual.start||{amount:null,date:null}; manualSnapshots=data.manual.snapshots||[]; manualSnapshots.sort((a,b)=>new Date(b.date)-new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
   localStorage.setItem(LS_KEY,JSON.stringify(data)); renderLog(); updateAll();
 }
 function setSyncStatus(state, txt) {
