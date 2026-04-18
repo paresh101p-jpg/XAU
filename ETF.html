@@ -1745,7 +1745,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
     const days = dateStr ? calcDaysSince(dateStr) : null;
     const daysDisplay = days !== null ? `Day ${days}` : (dateStr ? '—' : '');
     let badgeHtml = '';
-    if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : `<span class="lifo-badge">SELL NEXT</span>`;
+    if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : ``;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
     const buyTargetLot = bp * (1 - cfg.buy / 100);
     const sellTargetLot = bp * (1 + cfg.sell / 100);
