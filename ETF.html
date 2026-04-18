@@ -1786,8 +1786,8 @@ function renderHold(k, p, buyTarget, overallAvg) {
           <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
         </div>
         <div class="progress-labels">
-          <span class="progress-label-buy ${buyHit ? 'hit' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${buyHit ? '🎯 Hit!' : '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '%'})</span></span>
-          <span class="progress-label-sell ${sellHit ? 'hit' : ''}">▲ Sell ₹${sellTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${sellHit ? '🎯 Hit!' : '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '%'})</span></span>
+          <span class="progress-label-buy ${buyHit ? 'hit' : ''}">▼ Buy ₹ ${buyTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${buyHit ? '🎯 Hit!' : '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '%'})</span></span>
+          <span class="progress-label-sell ${sellHit ? 'hit' : ''}">▲ Sell ₹ ${sellTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${sellHit ? '🎯 Hit!' : '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '%'})</span></span>
         </div>
       </div>
       <div class="h-date-row">
