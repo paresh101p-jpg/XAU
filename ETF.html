@@ -645,10 +645,15 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .h-pct {
-  font-size: 0.65rem; padding: 2px 8px; border-radius: 6px;
+  font-size: 0.7rem; padding: 3px 10px; border-radius: 8px;
+  display: flex; align-items: center; gap: 5px;
+  line-height: 1.4;
 }
 .h-pct.up { background: var(--green-dim); color: var(--green); }
 .h-pct.dn { background: var(--red-dim); color: var(--red); }
+.h-pct .pnl-amt { font-size: 0.78rem; }
+.h-pct .pnl-sep { opacity: 0.5; font-size: 0.6rem; }
+.h-pct .pnl-pct { font-size: 0.62rem; opacity: 0.85; }
 .h-card-body {
   padding: 10px 12px;
   display: flex;
@@ -920,14 +925,7 @@ body {
 }
 .h-date-txt { font-size: 0.6rem; color: var(--muted); }
 .h-days-badge { font-size: 0.58rem; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--text); }
-.h-card-footer {
-  padding: 7px 12px; background: rgba(0,0,0,0.15);
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: center; align-items: center;
-}
-.h-pnl-big { font-size: 0.9rem; }
-.h-pnl-big.profit { color: var(--green); }
-.h-pnl-big.loss   { color: var(--red); }
+
 .btn-h-edit, .btn-h-del {
   border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.62rem; cursor: pointer; transition: 0.15s;
 }
@@ -1768,7 +1766,11 @@ function renderHold(k, p, buyTarget, overallAvg) {
       <div class="h-card-top">
         <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share ${badgeHtml}</span>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span class="h-pct ${isProfit ? 'up' : 'dn'}">${isProfit ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%</span>
+          <span class="h-pct ${isProfit ? 'up' : 'dn'}">
+            <span class="pnl-amt">${isProfit ? '+' : '-'}₹${Math.abs(pnl).toFixed(2)}</span>
+            <span class="pnl-sep">|</span>
+            <span class="pnl-pct">${isProfit ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%</span>
+          </span>
           <button class="btn-h-edit" onclick="openEditModal('${k}',${origIdx})">✏️</button>
           <button class="btn-h-del" onclick="deleteHolding('${k}',${origIdx})">🗑</button>
         </div>
@@ -1791,10 +1793,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
       <div class="h-date-row">
         <span class="h-date-txt">📅 ${dateDisplay} · ${timeDisplay}</span>
         <span class="h-days-badge">${daysDisplay}</span>
-      </div>
-      <div class="h-card-footer">
-        <span class="h-pnl-big ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'} ₹${Math.abs(pnl).toFixed(2)}</span>
-      </div>
+      </div>      
     </div>`;
     cardHtmls.push(cardHtml);
   }
