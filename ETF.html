@@ -651,9 +651,13 @@ body {
 .h-pct.dn { background: var(--red-dim); color: var(--red); }
 .h-card-body {
   padding: 10px 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 8px;
+}
+.h-card-body .h-cell:last-child {
+  text-align: right;
 }
 .h-cell .hcl {
   font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
@@ -757,9 +761,9 @@ body {
   bottom: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.58rem;
+  font-size: 0.72rem;          /* ← bada kiya */
   background: linear-gradient(135deg, #1a1500, #2a2000);
-  padding: 3px 9px;
+  padding: 4px 12px;           /* ← thoda zyada padding */
   border-radius: 20px;
   white-space: nowrap;
   color: #FFD700;
@@ -1691,7 +1695,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
       </div>
       <div class="h-card-body">
         <div class="h-cell"><div class="hcl">Curr. Value</div><div class="hcv">₹ ${Number(curVal).toLocaleString('en-IN')}</div></div>
-        <div class="h-cell"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
+        <div class="h-cell" style="text-align:right;"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
       </div>
       <div class="progress-wrapper">
         <div class="progress-bar-container">
