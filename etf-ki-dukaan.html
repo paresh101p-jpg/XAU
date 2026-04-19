@@ -243,7 +243,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
       Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">~1.5 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;display:none;">
       <button class="btn btn-g" onclick="startLoop()" id="btnLoopStart">▶️ Loop Shuru Karo</button>
       <button class="btn btn-r" onclick="stopLoop()" id="btnLoopStop" disabled>⏹ Loop Band Karo</button>
       <button class="btn btn-b" onclick="fetchAllPrices(true)" id="btnFetch">⚡ Ek Baar Sab Fetch</button>
@@ -618,11 +618,15 @@ async function onUserSignedIn(user) {
   await loadFromFirebase();
   renderDashboard();
   renderHoldings();
-  // Auto start loop after login
-  setTimeout(() => {
+  // Pehli baar sab fetch karo, phir loop auto shuru karo
+  setTimeout(async () => {
     if (!loopRunning) {
-      startLoop();
-      showToast('🔄 Auto loop shuru ho gaya!');
+      showToast('⬇️ Pehli baar sab prices fetch ho rahe hain...');
+      await fetchAllPrices(true);
+      if (!loopRunning) {
+        startLoop();
+        showToast('🔄 Auto loop shuru ho gaya!');
+      }
     }
   }, 1000);
 }
@@ -1054,7 +1058,7 @@ async function retryOne(sym) {
       if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
       const barEl = document.getElementById('ec-bar-' + sym);
       if (barEl) {
-        if (rsi !== null) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBg2; barEl.style.opacity = '1'; }
+        if (rsi !== null) { barEl.style.width = (100 - rsiPct) + '%'; barEl.style.background = rsiBg2; barEl.style.opacity = '1'; }
         else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
       }
     }
@@ -1154,7 +1158,7 @@ async function runLoopTick() {
       if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
       const barEl = document.getElementById('ec-bar-' + e.sym);
       if (barEl) {
-        if (rsi !== null) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBgGrad2; barEl.style.opacity = '1'; }
+        if (rsi !== null) { barEl.style.width = (100 - rsiPct) + '%'; barEl.style.background = rsiBgGrad2; barEl.style.opacity = '1'; }
         else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
       }
     }
@@ -1300,13 +1304,13 @@ function buildEtfCard(e, rank) {
         <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
       </div>
       <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:60px;">
-        ${rsi === null ? `<span style="color:var(--amber);">📅 ${d.days}d data</span>` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+        ${rsi === null ? `` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
       </div>
     </div>
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
         ${rsi !== null
-          ? `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${rsiPct}%;background:${rsiBgGrad};"></div>`
+          ? `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${100 - rsiPct}%;background:${rsiBgGrad};"></div>`
           : `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:0%;background:#444;"></div>`
         }
       </div>
@@ -1369,7 +1373,8 @@ async function fetchAllPrices(force = false) {
   }
   fetchAbort = false;
   setApiStatus('api-loading', '⬇️ Fetching all…');
-  document.getElementById('btnFetch').disabled = true;
+  const btnFetchEl = document.getElementById('btnFetch');
+  if (btnFetchEl) btnFetchEl.disabled = true;
   initStatusRows();
   let ok = 0, fail = 0;
   for (let i = 0; i < S.etfs.length; i++) {
@@ -1396,7 +1401,8 @@ async function fetchAllPrices(force = false) {
   S.fetchedToday = ok;
   save();
   setApiStatus('api-done', `✅ ${ok} fetched`);
-  document.getElementById('btnFetch').disabled = false;
+  const btnFetchEl2 = document.getElementById('btnFetch');
+  if (btnFetchEl2) btnFetchEl2.disabled = false;
   showToast(`✅ ${ok} fetched, ${fail} failed`);
   renderFetchTab(); renderDashboard();
 }
@@ -1543,7 +1549,7 @@ function buildPickCard(r, held, boughtToday) {
           ${r.changePct !== null ? (up?'+':'')+r.changePct.toFixed(2)+'%' : '—'}</div></div>
     </div>
     ${r.rsi !== null ? `<div class="rsi-bar-wrap">
-      <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${rsiPct}%;background:${rsiBg(r.rsi)};"></div></div>
+      <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${100 - rsiPct}%;background:${rsiBg(r.rsi)};"></div></div>
       <div class="rsi-lbl"><span>0 Oversold</span><span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span><span>100 Overbought</span></div>
     </div>` : `<div style="padding:4px 16px 6px;font-size:.6rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
     <div class="pick-btns">
