@@ -832,18 +832,22 @@ async function fetchYahooPrice(sym) {
         const meta = result.meta;
         const price = meta.regularMarketPrice || meta.previousClose;
         if (!price || price <= 0) throw new Error('Invalid price');
-        // Historical closes bhi extract karo
+
+        // Historical closes extract — IST dates use karo (UTC se galat date aata hai NSE ke liye)
         const timestamps = result.timestamp || [];
         const closes = result.indicators?.quote?.[0]?.close || [];
         const historicalData = [];
         for (let i = 0; i < timestamps.length; i++) {
           const c = closes[i];
           if (c && c > 0) {
-            const d = new Date(timestamps[i] * 1000);
-            const dateStr = d.toISOString().slice(0, 10);
+            // IST date: UTC+5:30
+            const istDate = new Date(new Date(timestamps[i] * 1000)
+              .toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+            const dateStr = istDate.toISOString().slice(0, 10);
             historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
           }
         }
+
         return { price: parseFloat(price.toFixed(2)), history: historicalData };
       } catch(e) {
         lastErr = e;
@@ -859,16 +863,18 @@ function savePrice(sym, fetchResult) {
   const ts = Date.now();
   if (!S.prices[sym]) S.prices[sym] = [];
 
-  // Agar fetchResult object hai (new format with history)
   const price = typeof fetchResult === 'object' ? fetchResult.price : fetchResult;
   const history = typeof fetchResult === 'object' ? (fetchResult.history || []) : [];
 
-  // Historical prices save karo (jo pehle se stored nahi hain)
+  // Historical prices save karo — aaj ki date SKIP (wo alag se ts ke saath save hogi)
   history.forEach(h => {
-    if (h.date !== today) { // aaj ka baad mein handle karenge ts ke saath
+    if (h.date && h.date !== today) {
       const exists = S.prices[sym].find(p => p.date === h.date);
       if (!exists) {
         S.prices[sym].push({ date: h.date, price: h.price });
+      } else {
+        // Price update karo agar better hai
+        exists.price = h.price;
       }
     }
   });
@@ -877,6 +883,7 @@ function savePrice(sym, fetchResult) {
   S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
   S.prices[sym].push({ date: today, price, ts });
   S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
+  // Max 60 din ka data rakho
   if (S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
 }
 
