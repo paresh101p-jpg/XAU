@@ -729,19 +729,21 @@ function switchTab(name) {
   if (name === 'dashboard') renderDashboard();
 }
 
-/* RSI functions (same as before) */
+/* RSI functions */
 function calcRSI(closes, period) {
-  if (!closes || closes.length < period + 1) return null;
+  if (!closes || closes.length < 2) return null;
+  // Adaptive: agar configured period ka data nahi, to jo available ho use karo
+  const effPeriod = Math.min(period, closes.length - 1);
   let g = 0, l = 0;
-  for (let i = 1; i <= period; i++) {
+  for (let i = 1; i <= effPeriod; i++) {
     const d = closes[i] - closes[i-1];
     if (d > 0) g += d; else l -= d;
   }
-  let ag = g/period, al = l/period;
-  for (let i = period+1; i < closes.length; i++) {
+  let ag = g/effPeriod, al = l/effPeriod;
+  for (let i = effPeriod+1; i < closes.length; i++) {
     const d = closes[i] - closes[i-1];
-    ag = (ag*(period-1) + (d>0?d:0)) / period;
-    al = (al*(period-1) + (d<0?-d:0)) / period;
+    ag = (ag*(effPeriod-1) + (d>0?d:0)) / effPeriod;
+    al = (al*(effPeriod-1) + (d<0?-d:0)) / effPeriod;
   }
   if (al === 0) return 100;
   return parseFloat((100 - 100/(1 + ag/al)).toFixed(2));
@@ -751,12 +753,14 @@ function getETFData(sym) {
   const closes = hist.map(h => h.price);
   const period = S.rsiPeriod || 14;
   const rsi = calcRSI(closes, period);
+  const effPeriod = closes.length >= 2 ? Math.min(period, closes.length - 1) : period;
+  const isPartialRSI = closes.length >= 2 && closes.length < period + 1;
   const latest = hist[hist.length - 1] || null;
   const prev = hist[hist.length - 2] || null;
   const price = latest ? latest.price : null;
   const changePct = (latest && prev && prev.price > 0)
     ? ((latest.price - prev.price) / prev.price) * 100 : null;
-  return { rsi, price, changePct, days: closes.length, lastDate: latest?.date || null };
+  return { rsi, price, changePct, days: closes.length, lastDate: latest?.date || null, effPeriod, isPartialRSI };
 }
 function getAllRSI() {
   return S.etfs.map(e => {
@@ -812,22 +816,46 @@ async function tryProxy(proxyFn, yahooUrl) {
   } catch {
     data = JSON.parse(text);
   }
+async function tryProxy(proxyFn, yahooUrl) {
+  const res = await fetchWithTimeout(proxyFn(yahooUrl), 25000);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  let data;
+  try {
+    const outer = JSON.parse(text);
+    data = typeof outer.contents === 'string' ? JSON.parse(outer.contents) : outer;
+  } catch {
+    data = JSON.parse(text);
+  }
   const result = data?.chart?.result?.[0];
   if (!result) throw new Error('No chart result');
-  const meta = result.meta;
-  const price = meta.regularMarketPrice || meta.previousClose;
-  if (!price || price <= 0) throw new Error('Invalid price');
-  return parseFloat(price.toFixed(2));
+  return result; // full result return karo
 }
 async function fetchYahooPrice(sym) {
   const ticker = sym + '.NS';
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+  // 30 din ka history — RSI-14 ke liye enough data milega ek hi call mein
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=30d`;
   let lastErr = null;
   for (const proxyFn of PROXIES) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        const price = await tryProxy(proxyFn, yahooUrl);
-        return price;
+        const result = await tryProxy(proxyFn, yahooUrl);
+        const meta = result.meta;
+        const price = meta.regularMarketPrice || meta.previousClose;
+        if (!price || price <= 0) throw new Error('Invalid price');
+        // Historical closes bhi extract karo
+        const timestamps = result.timestamp || [];
+        const closes = result.indicators?.quote?.[0]?.close || [];
+        const historicalData = [];
+        for (let i = 0; i < timestamps.length; i++) {
+          const c = closes[i];
+          if (c && c > 0) {
+            const d = new Date(timestamps[i] * 1000);
+            const dateStr = d.toISOString().slice(0, 10);
+            historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
+          }
+        }
+        return { price: parseFloat(price.toFixed(2)), history: historicalData };
       } catch(e) {
         lastErr = e;
         if (attempt < 3) await sleep(attempt * 2000);
@@ -837,10 +865,26 @@ async function fetchYahooPrice(sym) {
   }
   throw new Error(lastErr?.message?.includes('abort') ? 'Timed out' : (lastErr?.message || 'Failed'));
 }
-function savePrice(sym, price) {
+function savePrice(sym, fetchResult) {
   const today = todayISO();
-  const ts = Date.now(); // epoch ms for "X min pehle" calculation
+  const ts = Date.now();
   if (!S.prices[sym]) S.prices[sym] = [];
+
+  // Agar fetchResult object hai (new format with history)
+  const price = typeof fetchResult === 'object' ? fetchResult.price : fetchResult;
+  const history = typeof fetchResult === 'object' ? (fetchResult.history || []) : [];
+
+  // Historical prices save karo (jo pehle se stored nahi hain)
+  history.forEach(h => {
+    if (h.date !== today) { // aaj ka baad mein handle karenge ts ke saath
+      const exists = S.prices[sym].find(p => p.date === h.date);
+      if (!exists) {
+        S.prices[sym].push({ date: h.date, price: h.price });
+      }
+    }
+  });
+
+  // Aaj ka price ts ke saath save karo (loop tracking ke liye)
   S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
   S.prices[sym].push({ date: today, price, ts });
   S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
@@ -913,8 +957,9 @@ async function retryOne(sym) {
     if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-fetch" id="ec-st-${sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
   }
   try {
-    const price = await fetchYahooPrice(sym);
-    savePrice(sym, price);
+    const result = await fetchYahooPrice(sym);
+    const price = result.price;
+    savePrice(sym, result);
     save();
     const t = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${t}</span>`;
@@ -1004,8 +1049,9 @@ async function runLoopTick() {
   setApiStatus('api-loading', `🔄 ${e.sym} — ${fetchedCount}/${S.etfs.length}`);
 
   try {
-    const price = await fetchYahooPrice(e.sym);
-    savePrice(e.sym, price);
+    const result = await fetchYahooPrice(e.sym);
+    const price = result.price;
+    savePrice(e.sym, result);
     loopOk++;
     S.lastFetchDate = today;
     S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
@@ -1162,7 +1208,7 @@ function buildEtfCard(e, rank) {
     <div class="ec-time" id="ec-time-${e.sym}">⏱ ${timeStr}</div>
     <div class="ec-rsi-row">
       <div>
-        <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${S.rsiPeriod}D</div>
+        <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${d.isPartialRSI ? '~'+d.effPeriod+'D' : S.rsiPeriod+'D'}</div>
         <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
       </div>
       <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:50px;">
@@ -1242,8 +1288,9 @@ async function fetchAllPrices(force = false) {
     if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching…`;
     setBar(Math.round((i / S.etfs.length) * 100));
     try {
-      const price = await fetchYahooPrice(e.sym);
-      savePrice(e.sym, price);
+      const result = await fetchYahooPrice(e.sym);
+      const price = result.price;
+      savePrice(e.sym, result);
       ok++;
       if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span>`;
     } catch(err) {
@@ -1402,7 +1449,7 @@ function buildPickCard(r, held, boughtToday) {
       <div class="pick-sub">${r.days} din ka data · Target: ₹${tgt.toFixed(2)} (+${S.sellTarget}%)</div>
     </div>
     <div class="pick-stats">
-      <div class="ps"><div class="ps-l">RSI (${S.rsiPeriod}D)</div>
+      <div class="ps"><div class="ps-l">RSI (${r.isPartialRSI ? '~'+r.effPeriod+'D ⚠️' : S.rsiPeriod+'D'})</div>
         <div class="ps-v ${rsiClass(r.rsi)}">${r.rsi !== null ? r.rsi.toFixed(1) : 'N/A'}</div></div>
       <div class="ps"><div class="ps-l">Price</div>
         <div class="ps-v" style="color:var(--yellow)">₹ ${r.price.toFixed(2)}</div></div>
@@ -1459,7 +1506,7 @@ function buildWLRow(r, rank) {
       </div>
     </div>
     <div style="text-align:center;flex-shrink:0;min-width:68px;">
-      <div style="font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">RSI ${S.rsiPeriod}D</div>
+      <div style="font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">RSI ${r.isPartialRSI ? '~'+r.effPeriod+'D' : S.rsiPeriod+'D'}</div>
       <div style="background:${rsiPillBg};border:1px solid ${rsiPillBorder};border-radius:8px;padding:3px 8px;display:inline-block;">
         <span class="${rsiClass(r.rsi)}" style="font-size:.82rem;font-weight:700;">${r.rsi !== null ? r.rsi.toFixed(1) : '—'}</span>
       </div>
