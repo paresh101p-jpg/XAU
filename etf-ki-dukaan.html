@@ -594,21 +594,6 @@ async function onUserSignedIn(user) {
       showToast('🔄 Auto loop shuru ho gaya!');
     }
   }, 1000);
-  // Real-time Firebase listener
-  dbRef.on('value', (snapshot) => {
-    const fbData = snapshot.val();
-    if (fbData) {
-      const newS = {...S, ...fbData};
-      if (JSON.stringify(newS) !== JSON.stringify(S)) {
-        S = newS;
-        saveLocal();
-        renderDashboard();
-        renderPriceGrid();
-        renderSettings();
-        showToast('🔄 Dusre device se data update ho gaya');
-      }
-    }
-  });
 }
 
 function showAuthScreen() {
@@ -664,14 +649,18 @@ function saveToFirebase() {
   } catch(e) {}
 }
 
+function saveLocal() {
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {}
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(LS);
-    if (raw) { const parsed = JSON.parse(raw); S = { ...S, ...parsed }; }
-  } catch(e) { console.error('Load error', e); }
-}
-function saveLocal() {
-  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {}
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      S = { ...S, ...parsed };
+    }
+  } catch(e) { console.error('Load error:', e); }
 }
 
 function save() {
@@ -708,8 +697,10 @@ function setBar(pct) {
 }
 function switchTab(name) {
   ['dashboard','fetch','prices','settings'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('active', t===name);
-    document.getElementById('tab-'+t+'-content').style.display = t===name ? 'flex' : 'none';
+    const tabEl = document.getElementById('tab-'+t);
+    const contentEl = document.getElementById('tab-'+t+'-content');
+    if (tabEl) tabEl.classList.toggle('active', t===name);
+    if (contentEl) contentEl.style.display = t===name ? 'flex' : 'none';
   });
   if (name === 'fetch') renderFetchTab();
   if (name === 'prices') renderPriceGrid();
@@ -854,7 +845,7 @@ function isGoodFetchTime() {
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-/* Rolling Loop */
+/* Rolling Loop (same) */
 let loopRunning = false;
 let loopIndex = 0;
 let loopRound = 0;
@@ -863,33 +854,19 @@ let loopFail = 0;
 let nextEtfTimer = null;
 let countdownSec = 0;
 
-// Sabse purane/unfetched ETF pehle
-function getSmartFetchOrder() {
-  const today = todayISO();
-  return S.etfs.map((e, i) => {
-    const hist = (S.prices[e.sym] || []);
-    const todayEntry = hist.find(h => h.date === today);
-    const lastTs = todayEntry?.ts || (hist.length ? new Date(hist[hist.length-1]?.date + 'T00:00:00').getTime() : 0);
-    return { idx: i, sym: e.sym, fetchedToday: !!todayEntry, lastTs };
-  }).sort((a, b) => {
-    if (!a.fetchedToday && b.fetchedToday) return -1;
-    if (a.fetchedToday && !b.fetchedToday) return 1;
-    return a.lastTs - b.lastTs;
-  });
-}
-
 async function startLoop() {
   if (loopRunning) return;
   if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
   loopRunning = true;
-  loopRound = 0; loopOk = 0; loopFail = 0;
+  loopIndex = 0;
+  loopRound = 0;
+  loopOk = 0;
+  loopFail = 0;
   fetchAbort = false;
-  // Smart start: pehle wo ETF jo sabse purana hai
-  loopIndex = getSmartFetchOrder()[0]?.idx || 0;
   initStatusRows();
   updateLoopUI();
   setApiStatus('api-loading', '🔄 Loop ON');
-  showToast('🔄 Rolling loop shuru! Purane prices pehle update honge.');
+  showToast('🔄 Rolling loop shuru! Har ETF 10 min baad update hoga.');
   runLoopTick();
 }
 function stopLoop() {
@@ -925,41 +902,90 @@ async function retryOne(sym) {
 async function runLoopTick() {
   if (!loopRunning || fetchAbort) return;
   if (!S.etfs.length) { stopLoop(); return; }
-  // Smart: sabse purana ETF pehle fetch karo
-  const order = getSmartFetchOrder();
-  loopIndex = order[0]?.idx || 0;
-  const e = S.etfs[loopIndex];
+
   const today = todayISO();
-  const fetchedTodayCount = S.etfs.filter(e2 => (S.prices[e2.sym]||[]).some(h=>h.date===today)).length;
-  // Check if round complete
-  if (fetchedTodayCount === S.etfs.length) {
+
+  // Smart priority: unfetched ETFs pehle, phir oldest fetched
+  function getNextEtfIndex() {
+    // Find all unfetched ETFs (jo aaj fetch nahi hue)
+    const unfetched = S.etfs
+      .map((e, i) => ({ e, i }))
+      .filter(({ e }) => !(S.prices[e.sym] || []).some(h => h.date === today));
+    
+    if (unfetched.length > 0) {
+      // Unfetched mein se loopIndex ke baad wala pehle
+      const afterCurrent = unfetched.filter(({ i }) => i >= loopIndex);
+      const pick = afterCurrent.length > 0 ? afterCurrent[0] : unfetched[0];
+      if (afterCurrent.length === 0) {
+        // Ek round complete
+        loopRound++;
+        loopOk = 0;
+        loopFail = 0;
+        S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+        save();
+        showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
+        updateLoopUI();
+      }
+      return pick.i;
+    }
+
+    // Sab fetch ho gaye — oldest ts wala pehle (next cycle)
     loopRound++;
+    loopOk = 0;
+    loopFail = 0;
     S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     save();
     showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
     updateLoopUI();
+
+    // Oldest fetched timestamp wala
+    let oldestIdx = 0;
+    let oldestTs = Infinity;
+    S.etfs.forEach((e, i) => {
+      const hist = S.prices[e.sym] || [];
+      const todayEntry = hist.find(h => h.date === today);
+      const ts = todayEntry?.ts || 0;
+      if (ts < oldestTs) { oldestTs = ts; oldestIdx = i; }
+    });
+    return oldestIdx;
   }
+
+  loopIndex = getNextEtfIndex();
+  const e = S.etfs[loopIndex];
+
   const stEl = document.getElementById('fst-' + e.sym);
+  const npEl = document.getElementById('np-st-' + e.sym);
   if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
+  if (npEl) npEl.innerHTML = `<span class="spinner"></span>`;
   const rowEl = document.getElementById('frow-' + e.sym);
   if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-  setBar(Math.round((fetchedTodayCount / S.etfs.length) * 100));
-  setApiStatus('api-loading', `🔄 Fetch ho raha hai: ${e.sym} (${fetchedTodayCount}/${S.etfs.length})`);
+  setBar(Math.round(
+    (S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length / S.etfs.length) * 100
+  ));
+  // Header mein clearly dikhao konsa ETF fetch ho raha hai
+  const fetchedNow = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length;
+  setApiStatus('api-loading', `🔄 ${e.sym} — ${fetchedNow}/${S.etfs.length}`);
+
   try {
     const price = await fetchYahooPrice(e.sym);
     savePrice(e.sym, price);
     loopOk++;
-    S.lastFetchDate = todayISO();
+    S.lastFetchDate = today;
     S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    S.fetchedToday = (S.fetchedToday||0) + 1;
+    // fetchedToday = actual unique ETFs fetched today
+    S.fetchedToday = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length;
     save();
-    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">abhi abhi</span>`;
+    const fetchTimeStr = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTimeStr}</span>`;
+    if (npEl) npEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
     loopFail++;
     const msg = err.message || 'Error';
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
+    if (npEl) npEl.innerHTML = `<span style="color:var(--red);">❌</span>`;
   }
+  loopIndex++;
   updateLoopUI();
   const DELAY_SEC = 5 * 60;
   countdownSec = DELAY_SEC;
@@ -992,10 +1018,8 @@ function updateLoopUI() {
   const statusEl = document.getElementById('loopStatus');
   if (statusEl) {
     if (loopRunning) {
-      const curSym = S.etfs[loopIndex]?.sym || '—';
-      const todayNow = todayISO();
-      const fetchedTodayNow = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h=>h.date===todayNow)).length;
-      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · <span style="color:var(--yellow);font-weight:700;">Ab fetch: ${curSym}</span> · ${fetchedTodayNow}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
+      const nextSym = S.etfs[loopIndex]?.sym || '—';
+      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
     } else {
       statusEl.innerHTML = `<span style="color:var(--muted)">⚫ Loop band hai</span>`;
     }
@@ -1020,12 +1044,30 @@ function initStatusRows() {
   sumDiv.innerHTML = `<span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span><span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>`;
   statusList.appendChild(sumDiv);
 
-  // Smart order: jo sabse zyada time se update nahi hua woh upar
-  const smartOrder = getSmartFetchOrder();
-  const nextIdx = loopRunning ? (getSmartFetchOrder()[0]?.idx) : -1;
+  // Find which ETF is "next" to be fetched (oldest ts or unfetched)
+  let nextEtfSym = null;
+  if (loopRunning) {
+    const currentETF = S.etfs[loopIndex > 0 ? loopIndex - 1 : 0];
+    nextEtfSym = currentETF?.sym;
+  } else {
+    // Not running — find oldest/unfetched
+    const unfetched = S.etfs.filter(e => !(S.prices[e.sym]||[]).some(h => h.date === today));
+    if (unfetched.length > 0) {
+      nextEtfSym = unfetched[0].sym;
+    } else {
+      // All fetched — oldest ts
+      let oldestTs = Infinity, oldestSym = null;
+      S.etfs.forEach(e => {
+        const hist = S.prices[e.sym] || [];
+        const td = hist.find(h => h.date === today);
+        const ts = td?.ts || 0;
+        if (ts < oldestTs) { oldestTs = ts; oldestSym = e.sym; }
+      });
+      nextEtfSym = oldestSym;
+    }
+  }
 
-  smartOrder.forEach((item) => {
-    const e = S.etfs[item.idx];
+  S.etfs.forEach(e => {
     const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const td = hist.find(h => h.date === today);
     const lastEntry = hist[0];
@@ -1033,36 +1075,45 @@ function initStatusRows() {
     div.className = 'fe-row';
     div.id = 'frow-' + e.sym;
 
-    // Price or waiting
+    // Highlight currently fetching row
+    const isCurrentlyFetching = loopRunning && S.etfs[loopIndex > 0 ? loopIndex - 1 : 0]?.sym === e.sym;
+    if (isCurrentlyFetching) {
+      div.style.cssText = 'border-color:rgba(245,200,66,.5);background:rgba(245,200,66,.05);';
+    }
+
+    // Price status
     let statusHtml;
-    if (td) {
+    if (isCurrentlyFetching) {
+      statusHtml = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.6rem;">Fetching…</span>`;
+    } else if (td) {
+      const fetchTime = td.ts ? new Date(td.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : fmtDate(td.date);
       statusHtml = `<span class="fe-ok" style="font-weight:700;">₹${td.price.toFixed(2)}</span>`;
     } else {
-      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Waiting</span>`;
+      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Pending</span>`;
     }
 
-    // Next label agar loop chal raha hai
-    if (loopRunning && item.idx === nextIdx && countdownSec > 0) {
-      const m = Math.floor(countdownSec/60), s = countdownSec%60;
-      statusHtml += ` <span style="font-size:.46rem;color:var(--yellow);background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.3);border-radius:4px;padding:1px 5px;">⏭ Next ${m}:${String(s).padStart(2,'0')}</span>`;
-    }
-
-    // Time - actual elapsed time, NOT "today"
+    // Time display — actual time, not "abhi abhi"
     const lastP = td || lastEntry;
     let timeStr;
     if (lastP) {
       if (lastP.ts) {
-        timeStr = timeAgo(lastP.ts);
+        const fetchTime = new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+        const diffMin = Math.floor((Date.now() - lastP.ts) / 60000);
+        if (diffMin < 1) timeStr = fetchTime + ' (abhi)';
+        else if (diffMin < 60) timeStr = fetchTime + ` (${diffMin}m pehle)`;
+        else timeStr = fetchTime;
       } else {
-        const diffDays = Math.round((new Date(today) - new Date(lastP.date)) / 86400000);
-        timeStr = diffDays === 0 ? 'Aaj' : diffDays + 'd pehle';
+        timeStr = fmtDate(lastP.date);
       }
     } else {
       timeStr = 'Kabhi nahi';
     }
-    const timeHtml = `<span style="font-size:.48rem;color:var(--muted);margin-left:auto;">${timeStr}</span>`;
 
-    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span>${timeHtml}`;
+    // "Next price update" label
+    const isNext = !isCurrentlyFetching && e.sym === nextEtfSym;
+    const nextLabel = isNext ? `<span style="font-size:.48rem;background:rgba(91,155,213,.15);color:var(--blue);border:1px solid rgba(91,155,213,.3);border-radius:4px;padding:1px 5px;margin-left:4px;">⏭ Next</span>` : '';
+
+    div.innerHTML = `<span class="fe-sym">${e.sym}${nextLabel}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span><span style="font-size:.48rem;color:var(--muted);margin-left:auto;white-space:nowrap;">${timeStr}</span>`;
     statusList.appendChild(div);
   });
 }
@@ -1120,9 +1171,10 @@ function renderFetchTab() {
   }
   const fcEl = document.getElementById('fetchedCount');
   if (fcEl) {
-    const actualCount = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today)).length;
-    fcEl.textContent = `${actualCount} / ${S.etfs.length} ETFs`;
-    fcEl.style.color = actualCount > 0 ? 'var(--green)' : 'var(--muted)';
+    const today2 = todayISO();
+    const cnt = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today2)).length;
+    fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
+    fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
   }
   updateCountdown();
 }
@@ -1188,50 +1240,46 @@ function renderDashboard() {
     html += `</div>`;
   }
 
-  cont.innerHTML = html;
-  // Holdings section dashboard mein dikhao
-  const holdDiv = document.createElement('div');
-  holdDiv.id = 'dashboard-holdings-section';
-  const tgtPct2 = S.sellTarget || 4.51;
-  let holdHtml = '<div class="sec" style="margin-top:4px;">💼 Active Holdings <span class="badge">' + S.holdings.length + '</span></div>';
-  if (!S.holdings.length) {
-    holdHtml += '<div class="no-pick"><span class="no-pick-icon">💼</span><div class="no-pick-msg"><strong>Koi holding nahi hai.</strong><br>BUY button se kharidao.</div></div>';
-  } else {
+  // --- HOLDINGS SECTION IN DASHBOARD ---
+  if (S.holdings.length > 0) {
+    html += `<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
+    const tgtPct = S.sellTarget || 4.51;
     S.holdings.forEach(h => {
-      const d2 = getETFData(h.sym);
-      const curPx2 = d2.price || h.buyPrice;
-      const pnl2 = (curPx2 - h.buyPrice) * h.units;
-      const pct2 = ((curPx2 - h.buyPrice) / h.buyPrice) * 100;
-      const tgt2 = h.buyPrice * (1 + tgtPct2/100);
-      const sellHit2 = curPx2 >= tgt2;
-      const isP2 = pnl2 >= 0;
-      const rem2 = tgt2 > curPx2 ? ((tgt2 - curPx2)/curPx2*100).toFixed(2) : '0';
-      holdHtml += '<div class="hc ' + (sellHit2?'sell-active':'') + '">' +
-        '<div class="hc-top">' +
-          '<div><div class="hc-nm">' + h.sym + '</div><div class="hc-sm">' + h.units + ' Share · Buy ₹' + h.buyPrice.toFixed(2) + ' · ' + fmtDate(h.buyDate) + '</div></div>' +
-          '<div><div class="hc-pnl-v ' + (isP2?'pp':'ll') + '">' + (isP2?'+':'-') + '₹' + Math.abs(pnl2).toFixed(2) + '</div>' +
-          '<div class="hc-pnl-p ' + (isP2?'pp':'ll') + '">' + (isP2?'▲':'▼') + ' ' + Math.abs(pct2).toFixed(2) + '%</div></div>' +
-        '</div>' +
-        '<div class="hc-body">' +
-          '<div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ' + h.buyPrice.toFixed(2) + '</div></div>' +
-          '<div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ' + curPx2.toFixed(2) + '</div></div>' +
-          '<div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ' + Math.round(h.buyPrice * h.units).toLocaleString('en-IN') + '</div></div>' +
-        '</div>' +
-        '<div style="padding:4px 13px 10px;">' +
-          '<div style="font-size:.6rem;color:' + (sellHit2?'var(--red)':'var(--muted)') + ';">' +
-            (sellHit2 ? '🎯 SELL TARGET HIT! ₹' + tgt2.toFixed(2) + ' (+' + tgtPct2 + '%)' : 'Target: ₹' + tgt2.toFixed(2) + ' (+' + tgtPct2 + '%) · ' + rem2 + '% baki') +
-          '</div>' +
-          (d2.rsi !== null ? '<div style="font-size:.6rem;color:' + (rsiClass(d2.rsi)==='rsi-os'?'var(--red)':rsiClass(d2.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)') + ';margin-top:3px;">RSI: ' + d2.rsi.toFixed(1) + '</div>' : '') +
-        '</div>' +
-        (sellHit2 ? '<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +' + tgtPct2 + '% Target Hit!</div><button class="btn-sell-now" onclick="openModal('' + h.sym + '',' + curPx2 + ','sell')">💰 SELL NOW</button></div>' : '') +
-      '</div>';
+      const d = getETFData(h.sym);
+      const curPx = d.price || h.buyPrice;
+      const pnl = (curPx - h.buyPrice) * h.units;
+      const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
+      const tgt = h.buyPrice * (1 + tgtPct/100);
+      const sellHit = curPx >= tgt;
+      const isP = pnl >= 0;
+      const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
+      html += `<div class="hc ${sellHit?'sell-active':''}">
+        <div class="hc-top">
+          <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
+          <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
+            <div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
+        </div>
+        <div class="hc-body">
+          <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
+          <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
+          <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
+        </div>
+        <div style="padding:4px 13px 10px;">
+          <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
+            ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
+          </div>
+          ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
+        </div>
+        ${sellHit ? `<div class="sell-row">
+          <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
+          <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
+        </div>` : ''}
+      </div>`;
     });
   }
-  holdDiv.innerHTML = holdHtml;
-  cont.appendChild(holdDiv);
-}
 
-function buildPickCard(r, held, boughtToday) {
+  cont.innerHTML = html;
+}(r, held, boughtToday) {
   const today = todayISO();
   const canBuy = !held && !boughtToday;
   const buyTxt = held ? '✅ Already Held' : boughtToday ? '✅ Aaj Liya' : '🛒 BUY';
@@ -1274,9 +1322,11 @@ function buildWLRow(r, rank) {
   const isToday = lastEntry?.date === today;
   const ago = lastEntry?.ts ? timeAgo(lastEntry.ts) : null;
   const updateLabel = isToday
-    ? ago
-      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${ago} update</span>`
-      : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
+    ? ago !== 'abhi abhi'
+      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${ago}</span>`
+      : lastEntry?.ts
+        ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${new Date(lastEntry.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`
+        : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
     : lastEntry
       ? `<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`
       : '';
@@ -1540,6 +1590,27 @@ window.onload = async () => {
   document.getElementById('tradeModal').addEventListener('click', e => {
     if (e.target.id === 'tradeModal') closeModal();
   });
+
+
+
+  // Listen for real-time changes from other devices
+  if (dbRef) {
+    dbRef.on('value', (snapshot) => {
+      const fbData = snapshot.val();
+      if (fbData) {
+        // Simple merge (you can make it smarter if needed)
+        const newS = {...S, ...fbData};
+        if (JSON.stringify(newS) !== JSON.stringify(S)) {
+          S = newS;
+          saveLocal();
+          renderDashboard();
+          renderPriceGrid();
+          renderSettings();
+          showToast('🔄 Dusre device se data update ho gaya');
+        }
+      }
+    });
+  }
 };
 </script>
 </body>
