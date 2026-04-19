@@ -767,8 +767,7 @@ function getAllRSI() {
     const d = getETFData(e.sym);
     const held = S.holdings.some(h => h.sym === e.sym);
     return { sym: e.sym, ...d, held };
-  }).filter(r => r.price !== null)
-    .sort((a,b) => {
+  }).sort((a,b) => {
       if (a.rsi === null && b.rsi === null) return 0;
       if (a.rsi === null) return 1; if (b.rsi === null) return -1;
       return a.rsi - b.rsi;
@@ -977,7 +976,10 @@ async function retryOne(sym) {
       const rsiEl = document.getElementById('ec-rsi-' + sym);
       if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
       const barEl = document.getElementById('ec-bar-' + sym);
-      if (barEl) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBg2; }
+      if (barEl) {
+        if (rsi !== null) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBg2; barEl.style.opacity = '1'; }
+        else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
+      }
     }
     showToast(`✅ ${sym} — ₹${price.toFixed(2)}`);
     renderDashboard();
@@ -1074,7 +1076,10 @@ async function runLoopTick() {
       const rsiEl = document.getElementById('ec-rsi-' + e.sym);
       if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
       const barEl = document.getElementById('ec-bar-' + e.sym);
-      if (barEl) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBgGrad2; }
+      if (barEl) {
+        if (rsi !== null) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBgGrad2; barEl.style.opacity = '1'; }
+        else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
+      }
     }
     if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
@@ -1207,13 +1212,16 @@ function buildEtfCard(e, rank) {
         <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${d.isPartialRSI ? '~'+d.effPeriod+'D' : S.rsiPeriod+'D'}</div>
         <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
       </div>
-      <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:50px;">
-        ${rsi === null ? 'No data' : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+      <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:60px;">
+        ${rsi === null ? '<span style="color:var(--amber);">⚠️ Aur data chahiye</span>' : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
       </div>
     </div>
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
-        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${rsiPct}%;background:${rsiBgGrad};"></div>
+        ${rsi !== null
+          ? `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${rsiPct}%;background:${rsiBgGrad};"></div>`
+          : `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:100%;background:repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px);opacity:.5;"></div>`
+        }
       </div>
       <div class="ec-bar-labels"><span>0</span><span style="color:var(--red);">30</span><span style="color:var(--amber);">70</span><span>100</span></div>
     </div>
@@ -1341,8 +1349,8 @@ function renderDashboard() {
   const oversold = S.rsiOversold || 30;
   const all = getAllRSI();
   const heldSyms = new Set(S.holdings.map(h => h.sym));
-  const under = all.filter(r => r.rsi !== null && r.rsi < oversold && !r.held);
-  const underAll = all.filter(r => r.rsi !== null && r.rsi < oversold);
+  const under = all.filter(r => r.price !== null && r.rsi !== null && r.rsi < oversold && !r.held);
+  const underAll = all.filter(r => r.price !== null && r.rsi !== null && r.rsi < oversold);
   const noPrice = S.etfs.filter(e => !S.prices[e.sym] || !S.prices[e.sym].length);
   let pickETF = null;
   if (S.dailyPick && S.dailyPick.date === today) pickETF = all.find(r => r.sym === S.dailyPick.sym);
@@ -1367,7 +1375,7 @@ function renderDashboard() {
     </div>`;
   }
   html += `<div class="sec" style="margin-top:2px;">🎯 Aaj Ka Pick</div>`;
-  if (!all.length) {
+  if (!all.filter(r => r.price !== null).length) {
     html += `<div class="no-pick"><span class="no-pick-icon">💰</span>
       <div class="no-pick-msg">Pehle <strong>"Auto Fetch"</strong> tab se prices fetch karo.<br>
       <span style="font-size:.58rem;opacity:.7;">RSI ke liye ${S.rsiPeriod+1} din ke prices chahiye.</span></div></div>`;
@@ -1381,12 +1389,6 @@ function renderDashboard() {
   if (underAll.length > 0) {
     html += `<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
     underAll.forEach((r, i) => { html += buildWLRow(r, i+1); });
-    html += `</div>`;
-  }
-  const withRSI = all.filter(r => r.rsi !== null && r.rsi >= oversold);
-  if (withRSI.length > 0) {
-    html += `<div class="sec">📊 Baaki ETFs — RSI Sorted <span class="badge">${withRSI.length}</span></div><div class="wl">`;
-    withRSI.forEach((r, i) => { html += buildWLRow(r, i+1); });
     html += `</div>`;
   }
 
@@ -1509,7 +1511,7 @@ function buildWLRow(r, rank) {
       <div style="font-size:.48rem;color:var(--muted);margin-top:2px;">${rsiLabel}</div>
     </div>
     <div class="wl-px" style="min-width:80px;">
-      <div style="font-size:.82rem;font-weight:700;color:var(--yellow);">₹${r.price.toFixed(2)}</div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--yellow);">${r.price !== null ? '₹'+r.price.toFixed(2) : '—'}</div>
       <div class="wl-chg ${up?'up':'dn'}" style="font-size:.6rem;margin-top:1px;">
         ${r.changePct !== null ? (up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%' : '—'}
       </div>
