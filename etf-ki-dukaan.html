@@ -241,7 +241,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="auto-panel">
     <div class="ap-title">🔄 Rolling Loop — Har ETF 10 Min Baad Update</div>
     <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
-      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">5 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
+      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">~1.5 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-g" onclick="startLoop()" id="btnLoopStart">▶️ Loop Shuru Karo</button>
@@ -259,7 +259,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     </div>
     <div style="background:var(--bg3);border-radius:6px;padding:7px 10px;">
       <div style="font-size:.55rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;">
-        <span>📋 <strong style="color:var(--text)">75 ETFs × 5 min</strong> = ~6.25 hr mein ek full round</span>
+        <span>📋 <strong style="color:var(--text)">75 ETFs × 1.5 min</strong> = ~2 hr mein ek full round</span>
         <span>🔁 Round complete → phir se ITBEES se shuru</span>
         <span>💾 Har price turant save hoti hai</span>
       </div>
@@ -987,6 +987,8 @@ let loopRound = 0;
 let loopOk = 0;
 let loopFail = 0;
 let nextEtfTimer = null;
+let consecutiveRateLimits = 0;
+let lastErr = null;
 let countdownSec = 0;
 
 async function startLoop() {
@@ -1160,6 +1162,7 @@ async function runLoopTick() {
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
     loopFail++;
+    lastErr = err;
     const msg = err.message || 'Error';
     const cardEl3 = document.getElementById('etf-card-' + e.sym);
     if (cardEl3) {
@@ -1170,7 +1173,15 @@ async function runLoopTick() {
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
   }
   updateLoopUI();
-  const DELAY_SEC = 5 * 60;
+  // Smart delay: 90 sec normal, agar rate limit error aaye to badh jaata hai
+  const isRateLimit = lastErr && (lastErr.message||'').toLowerCase().includes('429');
+  if (isRateLimit) {
+    consecutiveRateLimits = (consecutiveRateLimits || 0) + 1;
+    showToast('⚠️ Rate limit! Gap badh raha hai...');
+  } else {
+    consecutiveRateLimits = Math.max(0, (consecutiveRateLimits || 0) - 1);
+  }
+  const DELAY_SEC = consecutiveRateLimits > 0 ? Math.min(300, 90 + consecutiveRateLimits * 60) : 90;
   countdownSec = DELAY_SEC;
   tickCountdown();
 }
@@ -1202,7 +1213,8 @@ function updateLoopUI() {
   if (statusEl) {
     if (loopRunning) {
       const nextSym = S.etfs[loopIndex]?.sym || '—';
-      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
+      const delayMin = Math.round((consecutiveRateLimits > 0 ? Math.min(300, 90 + consecutiveRateLimits*60) : 90)/60*10)/10;
+      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail} · ⏱${delayMin}m gap`;
     } else {
       statusEl.innerHTML = `<span style="color:var(--muted)">⚫ Loop band hai</span>`;
     }
