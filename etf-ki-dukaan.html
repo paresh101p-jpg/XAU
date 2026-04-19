@@ -567,6 +567,7 @@ let S = {
   lastFetchDate: null,
   lastFetchTime: null,
   fetchedToday: 0,
+  firstFetchDone: false,
 };
 let pending = null;
 let fetchAbort = false;
@@ -618,16 +619,20 @@ async function onUserSignedIn(user) {
   await loadFromFirebase();
   renderDashboard();
   renderHoldings();
-  // Pehli baar sab fetch karo, phir loop auto shuru karo
+  // Pehli baar login check: Firebase mein firstFetchDone flag dekho
   setTimeout(async () => {
-    if (!loopRunning) {
-      showToast('⬇️ Pehli baar sab prices fetch ho rahe hain...');
-      await fetchAllPrices(true);
-      if (!loopRunning) {
-        startLoop();
-        showToast('🔄 Auto loop shuru ho gaya!');
-      }
+    if (loopRunning) stopLoop();
+    if (!S.firstFetchDone) {
+      // Pehli baar — sab fetch karo
+      showToast('⬇️ Pehli baar sab ETFs fetch ho rahe hain...');
+      await fetchAllOnLogin();
+      // Flag set karo taaki dobara kabhi na chale
+      S.firstFetchDone = true;
+      save();
     }
+    // Hamesha loop shuru karo (pehli baar bhi, baad mein bhi)
+    startLoop();
+    showToast('🔄 Auto loop shuru ho gaya!');
   }, 1000);
 }
 
@@ -1364,6 +1369,38 @@ function initStatusRows() {
   }
 
   statusList.innerHTML = html;
+}
+async function fetchAllOnLogin() {
+  if (!S.etfs.length) return;
+  fetchAbort = false;
+  setApiStatus('api-loading', '⬇️ Fetching all…');
+  initStatusRows();
+  let ok = 0, fail = 0;
+  for (let i = 0; i < S.etfs.length; i++) {
+    if (fetchAbort) break;
+    const e = S.etfs[i];
+    const stEl = document.getElementById('fst-' + e.sym);
+    if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching…`;
+    setBar(Math.round((i / S.etfs.length) * 100));
+    try {
+      const result = await fetchYahooPrice(e.sym);
+      savePrice(e.sym, result);
+      ok++;
+      if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${result.price.toFixed(2)}</span>`;
+    } catch(err) {
+      fail++;
+      if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${(err.message||'?').slice(0,25)}</span>`;
+    }
+    if (i < S.etfs.length - 1) await sleep(400);
+  }
+  setBar(100); setTimeout(() => setBar(0), 1500);
+  S.lastFetchDate = todayISO();
+  S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  S.fetchedToday = ok;
+  save();
+  setApiStatus('api-done', `✅ ${ok} fetched`);
+  showToast(`✅ ${ok} fetched, ${fail} failed`);
+  renderFetchTab(); renderDashboard();
 }
 async function fetchAllPrices(force = false) {
   if (loopRunning) { showToast('⚠️ Loop chal rahi hai — pehle band karo'); return; }
