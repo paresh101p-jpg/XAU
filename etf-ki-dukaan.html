@@ -202,7 +202,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="tab active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 Dashboard</div>
   <div class="tab" onclick="switchTab('fetch')" id="tab-fetch">🌐 Auto Fetch</div>
   <div class="tab" onclick="switchTab('prices')" id="tab-prices">✏️ Override Prices</div>
-  <div class="tab" onclick="switchTab('holdings')" id="tab-holdings">💼 Holdings</div>
   <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</div>
 </div>
 <!-- ═══ DASHBOARD ═══ -->
@@ -588,7 +587,6 @@ async function onUserSignedIn(user) {
   document.getElementById('btnSignOut').style.display = 'inline-flex';
   await loadFromFirebase();
   renderDashboard();
-  renderHoldings();
   // Auto start loop after login
   setTimeout(() => {
     if (!loopRunning) {
@@ -688,13 +686,12 @@ function setBar(pct) {
   document.getElementById('fetchBar').style.width = pct + '%';
 }
 function switchTab(name) {
-  ['dashboard','fetch','prices','holdings','settings'].forEach(t => {
+  ['dashboard','fetch','prices','settings'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===name);
     document.getElementById('tab-'+t+'-content').style.display = t===name ? 'flex' : 'none';
   });
   if (name === 'fetch') renderFetchTab();
   if (name === 'prices') renderPriceGrid();
-  if (name === 'holdings') renderHoldings();
   if (name === 'settings') renderSettings();
   if (name === 'dashboard') renderDashboard();
 }
@@ -849,16 +846,38 @@ async function startLoop() {
   if (loopRunning) return;
   if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
   loopRunning = true;
-  loopIndex = 0;
   loopRound = 0;
   loopOk = 0;
   loopFail = 0;
   fetchAbort = false;
+  // Smart start: find first ETF that hasn't been fetched today or was fetched longest ago
+  loopIndex = getNextFetchIndex();
   initStatusRows();
   updateLoopUI();
   setApiStatus('api-loading', '🔄 Loop ON');
-  showToast('🔄 Rolling loop shuru! Har ETF 10 min baad update hoga.');
+  showToast('🔄 Rolling loop shuru! Purane prices pehle update honge.');
   runLoopTick();
+}
+
+// Returns index of ETF that needs fetch most urgently
+function getSmartFetchOrder() {
+  const today = todayISO();
+  return S.etfs.map((e, i) => {
+    const hist = (S.prices[e.sym] || []);
+    const todayEntry = hist.find(h => h.date === today);
+    const lastTs = todayEntry?.ts || (hist.length ? new Date(hist[hist.length-1]?.date + 'T00:00:00').getTime() : 0);
+    return { idx: i, sym: e.sym, fetchedToday: !!todayEntry, lastTs };
+  }).sort((a, b) => {
+    // Not fetched today comes first, then sort by oldest timestamp
+    if (!a.fetchedToday && b.fetchedToday) return -1;
+    if (a.fetchedToday && !b.fetchedToday) return 1;
+    return a.lastTs - b.lastTs;
+  });
+}
+
+function getNextFetchIndex() {
+  const order = getSmartFetchOrder();
+  return order[0]?.idx || 0;
 }
 function stopLoop() {
   loopRunning = false;
@@ -893,23 +912,33 @@ async function retryOne(sym) {
 async function runLoopTick() {
   if (!loopRunning || fetchAbort) return;
   if (!S.etfs.length) { stopLoop(); return; }
-  if (loopIndex >= S.etfs.length) {
+
+  // Smart order: pick ETF that needs update most urgently
+  const order = getSmartFetchOrder();
+  const nextItem = order[0];
+  loopIndex = nextItem.idx;
+
+  // Check if all ETFs were fetched recently (within last 5 min), wait
+  if (nextItem.fetchedToday && (Date.now() - nextItem.lastTs) < 4.5 * 60 * 1000) {
     loopRound++;
-    loopIndex = 0;
-    loopOk = 0;
-    loopFail = 0;
     S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     save();
     showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
     updateLoopUI();
   }
+
   const e = S.etfs[loopIndex];
   const stEl = document.getElementById('fst-' + e.sym);
   if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
   const rowEl = document.getElementById('frow-' + e.sym);
   if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-  setBar(Math.round((loopIndex / S.etfs.length) * 100));
-  setApiStatus('api-loading', `🔄 ${loopIndex+1}/${S.etfs.length} — ${e.sym}`);
+
+  // Count how many fetched today
+  const today = todayISO();
+  const fetchedTodayCount = S.etfs.filter(e2 => (S.prices[e2.sym]||[]).some(h=>h.date===today)).length;
+  setBar(Math.round((fetchedTodayCount / S.etfs.length) * 100));
+  setApiStatus('api-loading', `🔄 Fetching: ${e.sym} (${fetchedTodayCount}/${S.etfs.length} done)`);
+
   try {
     const price = await fetchYahooPrice(e.sym);
     savePrice(e.sym, price);
@@ -918,7 +947,6 @@ async function runLoopTick() {
     S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     S.fetchedToday = (S.fetchedToday||0) + 1;
     save();
-    const agoNow = timeAgo(Date.now());
     if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">abhi abhi</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
@@ -926,7 +954,6 @@ async function runLoopTick() {
     const msg = err.message || 'Error';
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
   }
-  loopIndex++;
   updateLoopUI();
   const DELAY_SEC = 5 * 60;
   countdownSec = DELAY_SEC;
@@ -935,6 +962,7 @@ async function runLoopTick() {
 function tickCountdown() {
   if (!loopRunning) return;
   updateCountdown();
+  updateNextPriceLabels();
   if (countdownSec <= 0) {
     runLoopTick();
     return;
@@ -959,8 +987,10 @@ function updateLoopUI() {
   const statusEl = document.getElementById('loopStatus');
   if (statusEl) {
     if (loopRunning) {
-      const nextSym = S.etfs[loopIndex]?.sym || '—';
-      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
+      const curSym = S.etfs[loopIndex]?.sym || '—';
+      const today = todayISO();
+      const fetchedTodayCount = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h=>h.date===today)).length;
+      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · <span style="color:var(--yellow);font-weight:700;">Ab: ${curSym}</span> · ${fetchedTodayCount}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
     } else {
       statusEl.innerHTML = `<span style="color:var(--muted)">⚫ Loop band hai</span>`;
     }
@@ -970,7 +1000,31 @@ function updateLoopUI() {
     el.textContent = `Last round complete: ${S.lastRoundTime||'—'} · Total rounds: ${loopRound}`;
     el.style.color = 'var(--green)';
   }
+  // Update "Next price update" labels in fetch status list
+  updateNextPriceLabels();
   renderFetchTab();
+}
+
+function updateNextPriceLabels() {
+  if (!loopRunning) return;
+  const order = getSmartFetchOrder();
+  // Remove all existing "next" markers
+  document.querySelectorAll('.next-price-lbl').forEach(el => el.remove());
+  // Mark next ETF (first in order that hasn't been fetched yet or oldest)
+  const nextItem = order[0];
+  if (nextItem) {
+    const rowEl = document.getElementById('frow-' + nextItem.sym);
+    if (rowEl && countdownSec > 0) {
+      const m = Math.floor(countdownSec / 60);
+      const s = countdownSec % 60;
+      const lbl = document.createElement('span');
+      lbl.className = 'next-price-lbl';
+      lbl.style.cssText = 'font-size:.48rem;color:var(--yellow);background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:4px;padding:1px 5px;margin-left:4px;white-space:nowrap;';
+      lbl.textContent = `⏭ Next (${m}:${s.toString().padStart(2,'0')})`;
+      const stEl = document.getElementById('fst-' + nextItem.sym);
+      if (stEl) stEl.appendChild(lbl);
+    }
+  }
 }
 function initStatusRows() {
   const statusList = document.getElementById('fetchStatusList');
@@ -985,7 +1039,11 @@ function initStatusRows() {
   sumDiv.innerHTML = `<span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span><span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>`;
   statusList.appendChild(sumDiv);
 
-  S.etfs.forEach(e => {
+  // Get smart order for display
+  const smartOrder = getSmartFetchOrder();
+
+  smartOrder.forEach((item, displayIdx) => {
+    const e = S.etfs[item.idx];
     const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const td = hist.find(h => h.date === today);
     const lastEntry = hist[0];
@@ -1001,9 +1059,20 @@ function initStatusRows() {
       statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Waiting</span>`;
     }
 
-    // Time ago
+    // Time ago - show actual elapsed time, NOT "today"
     const lastP = td || lastEntry;
-    const timeStr = lastP ? (lastP.ts ? timeAgo(lastP.ts) : fmtDate(lastP.date)) : 'Kabhi nahi';
+    let timeStr;
+    if (lastP) {
+      if (lastP.ts) {
+        timeStr = timeAgo(lastP.ts);
+      } else {
+        // No timestamp - show date
+        const diffDays = Math.round((new Date(today) - new Date(lastP.date)) / 86400000);
+        timeStr = diffDays === 0 ? 'Aaj (time nahi)' : diffDays + ' din pehle';
+      }
+    } else {
+      timeStr = 'Kabhi nahi';
+    }
     const timeHtml = `<span style="font-size:.48rem;color:var(--muted);margin-left:auto;">${timeStr}</span>`;
 
     div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span>${timeHtml}`;
@@ -1053,6 +1122,7 @@ function renderFetchTab() {
   const lfEl = document.getElementById('lastFetchTime');
   if (lfEl) {
     if (S.lastFetchDate === today && S.lastFetchTime) {
+      // Show actual time, not just "Aaj"
       lfEl.textContent = `Aaj ${S.lastFetchTime}`;
       lfEl.style.color = 'var(--green)';
     } else if (S.lastFetchDate) {
@@ -1064,9 +1134,10 @@ function renderFetchTab() {
   }
   const fcEl = document.getElementById('fetchedCount');
   if (fcEl) {
-    const cnt = S.lastFetchDate === today ? (S.fetchedToday || 0) : 0;
-    fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
-    fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
+    // Count from actual prices data, not stored counter (more accurate)
+    const actualCount = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today)).length;
+    fcEl.textContent = `${actualCount} / ${S.etfs.length} ETFs`;
+    fcEl.style.color = actualCount > 0 ? 'var(--green)' : 'var(--muted)';
   }
   updateCountdown();
 }
@@ -1133,9 +1204,61 @@ function renderDashboard() {
   }
 
   cont.innerHTML = html;
+  // Also render holdings inside dashboard
+  renderHoldingsInDashboard();
 }
 
-function buildPickCard(r, held, boughtToday) {
+function renderHoldingsInDashboard() {
+  const cont = document.getElementById('tab-dashboard-content');
+  if (!cont) return;
+  let holdHtml = '';
+  if (!S.holdings.length) {
+    holdHtml = `<div class="no-pick" style="margin-top:0;"><span class="no-pick-icon">💼</span>
+      <div class="no-pick-msg"><strong>Koi holding nahi hai.</strong><br>BUY button se kharidao.</div></div>`;
+  } else {
+    const tgtPct = S.sellTarget || 4.51;
+    S.holdings.forEach(h => {
+      const d = getETFData(h.sym);
+      const curPx = d.price || h.buyPrice;
+      const pnl = (curPx - h.buyPrice) * h.units;
+      const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
+      const tgt = h.buyPrice * (1 + tgtPct/100);
+      const sellHit = curPx >= tgt;
+      const isP = pnl >= 0;
+      const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
+      holdHtml += `<div class="hc ${sellHit?'sell-active':''}">
+        <div class="hc-top">
+          <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
+          <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
+            <div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
+        </div>
+        <div class="hc-body">
+          <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
+          <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
+          <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
+        </div>
+        <div style="padding:4px 13px 10px;">
+          <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
+            ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
+          </div>
+          ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
+        </div>
+        ${sellHit ? `<div class="sell-row">
+          <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
+          <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
+        </div>` : ''}
+      </div>`;
+    });
+  }
+  // Append holdings section to dashboard
+  const holdDiv = document.createElement('div');
+  holdDiv.id = 'dashboard-holdings-section';
+  holdDiv.innerHTML = `<div class="sec" style="margin-top:4px;">💼 Active Holdings <span class="badge">${S.holdings.length}</span></div>${holdHtml}`;
+  // Remove old one if exists
+  const old = document.getElementById('dashboard-holdings-section');
+  if (old) old.remove();
+  cont.appendChild(holdDiv);
+}
   const today = todayISO();
   const canBuy = !held && !boughtToday;
   const buyTxt = held ? '✅ Already Held' : boughtToday ? '✅ Aaj Liya' : '🛒 BUY';
@@ -1416,7 +1539,7 @@ function confirmTrade() {
     if (S.dailyPick?.sym === sym) S.dailyPick = null;
     showToast(`✅ SOLD ${h.units} × ${sym} @ ₹${price.toFixed(2)} | P&L: ${pnl>=0?'+':''}₹${pnl.toFixed(2)}`);
   }
-  closeModal(); save(); renderDashboard(); renderHoldings();
+  closeModal(); save(); renderDashboard();
 }
 function addLog(e) { S.log.unshift(e); if (S.log.length > 50) S.log.pop(); renderLog(); }
 function renderLog() {
@@ -1458,7 +1581,6 @@ window.onload = async () => {
           S = newS;
           saveLocal();
           renderDashboard();
-          renderHoldings();
           renderPriceGrid();
           renderSettings();
           showToast('🔄 Dusre device se data update ho gaya');
