@@ -589,6 +589,13 @@ async function onUserSignedIn(user) {
   await loadFromFirebase();
   renderDashboard();
   renderHoldings();
+  // Auto start loop after login
+  setTimeout(() => {
+    if (!loopRunning) {
+      startLoop();
+      showToast('🔄 Auto loop shuru ho gaya!');
+    }
+  }, 1000);
 }
 
 function showAuthScreen() {
@@ -1469,13 +1476,7 @@ window.onload = async () => {
     if (e.target.id === 'tradeModal') closeModal();
   });
 
-  // Auto start loop on app open
-  setTimeout(() => {
-    if (!loopRunning) {
-      startLoop();
-      showToast('🔄 Auto loop shuru ho gaya!');
-    }
-  }, 1500);
+
 
   // Listen for real-time changes from other devices
   if (dbRef) {
