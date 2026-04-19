@@ -693,7 +693,8 @@ function save() {
    HELPERS (baaki code same)
 ══════════════════════════════════════ */
 function todayISO() {
-  return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})).toISOString().slice(0,10);
+  // IST = UTC + 5:30 = +19800 seconds
+  return new Date(Date.now() + 19800000).toISOString().slice(0,10);
 }
 function nowIST() {
   return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
@@ -815,7 +816,8 @@ async function tryProxy(proxyFn, yahooUrl) {
   } catch {
     data = JSON.parse(text);
   }
-  const result = data?.chart?.result?.[0];
+  // Try both flat and nested structure
+  const result = data?.chart?.result?.[0] || (data?.timestamp ? data : null);
   if (!result) throw new Error('No chart result');
   return result;
 }
@@ -826,8 +828,12 @@ async function fetchYahooPrice(sym) {
   let lastErr = null;
 
   function extractHistory(result) {
-    const timestamps = result.timestamp || [];
-    const closes = result.indicators?.quote?.[0]?.close || [];
+    // timestamps can be at result.timestamp or result.chart.result[0].timestamp
+    const timestamps = result.timestamp || result.chart?.result?.[0]?.timestamp || [];
+    const quoteData = result.indicators?.quote?.[0] || result.chart?.result?.[0]?.indicators?.quote?.[0] || {};
+    // Use adjclose if available, else close
+    const adjCloses = result.indicators?.adjclose?.[0]?.adjclose || result.chart?.result?.[0]?.indicators?.adjclose?.[0]?.adjclose || [];
+    const closes = adjCloses.length > 0 ? adjCloses : (quoteData.close || []);
     const historicalData = [];
     for (let i = 0; i < timestamps.length; i++) {
       const c = closes[i];
@@ -838,7 +844,10 @@ async function fetchYahooPrice(sym) {
         historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
       }
     }
-    return historicalData;
+    // Deduplicate by date (keep last)
+    const seen = {};
+    historicalData.forEach(h => { seen[h.date] = h.price; });
+    return Object.entries(seen).map(([date, price]) => ({date, price})).sort((a,b) => a.date.localeCompare(b.date));
   }
 
   for (const proxyFn of PROXIES) {
