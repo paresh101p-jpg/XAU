@@ -308,7 +308,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div id="dataInfo" style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:12px;font-size:.62rem;color:var(--muted);line-height:2;"></div>
 </div>
 <!-- AUTH OVERLAY -->
-<div class="auth-overlay" id="authOverlay" style="display:none;">
+<div class="auth-overlay" id="authOverlay" style="display:flex;">
   <div class="auth-box">
     <div class="auth-logo">🏪</div>
     <div class="auth-title">ETF Ki Dukaan</div>
@@ -544,9 +544,10 @@ let fetchAbort = false;
 
 /* Firebase Sync Helpers */
 async function initFirebaseAuth() {
-  // Hide overlay while checking auth state
+  // Show loading state first
   const overlay = document.getElementById('authOverlay');
-  overlay.style.display = 'none';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
 
   // Step 1: Check if returning from Google redirect
   try {
@@ -564,7 +565,7 @@ async function initFirebaseAuth() {
     const unsub = auth.onAuthStateChanged(async (user) => {
       unsub();
       if (user && !user.isAnonymous) {
-        // Already logged in — just continue
+        // Already logged in — hide overlay and continue
         await onUserSignedIn(user);
       } else {
         // Not logged in — show login screen
