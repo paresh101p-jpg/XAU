@@ -821,39 +821,46 @@ async function tryProxy(proxyFn, yahooUrl) {
 }
 async function fetchYahooPrice(sym) {
   const ticker = sym + '.NS';
-  // 30 din ka history — RSI-14 ke liye enough data milega ek hi call mein
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=30d`;
+  // 60 din ka history — RSI-14 ke liye plenty of data
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=60d`;
   let lastErr = null;
+
+  function extractHistory(result) {
+    const timestamps = result.timestamp || [];
+    const closes = result.indicators?.quote?.[0]?.close || [];
+    const historicalData = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      const c = closes[i];
+      if (c && c > 0 && timestamps[i]) {
+        // IST = UTC + 5:30 = +19800 seconds
+        const istMs = (timestamps[i] + 19800) * 1000;
+        const dateStr = new Date(istMs).toISOString().slice(0, 10);
+        historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
+      }
+    }
+    return historicalData;
+  }
+
   for (const proxyFn of PROXIES) {
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const result = await tryProxy(proxyFn, yahooUrl);
         const meta = result.meta;
         const price = meta.regularMarketPrice || meta.previousClose;
         if (!price || price <= 0) throw new Error('Invalid price');
 
-        // Historical closes extract — IST dates seedha offset se nikalo (toLocaleString bug fix)
-        const timestamps = result.timestamp || [];
-        const closes = result.indicators?.quote?.[0]?.close || [];
-        const historicalData = [];
-        for (let i = 0; i < timestamps.length; i++) {
-          const c = closes[i];
-          if (c && c > 0) {
-            // IST = UTC + 5:30 = UTC + 19800 seconds
-            const istMs = (timestamps[i] + 19800) * 1000;
-            const istDate = new Date(istMs);
-            const dateStr = istDate.toISOString().slice(0, 10);
-            historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
-          }
-        }
+        const historicalData = extractHistory(result);
+
+        // Agar history nahi aayi toh error throw karo — dusra proxy try karega
+        if (historicalData.length < 2) throw new Error('No history data');
 
         return { price: parseFloat(price.toFixed(2)), history: historicalData };
       } catch(e) {
         lastErr = e;
-        if (attempt < 3) await sleep(attempt * 2000);
+        if (attempt < 2) await sleep(2000);
       }
     }
-    await sleep(1500);
+    await sleep(1000);
   }
   throw new Error(lastErr?.message?.includes('abort') ? 'Timed out' : (lastErr?.message || 'Failed'));
 }
@@ -1211,14 +1218,14 @@ function buildEtfCard(e, rank) {
         <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
       </div>
       <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:60px;">
-        ${rsi === null ? `<span style="color:var(--amber);">⚠️ ${d.days < 2 ? 'Fetch karo' : d.days + 'd data'}</span>` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+        ${rsi === null ? `<span style="color:var(--amber);">📅 ${d.days}d data</span>` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
       </div>
     </div>
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
         ${rsi !== null
           ? `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${rsiPct}%;background:${rsiBgGrad};"></div>`
-          : `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:100%;background:repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px);opacity:.5;"></div>`
+          : `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:0%;background:#444;"></div>`
         }
       </div>
       <div class="ec-bar-labels"><span>0</span><span style="color:var(--red);">30</span><span style="color:var(--amber);">70</span><span>100</span></div>
