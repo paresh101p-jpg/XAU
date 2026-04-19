@@ -202,6 +202,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="tab active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 Dashboard</div>
   <div class="tab" onclick="switchTab('fetch')" id="tab-fetch">🌐 Auto Fetch</div>
   <div class="tab" onclick="switchTab('prices')" id="tab-prices">✏️ Override Prices</div>
+  <div class="tab" onclick="switchTab('holdings')" id="tab-holdings">💼 Holdings</div>
   <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</div>
 </div>
 <!-- ═══ DASHBOARD ═══ -->
@@ -455,15 +456,23 @@ let dbRef = null; // Will be set to users/{uid}/data
 /* Google Sign-In */
 async function signInWithGoogle() {
   const overlay = document.getElementById('authOverlay');
-  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Google se sign in ho raha hai...</div><div style="font-size:.6rem;color:var(--muted);margin-top:6px;">Ek second ruko…</div></div>`;
+  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Google se sign in ho raha hai...</div><div style="font-size:.6rem;color:var(--muted);margin-top:6px;">Popup band mat karo</div></div>`;
   try {
     googleProvider.setCustomParameters({ prompt: 'select_account' });
-    // GitHub Pages pe redirect method use karo — popup blocked ho sakta hai
-    await auth.signInWithRedirect(googleProvider);
-    // Page redirect ho jayega — yahan ka code execute nahi hoga
+    const result = await auth.signInWithPopup(googleProvider);
+    await onUserSignedIn(result.user);
   } catch (error) {
-    console.error("Sign in error:", error.code, error.message);
-    showAuthError(`Error: ${error.code || error.message}`);
+    console.error("Popup failed, trying redirect:", error.code);
+    if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      // Fallback to redirect
+      try {
+        await auth.signInWithRedirect(googleProvider);
+      } catch(e2) {
+        showAuthError(e2.message);
+      }
+    } else {
+      showAuthError(error.message);
+    }
   }
 }
 
@@ -535,6 +544,7 @@ let fetchAbort = false;
 
 /* Firebase Sync Helpers */
 async function initFirebaseAuth() {
+  // Show loading state first
   const overlay = document.getElementById('authOverlay');
   overlay.style.display = 'flex';
   overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
@@ -547,39 +557,18 @@ async function initFirebaseAuth() {
       return;
     }
   } catch (error) {
-    console.error("Redirect result error:", error.code, error.message);
-    // auth/unauthorized-domain matlab Firebase Console mein domain add nahi ki
-    if (error.code === 'auth/unauthorized-domain') {
-      overlay.style.display = 'flex';
-      overlay.innerHTML = `<div class="auth-box">
-        <div class="auth-logo">⚠️</div>
-        <div class="auth-title" style="color:var(--red)">Domain Authorized Nahi</div>
-        <div class="auth-sub" style="font-size:.62rem;line-height:1.9;">
-          Firebase Console mein ye domain add karni hogi:<br>
-          <code style="background:var(--bg3);padding:2px 8px;border-radius:4px;color:var(--yellow);font-size:.7rem;">${window.location.hostname}</code><br><br>
-          <strong style="color:var(--text)">Steps:</strong><br>
-          Firebase Console → Authentication<br>
-          → Settings → Authorized domains<br>
-          → Add domain → upar wala domain daalo
-        </div>
-        <button class="auth-skip" onclick="skipAuth()" style="margin-top:10px;">Bina login ke continue karo</button>
-      </div>`;
-      return;
-    }
-    // Koi aur error — show karo
-    if (error.code && error.code !== 'auth/no-auth-event') {
-      showAuthError(`${error.code}: ${error.message}`);
-      return;
-    }
+    console.error("Redirect result error:", error);
   }
 
-  // Step 2: Check current auth state
+  // Step 2: Check current auth state — Firebase remembers session automatically
   return new Promise((resolve) => {
     const unsub = auth.onAuthStateChanged(async (user) => {
       unsub();
       if (user && !user.isAnonymous) {
+        // Already logged in — hide overlay and continue
         await onUserSignedIn(user);
       } else {
+        // Not logged in — show login screen
         if (user && user.isAnonymous) await auth.signOut();
         showAuthScreen();
       }
@@ -599,6 +588,7 @@ async function onUserSignedIn(user) {
   document.getElementById('btnSignOut').style.display = 'inline-flex';
   await loadFromFirebase();
   renderDashboard();
+  renderHoldings();
   // Auto start loop after login
   setTimeout(() => {
     if (!loopRunning) {
@@ -665,16 +655,6 @@ function saveLocal() {
   try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {}
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem(LS);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      S = { ...S, ...parsed };
-    }
-  } catch(e) { console.error('Load error:', e); }
-}
-
 function save() {
   saveLocal();
   saveToFirebase();   // Real-time push to cloud
@@ -708,14 +688,13 @@ function setBar(pct) {
   document.getElementById('fetchBar').style.width = pct + '%';
 }
 function switchTab(name) {
-  ['dashboard','fetch','prices','settings'].forEach(t => {
-    const tabEl = document.getElementById('tab-'+t);
-    const contentEl = document.getElementById('tab-'+t+'-content');
-    if (tabEl) tabEl.classList.toggle('active', t===name);
-    if (contentEl) contentEl.style.display = t===name ? 'flex' : 'none';
+  ['dashboard','fetch','prices','holdings','settings'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+    document.getElementById('tab-'+t+'-content').style.display = t===name ? 'flex' : 'none';
   });
   if (name === 'fetch') renderFetchTab();
   if (name === 'prices') renderPriceGrid();
+  if (name === 'holdings') renderHoldings();
   if (name === 'settings') renderSettings();
   if (name === 'dashboard') renderDashboard();
 }
@@ -914,88 +893,38 @@ async function retryOne(sym) {
 async function runLoopTick() {
   if (!loopRunning || fetchAbort) return;
   if (!S.etfs.length) { stopLoop(); return; }
-
-  const today = todayISO();
-
-  // Smart priority: unfetched ETFs pehle, phir oldest fetched
-  function getNextEtfIndex() {
-    // Find all unfetched ETFs (jo aaj fetch nahi hue)
-    const unfetched = S.etfs
-      .map((e, i) => ({ e, i }))
-      .filter(({ e }) => !(S.prices[e.sym] || []).some(h => h.date === today));
-    
-    if (unfetched.length > 0) {
-      // Unfetched mein se loopIndex ke baad wala pehle
-      const afterCurrent = unfetched.filter(({ i }) => i >= loopIndex);
-      const pick = afterCurrent.length > 0 ? afterCurrent[0] : unfetched[0];
-      if (afterCurrent.length === 0) {
-        // Ek round complete
-        loopRound++;
-        loopOk = 0;
-        loopFail = 0;
-        S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-        save();
-        showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
-        updateLoopUI();
-      }
-      return pick.i;
-    }
-
-    // Sab fetch ho gaye — oldest ts wala pehle (next cycle)
+  if (loopIndex >= S.etfs.length) {
     loopRound++;
+    loopIndex = 0;
     loopOk = 0;
     loopFail = 0;
     S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     save();
     showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
     updateLoopUI();
-
-    // Oldest fetched timestamp wala
-    let oldestIdx = 0;
-    let oldestTs = Infinity;
-    S.etfs.forEach((e, i) => {
-      const hist = S.prices[e.sym] || [];
-      const todayEntry = hist.find(h => h.date === today);
-      const ts = todayEntry?.ts || 0;
-      if (ts < oldestTs) { oldestTs = ts; oldestIdx = i; }
-    });
-    return oldestIdx;
   }
-
-  loopIndex = getNextEtfIndex();
   const e = S.etfs[loopIndex];
-
   const stEl = document.getElementById('fst-' + e.sym);
-  const npEl = document.getElementById('np-st-' + e.sym);
   if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
-  if (npEl) npEl.innerHTML = `<span class="spinner"></span>`;
   const rowEl = document.getElementById('frow-' + e.sym);
   if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-  setBar(Math.round(
-    (S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length / S.etfs.length) * 100
-  ));
-  // Header mein clearly dikhao konsa ETF fetch ho raha hai
-  const fetchedNow = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length;
-  setApiStatus('api-loading', `🔄 ${e.sym} — ${fetchedNow}/${S.etfs.length}`);
-
+  setBar(Math.round((loopIndex / S.etfs.length) * 100));
+  setApiStatus('api-loading', `🔄 ${loopIndex+1}/${S.etfs.length} — ${e.sym}`);
   try {
     const price = await fetchYahooPrice(e.sym);
     savePrice(e.sym, price);
     loopOk++;
-    S.lastFetchDate = today;
+    S.lastFetchDate = todayISO();
     S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    // fetchedToday = actual unique ETFs fetched today
-    S.fetchedToday = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h=>h.date===today)).length;
+    S.fetchedToday = (S.fetchedToday||0) + 1;
     save();
-    const fetchTimeStr = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTimeStr}</span>`;
-    if (npEl) npEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span>`;
+    const agoNow = timeAgo(Date.now());
+    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">abhi abhi</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
     loopFail++;
     const msg = err.message || 'Error';
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
-    if (npEl) npEl.innerHTML = `<span style="color:var(--red);">❌</span>`;
   }
   loopIndex++;
   updateLoopUI();
@@ -1056,29 +985,6 @@ function initStatusRows() {
   sumDiv.innerHTML = `<span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span><span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>`;
   statusList.appendChild(sumDiv);
 
-  // Find which ETF is "next" to be fetched (oldest ts or unfetched)
-  let nextEtfSym = null;
-  if (loopRunning) {
-    const currentETF = S.etfs[loopIndex > 0 ? loopIndex - 1 : 0];
-    nextEtfSym = currentETF?.sym;
-  } else {
-    // Not running — find oldest/unfetched
-    const unfetched = S.etfs.filter(e => !(S.prices[e.sym]||[]).some(h => h.date === today));
-    if (unfetched.length > 0) {
-      nextEtfSym = unfetched[0].sym;
-    } else {
-      // All fetched — oldest ts
-      let oldestTs = Infinity, oldestSym = null;
-      S.etfs.forEach(e => {
-        const hist = S.prices[e.sym] || [];
-        const td = hist.find(h => h.date === today);
-        const ts = td?.ts || 0;
-        if (ts < oldestTs) { oldestTs = ts; oldestSym = e.sym; }
-      });
-      nextEtfSym = oldestSym;
-    }
-  }
-
   S.etfs.forEach(e => {
     const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const td = hist.find(h => h.date === today);
@@ -1087,45 +993,20 @@ function initStatusRows() {
     div.className = 'fe-row';
     div.id = 'frow-' + e.sym;
 
-    // Highlight currently fetching row
-    const isCurrentlyFetching = loopRunning && S.etfs[loopIndex > 0 ? loopIndex - 1 : 0]?.sym === e.sym;
-    if (isCurrentlyFetching) {
-      div.style.cssText = 'border-color:rgba(245,200,66,.5);background:rgba(245,200,66,.05);';
-    }
-
-    // Price status
+    // Price or waiting
     let statusHtml;
-    if (isCurrentlyFetching) {
-      statusHtml = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.6rem;">Fetching…</span>`;
-    } else if (td) {
-      const fetchTime = td.ts ? new Date(td.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : fmtDate(td.date);
+    if (td) {
       statusHtml = `<span class="fe-ok" style="font-weight:700;">₹${td.price.toFixed(2)}</span>`;
     } else {
-      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Pending</span>`;
+      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Waiting</span>`;
     }
 
-    // Time display — actual time, not "abhi abhi"
+    // Time ago
     const lastP = td || lastEntry;
-    let timeStr;
-    if (lastP) {
-      if (lastP.ts) {
-        const fetchTime = new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-        const diffMin = Math.floor((Date.now() - lastP.ts) / 60000);
-        if (diffMin < 1) timeStr = fetchTime + ' (abhi)';
-        else if (diffMin < 60) timeStr = fetchTime + ` (${diffMin}m pehle)`;
-        else timeStr = fetchTime;
-      } else {
-        timeStr = fmtDate(lastP.date);
-      }
-    } else {
-      timeStr = 'Kabhi nahi';
-    }
+    const timeStr = lastP ? (lastP.ts ? timeAgo(lastP.ts) : fmtDate(lastP.date)) : 'Kabhi nahi';
+    const timeHtml = `<span style="font-size:.48rem;color:var(--muted);margin-left:auto;">${timeStr}</span>`;
 
-    // "Next price update" label
-    const isNext = !isCurrentlyFetching && e.sym === nextEtfSym;
-    const nextLabel = isNext ? `<span style="font-size:.48rem;background:rgba(91,155,213,.15);color:var(--blue);border:1px solid rgba(91,155,213,.3);border-radius:4px;padding:1px 5px;margin-left:4px;">⏭ Next</span>` : '';
-
-    div.innerHTML = `<span class="fe-sym">${e.sym}${nextLabel}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span><span style="font-size:.48rem;color:var(--muted);margin-left:auto;white-space:nowrap;">${timeStr}</span>`;
+    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span>${timeHtml}`;
     statusList.appendChild(div);
   });
 }
@@ -1183,8 +1064,7 @@ function renderFetchTab() {
   }
   const fcEl = document.getElementById('fetchedCount');
   if (fcEl) {
-    const today2 = todayISO();
-    const cnt = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today2)).length;
+    const cnt = S.lastFetchDate === today ? (S.fetchedToday || 0) : 0;
     fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
     fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
   }
@@ -1252,46 +1132,10 @@ function renderDashboard() {
     html += `</div>`;
   }
 
-  // --- HOLDINGS SECTION IN DASHBOARD ---
-  if (S.holdings.length > 0) {
-    html += `<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
-    const tgtPct = S.sellTarget || 4.51;
-    S.holdings.forEach(h => {
-      const d = getETFData(h.sym);
-      const curPx = d.price || h.buyPrice;
-      const pnl = (curPx - h.buyPrice) * h.units;
-      const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
-      const tgt = h.buyPrice * (1 + tgtPct/100);
-      const sellHit = curPx >= tgt;
-      const isP = pnl >= 0;
-      const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
-      html += `<div class="hc ${sellHit?'sell-active':''}">
-        <div class="hc-top">
-          <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
-          <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
-            <div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
-        </div>
-        <div class="hc-body">
-          <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
-          <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
-          <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
-        </div>
-        <div style="padding:4px 13px 10px;">
-          <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
-            ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
-          </div>
-          ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
-        </div>
-        ${sellHit ? `<div class="sell-row">
-          <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
-          <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
-        </div>` : ''}
-      </div>`;
-    });
-  }
-
   cont.innerHTML = html;
-}(r, held, boughtToday) {
+}
+
+function buildPickCard(r, held, boughtToday) {
   const today = todayISO();
   const canBuy = !held && !boughtToday;
   const buyTxt = held ? '✅ Already Held' : boughtToday ? '✅ Aaj Liya' : '🛒 BUY';
@@ -1334,11 +1178,9 @@ function buildWLRow(r, rank) {
   const isToday = lastEntry?.date === today;
   const ago = lastEntry?.ts ? timeAgo(lastEntry.ts) : null;
   const updateLabel = isToday
-    ? ago !== 'abhi abhi'
-      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${ago}</span>`
-      : lastEntry?.ts
-        ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${new Date(lastEntry.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`
-        : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
+    ? ago
+      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${ago} update</span>`
+      : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
     : lastEntry
       ? `<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`
       : '';
@@ -1574,7 +1416,7 @@ function confirmTrade() {
     if (S.dailyPick?.sym === sym) S.dailyPick = null;
     showToast(`✅ SOLD ${h.units} × ${sym} @ ₹${price.toFixed(2)} | P&L: ${pnl>=0?'+':''}₹${pnl.toFixed(2)}`);
   }
-  closeModal(); save(); renderDashboard();
+  closeModal(); save(); renderDashboard(); renderHoldings();
 }
 function addLog(e) { S.log.unshift(e); if (S.log.length > 50) S.log.pop(); renderLog(); }
 function renderLog() {
@@ -1616,6 +1458,7 @@ window.onload = async () => {
           S = newS;
           saveLocal();
           renderDashboard();
+          renderHoldings();
           renderPriceGrid();
           renderSettings();
           showToast('🔄 Dusre device se data update ho gaya');
