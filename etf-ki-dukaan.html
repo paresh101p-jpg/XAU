@@ -816,20 +816,9 @@ async function tryProxy(proxyFn, yahooUrl) {
   } catch {
     data = JSON.parse(text);
   }
-async function tryProxy(proxyFn, yahooUrl) {
-  const res = await fetchWithTimeout(proxyFn(yahooUrl), 25000);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  let data;
-  try {
-    const outer = JSON.parse(text);
-    data = typeof outer.contents === 'string' ? JSON.parse(outer.contents) : outer;
-  } catch {
-    data = JSON.parse(text);
-  }
   const result = data?.chart?.result?.[0];
   if (!result) throw new Error('No chart result');
-  return result; // full result return karo
+  return result;
 }
 async function fetchYahooPrice(sym) {
   const ticker = sym + '.NS';
