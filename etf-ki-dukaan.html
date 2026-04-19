@@ -594,6 +594,21 @@ async function onUserSignedIn(user) {
       showToast('🔄 Auto loop shuru ho gaya!');
     }
   }, 1000);
+  // Listen for real-time changes from other devices
+  dbRef.on('value', (snapshot) => {
+    const fbData = snapshot.val();
+    if (fbData) {
+      const newS = {...S, ...fbData};
+      if (JSON.stringify(newS) !== JSON.stringify(S)) {
+        S = newS;
+        saveLocal();
+        renderDashboard();
+        renderPriceGrid();
+        renderSettings();
+        showToast('🔄 Dusre device se data update ho gaya');
+      }
+    }
+  });
 }
 
 function showAuthScreen() {
@@ -651,6 +666,16 @@ function saveToFirebase() {
 
 function saveLocal() {
   try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(LS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      S = { ...S, ...parsed };
+    }
+  } catch(e) { console.error('Load error', e); }
 }
 
 function save() {
@@ -1567,27 +1592,6 @@ window.onload = async () => {
   document.getElementById('tradeModal').addEventListener('click', e => {
     if (e.target.id === 'tradeModal') closeModal();
   });
-
-
-
-  // Listen for real-time changes from other devices
-  if (dbRef) {
-    dbRef.on('value', (snapshot) => {
-      const fbData = snapshot.val();
-      if (fbData) {
-        // Simple merge (you can make it smarter if needed)
-        const newS = {...S, ...fbData};
-        if (JSON.stringify(newS) !== JSON.stringify(S)) {
-          S = newS;
-          saveLocal();
-          renderDashboard();
-          renderPriceGrid();
-          renderSettings();
-          showToast('🔄 Dusre device se data update ho gaya');
-        }
-      }
-    });
-  }
 };
 </script>
 </body>
