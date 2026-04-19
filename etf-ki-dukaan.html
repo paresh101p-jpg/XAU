@@ -455,25 +455,36 @@ let dbRef = null; // Will be set to users/{uid}/data
 
 /* Google Sign-In */
 async function signInWithGoogle() {
+  const overlay = document.getElementById('authOverlay');
+  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Google se sign in ho raha hai...</div><div style="font-size:.6rem;color:var(--muted);margin-top:6px;">Popup band mat karo</div></div>`;
   try {
-    document.getElementById('authOverlay').innerHTML = `
-      <div class="auth-box">
-        <div style="font-size:1.8rem;margin-bottom:10px;">⏳</div>
-        <div style="font-size:.82rem;color:var(--text);font-weight:700;">Google pe redirect ho raha hai...</div>
-        <div style="font-size:.62rem;color:var(--muted);margin-top:8px;">Thoda wait karo...</div>
-      </div>`;
-    await auth.signInWithRedirect(googleProvider);
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    const result = await auth.signInWithPopup(googleProvider);
+    await onUserSignedIn(result.user);
   } catch (error) {
-    console.error("Google sign-in failed:", error);
-    document.getElementById('authOverlay').innerHTML = `
-      <div class="auth-box">
-        <div class="auth-logo">⚠️</div>
-        <div class="auth-title" style="color:var(--red)">Sign In Failed</div>
-        <div class="auth-sub" style="color:var(--muted);font-size:.65rem;">${error.message}</div>
-        <button class="btn-google" onclick="location.reload()" style="margin-top:12px;">↩ Dobara Try Karo</button>
-        <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
-      </div>`;
+    console.error("Popup failed, trying redirect:", error.code);
+    if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      // Fallback to redirect
+      try {
+        await auth.signInWithRedirect(googleProvider);
+      } catch(e2) {
+        showAuthError(e2.message);
+      }
+    } else {
+      showAuthError(error.message);
+    }
   }
+}
+
+function showAuthError(msg) {
+  document.getElementById('authOverlay').innerHTML = `
+    <div class="auth-box">
+      <div class="auth-logo">⚠️</div>
+      <div class="auth-title" style="color:var(--red)">Sign In Failed</div>
+      <div class="auth-sub" style="color:var(--muted);font-size:.62rem;word-break:break-word;">${msg}</div>
+      <button class="btn-google" onclick="location.reload()" style="margin-top:14px;">↩ Dobara Try Karo</button>
+      <button class="auth-skip" onclick="skipAuth()" style="margin-top:8px;">Bina login ke continue karo</button>
+    </div>`;
 }
 
 function skipAuth() {
