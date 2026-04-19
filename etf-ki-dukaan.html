@@ -167,6 +167,36 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
+/* ETF Card Grid */
+.etf-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.etf-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:10px 11px;position:relative;transition:border-color .2s,box-shadow .2s;}
+.etf-card.os{border-color:rgba(224,82,82,.55);background:rgba(224,82,82,.05);}
+.etf-card.os-1{border-color:rgba(224,82,82,.9);animation:sellGlow 1.4s infinite alternate;}
+.etf-card.ec-fetching{border-color:rgba(245,200,66,.6);}
+.ec-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:5px;}
+.ec-sym{font-size:.78rem;font-weight:700;color:var(--text);line-height:1.2;word-break:break-all;}
+.ec-st-badge{font-size:.48rem;padding:2px 5px;border-radius:5px;white-space:nowrap;flex-shrink:0;font-weight:700;margin-top:1px;}
+.ec-st-fetch{background:rgba(245,200,66,.18);color:var(--yellow);border:1px solid rgba(245,200,66,.4);}
+.ec-st-live{background:rgba(76,175,130,.14);color:var(--green);border:1px solid rgba(76,175,130,.3);}
+.ec-st-pending{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border);}
+.ec-st-stale{background:rgba(232,164,64,.12);color:var(--amber);border:1px solid rgba(232,164,64,.3);}
+.ec-price{font-size:.94rem;font-weight:700;color:var(--yellow);line-height:1;}
+.ec-no-price{font-size:.64rem;color:var(--muted);}
+.ec-time{font-size:.48rem;color:var(--muted);margin-top:2px;}
+.ec-rsi-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.ec-rsi-val{font-size:.78rem;font-weight:700;}
+.ec-rsi-lbl{font-size:.44rem;color:var(--muted);}
+.ec-bar-wrap{margin-top:4px;}
+.ec-bar-out{background:var(--bg3);border-radius:6px;height:5px;overflow:hidden;border:1px solid var(--border);}
+.ec-bar-in{height:100%;border-radius:6px;transition:width .6s ease;}
+.ec-bar-labels{display:flex;justify-content:space-between;font-size:.42rem;color:var(--muted);margin-top:2px;}
+.ec-os-tag{font-size:.46rem;background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.3);border-radius:4px;padding:1px 5px;display:inline-block;margin-top:3px;}
+/* Sort badge */
+.ec-rank{position:absolute;top:6px;left:8px;font-size:.44rem;color:var(--muted);font-weight:700;}
+/* Fetch cards section header */
+.cards-sec-hdr{font-size:.6rem;font-weight:700;padding:4px 8px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.csh-os{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.25);}
+.csh-normal{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
 /* Firebase Sync Status */
 .sync-status{font-size:.58rem;padding:4px 10px;border-radius:8px;background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);display:inline-flex;align-items:center;gap:5px;}
 .sync-ok{color:var(--green);}
@@ -875,18 +905,50 @@ async function retryOne(sym) {
   const npEl = document.getElementById('np-st-' + sym);
   const upd = (html) => { if (stEl) stEl.innerHTML = html; if (npEl) npEl.innerHTML = html; };
   upd(`<span class="spinner"></span> Fetching…`);
+  // Card state
+  const cardEl = document.getElementById('etf-card-' + sym);
+  if (cardEl) {
+    cardEl.classList.add('ec-fetching');
+    const stBadge = document.getElementById('ec-st-' + sym);
+    if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-fetch" id="ec-st-${sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
+  }
   try {
     const price = await fetchYahooPrice(sym);
     savePrice(sym, price);
     save();
     const t = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${t}</span>`;
+    // Update card
+    const d2 = getETFData(sym);
+    const oversold = S.rsiOversold || 30;
+    const rsi = d2.rsi;
+    const rsiPct = rsi !== null ? Math.min(Math.max(rsi,0),100) : 0;
+    const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
+    const rsiBg2 = rsi === null ? '#444' : rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' : rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' : 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
+    if (cardEl) {
+      cardEl.classList.remove('ec-fetching');
+      const stBadge = document.getElementById('ec-st-' + sym);
+      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-live" id="ec-st-${sym}">🟢 Live</span>`;
+      const pxEl = document.getElementById('ec-px-' + sym);
+      if (pxEl) pxEl.innerHTML = `<div class="ec-price">₹${price.toFixed(2)}</div>`;
+      const timeEl = document.getElementById('ec-time-' + sym);
+      if (timeEl) timeEl.textContent = `⏱ ${t} (abhi abhi)`;
+      const rsiEl = document.getElementById('ec-rsi-' + sym);
+      if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
+      const barEl = document.getElementById('ec-bar-' + sym);
+      if (barEl) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBg2; }
+    }
     showToast(`✅ ${sym} — ₹${price.toFixed(2)}`);
     renderDashboard();
   } catch(e) {
     const msg = (e.message||'?').slice(0,30);
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg}</span> <button onclick="retryOne('${sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
     if (npEl) npEl.innerHTML = `<span style="color:var(--red);">❌ ${msg}</span>`;
+    if (cardEl) {
+      cardEl.classList.remove('ec-fetching');
+      const stBadge = document.getElementById('ec-st-' + sym);
+      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-pending" id="ec-st-${sym}">❌ Failed</span>`;
+    }
     showToast(`❌ ${sym} fail — ${msg}`);
   }
 }
@@ -896,11 +958,22 @@ async function runLoopTick() {
 
   const today = todayISO();
 
-  // Unfetched ETFs pehle, phir oldest fetched
-  const unfetched = S.etfs.filter(e => !(S.prices[e.sym]||[]).some(h => h.date === today));
+  // PRIORITY: Jo ETF sabse pehle stale hua (oldest timestamp), usse pehle fetch karo
+  // Never-fetched = ts:0 = highest priority
+  function getLastTs(sym) {
+    const hist = S.prices[sym] || [];
+    if (!hist.length) return 0;
+    const withTs = hist.filter(h => h.ts);
+    if (!withTs.length) return 1;
+    return Math.max(...withTs.map(h => h.ts));
+  }
+  const sortedByAge = [...S.etfs].sort((a, b) => getLastTs(a.sym) - getLastTs(b.sym));
+  const etfToFetch = sortedByAge[0]; // Always oldest timestamp first
 
-  if (unfetched.length === 0 && loopIndex === 0) {
-    // Sab fetch ho chuke — ek round complete, oldest se shuru karo
+  // Check if round complete (all have been refreshed at least once in a rolling sense)
+  const oldestTs = getLastTs(sortedByAge[0].sym);
+  const newestTs = getLastTs(sortedByAge[sortedByAge.length-1].sym);
+  if (loopIndex > 0 && newestTs > 0 && oldestTs > 0 && newestTs - oldestTs < 60000) {
     loopRound++;
     loopOk = 0; loopFail = 0;
     S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
@@ -909,32 +982,24 @@ async function runLoopTick() {
     updateLoopUI();
   }
 
-  let etfToFetch;
-  if (unfetched.length > 0) {
-    // Pehle unfetched ETF lo
-    etfToFetch = unfetched[0];
-    loopIndex = S.etfs.findIndex(e => e.sym === etfToFetch.sym);
-  } else {
-    // Sab fetched — loopIndex se aage wala
-    if (loopIndex >= S.etfs.length) {
-      loopRound++;
-      loopIndex = 0;
-      loopOk = 0; loopFail = 0;
-      S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-      save();
-      showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
-      updateLoopUI();
-    }
-    etfToFetch = S.etfs[loopIndex];
-  }
-
   const e = etfToFetch;
+  loopIndex++;
+
+  // Card update — fetching state
+  const cardEl = document.getElementById('etf-card-' + e.sym);
+  if (cardEl) {
+    cardEl.classList.add('ec-fetching');
+    const stEl = document.getElementById('ec-st-' + e.sym);
+    if (stEl) stEl.outerHTML = `<span class="ec-st-badge ec-st-fetch" id="ec-st-${e.sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
+    const pxEl = document.getElementById('ec-px-' + e.sym);
+    if (pxEl) pxEl.innerHTML = `<div class="ec-no-price" style="color:var(--yellow);animation:pulse 1s infinite;">...</div>`;
+    cardEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  // Legacy row update (if exists)
   const stEl = document.getElementById('fst-' + e.sym);
   if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
-  const rowEl = document.getElementById('frow-' + e.sym);
-  if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
 
-  const fetchedCount = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h => h.date === today)).length;
+  const fetchedCount = S.etfs.filter(ex => getLastTs(ex.sym) > 1).length;
   setBar(Math.round((fetchedCount / S.etfs.length) * 100));
   setApiStatus('api-loading', `🔄 ${e.sym} — ${fetchedCount}/${S.etfs.length}`);
 
@@ -947,14 +1012,41 @@ async function runLoopTick() {
     S.fetchedToday = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h => h.date === today)).length;
     save();
     const fetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+    // Update card
+    const d2 = getETFData(e.sym);
+    const oversold = S.rsiOversold || 30;
+    const rsi = d2.rsi;
+    const rsiPct = rsi !== null ? Math.min(Math.max(rsi,0),100) : 0;
+    const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
+    const rsiBgGrad2 = rsi === null ? '#444' : rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' : rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' : 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
+    const cardEl2 = document.getElementById('etf-card-' + e.sym);
+    if (cardEl2) {
+      cardEl2.classList.remove('ec-fetching');
+      const stBadge = document.getElementById('ec-st-' + e.sym);
+      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-live" id="ec-st-${e.sym}">🟢 Live</span>`;
+      const pxEl2 = document.getElementById('ec-px-' + e.sym);
+      if (pxEl2) pxEl2.innerHTML = `<div class="ec-price">₹${price.toFixed(2)}</div>`;
+      const timeEl = document.getElementById('ec-time-' + e.sym);
+      if (timeEl) timeEl.textContent = `⏱ ${fetchTime} (abhi abhi)`;
+      const rsiEl = document.getElementById('ec-rsi-' + e.sym);
+      if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
+      const barEl = document.getElementById('ec-bar-' + e.sym);
+      if (barEl) { barEl.style.width = rsiPct + '%'; barEl.style.background = rsiBgGrad2; }
+    }
     if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
     loopFail++;
     const msg = err.message || 'Error';
+    const cardEl3 = document.getElementById('etf-card-' + e.sym);
+    if (cardEl3) {
+      cardEl3.classList.remove('ec-fetching');
+      const stBadge = document.getElementById('ec-st-' + e.sym);
+      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-pending" id="ec-st-${e.sym}">❌ Failed</span>`;
+    }
     if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
   }
-  loopIndex++;
   updateLoopUI();
   const DELAY_SEC = 5 * 60;
   countdownSec = DELAY_SEC;
@@ -1000,58 +1092,137 @@ function updateLoopUI() {
   }
   renderFetchTab();
 }
+/* ── helpers for card rendering ── */
+function getLastTs(sym) {
+  const hist = S.prices[sym] || [];
+  if (!hist.length) return 0;
+  const withTs = hist.filter(h => h.ts);
+  if (!withTs.length) return 1;
+  return Math.max(...withTs.map(h => h.ts));
+}
+
+function buildEtfCard(e, rank) {
+  const today = todayISO();
+  const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+  const td = hist.find(h => h.date === today);
+  const lastEntry = hist[0];
+  const d = getETFData(e.sym);
+  const oversold = S.rsiOversold || 30;
+
+  // Status badge
+  let badgeClass = 'ec-st-pending', badgeTxt = '⏳ Pending';
+  if (td) {
+    const diffMin = td.ts ? Math.floor((Date.now() - td.ts) / 60000) : 9999;
+    if (diffMin < 60) { badgeClass='ec-st-live'; badgeTxt='🟢 Live'; }
+    else { badgeClass='ec-st-stale'; badgeTxt='🕐 Old'; }
+  } else if (lastEntry) {
+    badgeClass='ec-st-stale'; badgeTxt='🕐 Stale';
+  }
+
+  // Time display
+  const lastP = td || lastEntry;
+  let timeStr = 'Kabhi nahi';
+  if (lastP) {
+    if (lastP.ts) {
+      const t = new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      const diffMin = Math.floor((Date.now() - lastP.ts) / 60000);
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffMin < 1) timeStr = t + ' (abhi abhi)';
+      else if (diffMin < 60) timeStr = t + ` (${diffMin}m pehle)`;
+      else if (diffHr < 24) timeStr = t + ` (${diffHr}h pehle)`;
+      else timeStr = fmtDate(lastP.date);
+    } else { timeStr = fmtDate(lastP.date); }
+  }
+
+  // RSI
+  const rsi = d.rsi;
+  const rsiPct = rsi !== null ? Math.min(Math.max(rsi, 0), 100) : 0;
+  const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
+  const rsiBgGrad = rsi === null ? '#444' :
+    rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' :
+    rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' :
+    'linear-gradient(90deg,#4CAF82,#5B9BD5)';
+  const isOs = rsi !== null && rsi < oversold;
+
+  // Card class
+  let cardClass = 'etf-card';
+  if (isOs) cardClass += rank === 1 ? ' os os-1' : ' os';
+
+  return `<div class="${cardClass}" id="etf-card-${e.sym}">
+    <div class="ec-top">
+      <div>
+        <div class="ec-sym">${e.sym}</div>
+        ${isOs ? `<span class="ec-os-tag">📉 Oversold</span>` : ''}
+      </div>
+      <span class="ec-st-badge ${badgeClass}" id="ec-st-${e.sym}">${badgeTxt}</span>
+    </div>
+    <div id="ec-px-${e.sym}">
+      ${td ? `<div class="ec-price">₹${td.price.toFixed(2)}</div>` : `<div class="ec-no-price">—</div>`}
+    </div>
+    <div class="ec-time" id="ec-time-${e.sym}">⏱ ${timeStr}</div>
+    <div class="ec-rsi-row">
+      <div>
+        <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${S.rsiPeriod}D</div>
+        <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
+      </div>
+      <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:50px;">
+        ${rsi === null ? 'No data' : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+      </div>
+    </div>
+    <div class="ec-bar-wrap">
+      <div class="ec-bar-out">
+        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${rsiPct}%;background:${rsiBgGrad};"></div>
+      </div>
+      <div class="ec-bar-labels"><span>0</span><span style="color:var(--red);">30</span><span style="color:var(--amber);">70</span><span>100</span></div>
+    </div>
+  </div>`;
+}
+
 function initStatusRows() {
   const statusList = document.getElementById('fetchStatusList');
   if (!statusList) return;
-  statusList.innerHTML = '';
   const today = todayISO();
+  const oversold = S.rsiOversold || 30;
 
   const fetchedToday = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today)).length;
-  const sumDiv = document.createElement('div');
-  sumDiv.style.cssText = 'padding:5px 10px;font-size:.58rem;background:var(--bg3);border-radius:6px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;';
-  sumDiv.innerHTML = `<span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span><span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>`;
-  statusList.appendChild(sumDiv);
 
-  // Next ETF kaun sa hai
-  const unfetched = S.etfs.filter(e => !(S.prices[e.sym]||[]).some(h => h.date === today));
-  const nextSym = unfetched.length > 0 ? unfetched[0].sym : null;
-
-  S.etfs.forEach(e => {
-    const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
-    const td = hist.find(h => h.date === today);
-    const lastEntry = hist[0];
-    const div = document.createElement('div');
-    div.className = 'fe-row';
-    div.id = 'frow-' + e.sym;
-
-    let statusHtml;
-    if (td) {
-      const t = td.ts ? new Date(td.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
-      statusHtml = `<span class="fe-ok" style="font-weight:700;">₹${td.price.toFixed(2)}</span>`;
-    } else {
-      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Pending</span>`;
-    }
-
-    // Actual time
-    const lastP = td || lastEntry;
-    let timeStr = 'Kabhi nahi';
-    if (lastP) {
-      if (lastP.ts) {
-        const t = new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-        const diffMin = Math.floor((Date.now() - lastP.ts) / 60000);
-        timeStr = diffMin < 1 ? `${t} (abhi)` : diffMin < 60 ? `${t} (${diffMin}m)` : t;
-      } else {
-        timeStr = fmtDate(lastP.date);
-      }
-    }
-
-    // Next label
-    const isNext = !loopRunning && e.sym === nextSym;
-    const nextLabel = isNext ? ` <span style="font-size:.46rem;background:rgba(91,155,213,.15);color:var(--blue);border:1px solid rgba(91,155,213,.3);border-radius:3px;padding:1px 4px;">⏭ Next</span>` : '';
-
-    div.innerHTML = `<span class="fe-sym">${e.sym}${nextLabel}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span><span style="font-size:.46rem;color:var(--muted);margin-left:auto;white-space:nowrap;">${timeStr}</span>`;
-    statusList.appendChild(div);
+  // Sort: RSI < oversold first (lowest RSI first = most oversold), then rest by RSI, null at bottom
+  const etfsSorted = [...S.etfs].sort((a, b) => {
+    const da = getETFData(a.sym), db = getETFData(b.sym);
+    const ra = da.rsi, rb = db.rsi;
+    const aOs = ra !== null && ra < oversold;
+    const bOs = rb !== null && rb < oversold;
+    if (aOs && !bOs) return -1;
+    if (!aOs && bOs) return 1;
+    if (ra === null && rb === null) return 0;
+    if (ra === null) return 1;
+    if (rb === null) return -1;
+    return ra - rb;
   });
+
+  const osEtfs = etfsSorted.filter(e => { const d = getETFData(e.sym); return d.rsi !== null && d.rsi < oversold; });
+  const normalEtfs = etfsSorted.filter(e => { const d = getETFData(e.sym); return d.rsi === null || d.rsi >= oversold; });
+
+  let html = `<div style="padding:5px 10px 8px;font-size:.58rem;background:var(--bg3);border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+    <span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span>
+    <span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>
+  </div>`;
+
+  if (osEtfs.length > 0) {
+    html += `<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
+    html += `<div class="etf-cards-grid" style="margin-bottom:10px;">`;
+    osEtfs.forEach((e, i) => { html += buildEtfCard(e, i+1); });
+    html += `</div>`;
+  }
+
+  if (normalEtfs.length > 0) {
+    html += `<div class="cards-sec-hdr csh-normal">📊 Baaki ETFs — RSI Sorted (${normalEtfs.length})</div>`;
+    html += `<div class="etf-cards-grid">`;
+    normalEtfs.forEach((e, i) => { html += buildEtfCard(e, 0); });
+    html += `</div>`;
+  }
+
+  statusList.innerHTML = html;
 }
 async function fetchAllPrices(force = false) {
   if (loopRunning) { showToast('⚠️ Loop chal rahi hai — pehle band karo'); return; }
