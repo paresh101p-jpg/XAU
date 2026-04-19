@@ -536,27 +536,26 @@ let fetchAbort = false;
 async function initFirebaseAuth() {
   return new Promise((resolve) => {
     auth.onAuthStateChanged(async (user) => {
-      if (user) {
+      if (user && !user.isAnonymous) {
+        // Real Google user — hide overlay, show app
         currentUserUID = user.uid;
         dbRef = database.ref('users/' + currentUserUID + '/data');
-        // Hide auth overlay
         const overlay = document.getElementById('authOverlay');
         if (overlay) overlay.style.display = 'none';
-        // Show user info in header
-        const isAnon = user.isAnonymous;
-        const displayName = user.displayName || (isAnon ? 'Anonymous' : user.email);
-        const shortId = isAnon ? `Anon (${user.uid.slice(0,6)})` : `${displayName}`;
-        document.getElementById('syncStatus').innerHTML = `🟢 <span style="color:var(--yellow)">${shortId}</span>`;
+        const displayName = user.displayName || user.email;
+        document.getElementById('syncStatus').innerHTML = '🟢 <span style="color:var(--yellow)">' + displayName + '</span>';
         document.getElementById('syncStatus').classList.add('sync-ok');
-        if (!isAnon) {
-          document.getElementById('btnSignOut').style.display = 'inline-flex';
-        }
+        document.getElementById('btnSignOut').style.display = 'inline-flex';
         await loadFromFirebase();
         resolve();
       } else {
-        // Show auth overlay — don't auto sign-in anonymously
+        // No user OR anonymous — sign out any anon session and show overlay
+        if (user && user.isAnonymous) {
+          await auth.signOut();
+        }
         const overlay = document.getElementById('authOverlay');
         if (overlay) overlay.style.display = 'flex';
+        document.getElementById('syncStatus').textContent = 'Sign in karo';
         resolve();
       }
     });
