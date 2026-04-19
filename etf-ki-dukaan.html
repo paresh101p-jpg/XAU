@@ -809,11 +809,23 @@ async function fetchYahooPrice(sym) {
 }
 function savePrice(sym, price) {
   const today = todayISO();
+  const ts = Date.now(); // epoch ms for "X min pehle" calculation
   if (!S.prices[sym]) S.prices[sym] = [];
   S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
-  S.prices[sym].push({ date: today, price });
+  S.prices[sym].push({ date: today, price, ts });
   S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
   if (S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
+}
+
+function timeAgo(ts) {
+  if (!ts) return null;
+  const diffMs = Date.now() - ts;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffMin < 1) return 'abhi abhi';
+  if (diffMin < 60) return diffMin + ' min pehle';
+  if (diffHr < 24) return diffHr + ' hr pehle';
+  return Math.floor(diffHr/24) + ' din pehle';
 }
 function isGoodFetchTime() {
   const now = nowIST();
@@ -893,7 +905,7 @@ async function runLoopTick() {
   }
   const e = S.etfs[loopIndex];
   const stEl = document.getElementById('fst-' + e.sym);
-  if (stEl) stEl.innerHTML = `<span class="spinner"></span> Trying… <span style="color:var(--muted);font-size:.55rem;">proxy 1/3</span>`;
+  if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
   const rowEl = document.getElementById('frow-' + e.sym);
   if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
   setBar(Math.round((loopIndex / S.etfs.length) * 100));
@@ -906,7 +918,8 @@ async function runLoopTick() {
     S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     S.fetchedToday = (S.fetchedToday||0) + 1;
     save();
-    if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${S.lastFetchTime}</span>`;
+    const agoNow = timeAgo(Date.now());
+    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">abhi abhi</span>`;
     if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
   } catch(err) {
     loopFail++;
@@ -963,14 +976,37 @@ function initStatusRows() {
   const statusList = document.getElementById('fetchStatusList');
   if (!statusList) return;
   statusList.innerHTML = '';
+  const today = todayISO();
+
+  // Summary bar
+  const fetchedToday = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today)).length;
+  const sumDiv = document.createElement('div');
+  sumDiv.style.cssText = 'padding:5px 10px;font-size:.58rem;background:var(--bg3);border-radius:6px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;';
+  sumDiv.innerHTML = `<span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span><span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>`;
+  statusList.appendChild(sumDiv);
+
   S.etfs.forEach(e => {
-    const today = todayISO();
-    const hist = S.prices[e.sym] || [];
+    const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const td = hist.find(h => h.date === today);
+    const lastEntry = hist[0];
     const div = document.createElement('div');
     div.className = 'fe-row';
     div.id = 'frow-' + e.sym;
-    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${td ? `<span class="fe-ok">✅ ₹${td.price.toFixed(2)}</span>` : '⏳ Waiting…'}</span>`;
+
+    // Price or waiting
+    let statusHtml;
+    if (td) {
+      statusHtml = `<span class="fe-ok" style="font-weight:700;">₹${td.price.toFixed(2)}</span>`;
+    } else {
+      statusHtml = `<span style="color:var(--muted);font-size:.58rem;">⏳ Waiting</span>`;
+    }
+
+    // Time ago
+    const lastP = td || lastEntry;
+    const timeStr = lastP ? (lastP.ts ? timeAgo(lastP.ts) : fmtDate(lastP.date)) : 'Kabhi nahi';
+    const timeHtml = `<span style="font-size:.48rem;color:var(--muted);margin-left:auto;">${timeStr}</span>`;
+
+    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${statusHtml}</span>${timeHtml}`;
     statusList.appendChild(div);
   });
 }
@@ -1095,77 +1131,7 @@ function renderDashboard() {
     withRSI.forEach((r, i) => { html += buildWLRow(r, i+1); });
     html += `</div>`;
   }
-  if (noPrice.length > 0) {
-    html += `<div class="sec">⚠️ Price Nahi Hai <span class="badge">${noPrice.length}</span></div><div class="wl">`;
-    noPrice.forEach((e, i) => {
-      const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
-      const lastEntry = hist[0];
-      const today = todayISO();
-      const oversold = S.rsiOversold || 30;
-      const closes = hist.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(h=>h.price);
-      const rsi = calcRSI(closes, S.rsiPeriod || 14);
-      const rsiPct = rsi !== null ? Math.min(rsi, 100) : 0;
-      const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
-      const rsiBarColor = rsi === null ? 'var(--bg4)' : rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' : rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' : 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
-      const rsiLabel = rsi === null ? '— (data nahi)' : rsi < oversold ? `${rsi.toFixed(1)} — Oversold 🔥` : rsi > 70 ? `${rsi.toFixed(1)} — Overbought` : `${rsi.toFixed(1)} — Neutral`;
-      let updateBadge = '';
-      if (!lastEntry) {
-        updateBadge = `<span style="font-size:10px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:2px 7px;">Kabhi fetch nahi hua</span>`;
-      } else if (lastEntry.date === today) {
-        updateBadge = `<span style="font-size:10px;background:rgba(76,175,130,.1);color:var(--green);border:1px solid rgba(76,175,130,.25);border-radius:4px;padding:2px 7px;">🟢 Aaj updated</span>`;
-      } else {
-        updateBadge = `<span style="font-size:10px;background:rgba(232,164,64,.08);color:var(--amber);border:1px solid rgba(232,164,64,.2);border-radius:4px;padding:2px 7px;">🕐 ${fmtDate(lastEntry.date)}</span>`;
-      }
-      const priceDisplay = lastEntry
-        ? `<div style="font-size:14px;font-weight:700;color:var(--yellow);">₹ ${lastEntry.price.toFixed(2)}</div>`
-        : `<div style="font-size:14px;font-weight:700;color:var(--muted);">₹ —</div>`;
-      const sortedAsc = hist.slice().sort((a,b)=>a.date.localeCompare(b.date));
-      const prev2 = sortedAsc[sortedAsc.length - 2];
-      const last2 = sortedAsc[sortedAsc.length - 1];
-      let chgHtml = '';
-      if (prev2 && last2 && prev2.price > 0) {
-        const chg = ((last2.price - prev2.price) / prev2.price) * 100;
-        const up = chg >= 0;
-        chgHtml = `<div style="font-size:11px;color:${up?'var(--green)':'var(--red)'};">${up?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</div>`;
-      }
-      html += `<div class="wl-row no-price" style="border-color:rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;">
-        <div class="wl-rank" style="font-size:12px;color:var(--muted);">${i+1}</div>
-        <div class="wl-info" style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <div style="font-size:15px;font-weight:700;color:var(--text);">${e.sym}</div>
-            <span style="font-size:10px;background:rgba(255,165,0,.08);color:var(--amber);border:1px solid rgba(255,165,0,.2);border-radius:4px;padding:2px 7px;">No Price</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;margin-top:5px;flex-wrap:wrap;">
-            ${updateBadge}
-            <span style="font-size:11px;color:var(--muted);">${closes.length} din ka data</span>
-          </div>
-          <div style="margin-top:8px;">
-            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
-              <span style="color:var(--muted);">RSI (${S.rsiPeriod||14}D)</span>
-              <span style="font-weight:700;color:${rsiColor};">${rsiLabel}</span>
-            </div>
-            <div style="background:var(--bg3);border-radius:6px;height:7px;overflow:hidden;border:1px solid var(--border);">
-              <div style="height:100%;border-radius:6px;width:${rsiPct}%;background:${rsiBarColor};transition:width .5s;"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px;">
-              <span>0 Oversold</span><span>RSI ${rsi !== null ? rsi.toFixed(1) : '—'}</span><span>100 Overbought</span>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;min-width:90px;">
-          <div style="text-align:right;">
-            <div style="font-size:10px;color:var(--muted);">${lastEntry ? 'Last Known' : 'Current Price'}</div>
-            ${priceDisplay}
-            ${chgHtml}
-            ${!lastEntry ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;">Fetch karke dekho</div>` : ''}
-          </div>
-          <button onclick="retryOne('${e.sym}')" style="background:var(--yellow-dim);border:1px solid rgba(245,200,66,.4);color:var(--yellow);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">⬇ Fetch</button>
-          <div style="font-size:10px;color:var(--muted);text-align:right;" id="np-st-${e.sym}"></div>
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
+
   cont.innerHTML = html;
 }
 
@@ -1210,8 +1176,11 @@ function buildWLRow(r, rank) {
   const lastEntry = hist[0];
   const today = todayISO();
   const isToday = lastEntry?.date === today;
+  const ago = lastEntry?.ts ? timeAgo(lastEntry.ts) : null;
   const updateLabel = isToday
-    ? `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
+    ? ago
+      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${ago} update</span>`
+      : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
     : lastEntry
       ? `<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`
       : '';
