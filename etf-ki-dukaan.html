@@ -216,32 +216,40 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <!-- ═══ AUTO FETCH ═══ -->
 <div id="tab-fetch-content" class="main" style="display:none;">
   <div class="auto-panel">
-    <div class="ap-title">🌐 Yahoo Finance se Auto Price Fetch</div>
+    <div class="ap-title">🔄 Rolling Loop — Har ETF 10 Min Baad Update</div>
     <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
-      NSE ETF prices <strong style="color:var(--text)">Yahoo Finance</strong> se aati hain (<code style="background:var(--bg3);padding:1px 4px;border-radius:3px;">.NS</code> suffix).<br>
-      4 PM ke baad ek baar <strong style="color:var(--yellow)">Auto Fetch</strong> hoga aur next day tak save rahega.
+      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">10 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-y" onclick="fetchAllPrices(false)" id="btnFetch">⬇️ Abhi Fetch Karo</button>
-      <button class="btn btn-b" onclick="fetchAllPrices(true)">🔄 Force Re-Fetch</button>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-g" onclick="startLoop()" id="btnLoopStart">▶️ Loop Shuru Karo</button>
+      <button class="btn btn-r" onclick="stopLoop()" id="btnLoopStop" disabled>⏹ Loop Band Karo</button>
+      <button class="btn btn-b" onclick="fetchAllPrices(true)" id="btnFetch">⚡ Ek Baar Sab Fetch</button>
     </div>
-    <div class="ap-row">
-      <div>
-        <div class="ap-label">Last Fetch</div>
-        <div class="ap-val" id="lastFetchTime">—</div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:.62rem;" id="loopStatus"><span style="color:var(--muted)">⚫ Loop band hai</span></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div><div class="ap-label">Next ETF mein</div><div class="ap-val" id="loopCountdown">—</div></div>
+        <div><div class="ap-label">Last Fetch</div><div class="ap-val" id="lastFetchTime">—</div></div>
+        <div><div class="ap-label">Fetched Today</div><div class="ap-val" id="fetchedCount">—</div></div>
       </div>
-      <div>
-        <div class="ap-label">Next Auto Fetch</div>
-        <div class="ap-val" id="nextFetchTime">—</div>
-      </div>
-      <div>
-        <div class="ap-label">Fetched Today</div>
-        <div class="ap-val" id="fetchedCount">—</div>
+      <div style="font-size:.58rem;color:var(--muted);" id="loopRoundInfo"></div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:6px;padding:7px 10px;">
+      <div style="font-size:.55rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;">
+        <span>📋 <strong style="color:var(--text)">75 ETFs × 10 min</strong> = ~12.5 hr mein ek full round</span>
+        <span>🔁 Round complete → phir se ITBEES se shuru</span>
+        <span>💾 Har price turant save hoti hai</span>
       </div>
     </div>
   </div>
 
-  <div class="sec">📋 Fetch Status — ETF Wise</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 2px;">
+    <div class="sec" style="margin:0;flex:1;">📋 ETF Status</div>
+    <button onclick="initStatusRows()" style="font-size:.55rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:0 4px;">↻ Refresh list</button>
+  </div>
   <div id="fetchStatusList" class="fetch-result-box" style="max-height:none;">
     <div class="fr-skip">Fetch button dabao to yahaan live status dikhegi…</div>
   </div>
@@ -585,94 +593,210 @@ function isGoodFetchTime() {
   return totalMin >= 960 || totalMin <= 540;
 }
 
-// Main fetch function
-async function fetchAllPrices(force = false) {
-  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo pehle'); return; }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  const today = todayISO();
-  
-  // Check if already fetched today (unless force)
-  if (!force && S.lastFetchDate === today && (S.fetchedToday || 0) > 0) {
-    showToast(`✅ Aaj already ${S.fetchedToday} prices fetch ho chuke hain`);
-    return;
+/* ══════════════════════════════════════
+   ROLLING LOOP ENGINE
+   Ek ek ETF, har 10 min baad, endless loop
+══════════════════════════════════════ */
+let loopRunning  = false;   // kya loop chal rahi hai?
+let loopIndex    = 0;       // abhi kaun sa ETF chal raha hai
+let loopRound    = 0;       // kitne rounds complete hue
+let loopOk       = 0;       // is round mein kitne ok
+let loopFail     = 0;       // is round mein kitne fail
+let nextEtfTimer = null;    // countdown timer reference
+let countdownSec = 0;       // next fetch mein kitne seconds baki
+
+async function startLoop() {
+  if (loopRunning) return;
+  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
+  loopRunning = true;
+  loopIndex   = 0;
+  loopRound   = 0;
+  loopOk      = 0;
+  loopFail    = 0;
+  fetchAbort  = false;
+  initStatusRows();
+  updateLoopUI();
+  setApiStatus('api-loading', '🔄 Loop ON');
+  showToast('🔄 Rolling loop shuru! Har ETF 10 min baad update hoga.');
+  runLoopTick();
+}
+
+function stopLoop() {
+  loopRunning = false;
+  fetchAbort  = true;
+  if (nextEtfTimer) clearTimeout(nextEtfTimer);
+  nextEtfTimer = null;
+  setApiStatus('api-idle', '⏹ Stopped');
+  setBar(0);
+  updateLoopUI();
+  showToast('⏹ Loop band ho gayi.');
+}
+
+async function runLoopTick() {
+  if (!loopRunning || fetchAbort) return;
+  if (!S.etfs.length) { stopLoop(); return; }
+
+  // Round complete — restart
+  if (loopIndex >= S.etfs.length) {
+    loopRound++;
+    loopIndex = 0;
+    loopOk    = 0;
+    loopFail  = 0;
+    S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    save();
+    showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
+    updateLoopUI();
   }
 
+  const e = S.etfs[loopIndex];
+  const stEl = document.getElementById('fst-' + e.sym);
+  if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching…`;
+
+  // Scroll into view on fetch tab
+  const rowEl = document.getElementById('frow-' + e.sym);
+  if (rowEl) rowEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  setBar(Math.round((loopIndex / S.etfs.length) * 100));
+  setApiStatus('api-loading', `🔄 ${loopIndex+1}/${S.etfs.length} — ${e.sym}`);
+
+  try {
+    const price = await fetchYahooPrice(e.sym);
+    savePrice(e.sym, price);
+    loopOk++;
+    S.lastFetchDate = todayISO();
+    S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    S.fetchedToday  = (S.fetchedToday||0) + 1;
+    save();
+    if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${S.lastFetchTime}</span>`;
+    // Live dashboard update
+    if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
+  } catch(err) {
+    loopFail++;
+    if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${(err.message||'Error').slice(0,25)}</span>`;
+  }
+
+  loopIndex++;
+  updateLoopUI();
+
+  // 10 min countdown phir next ETF
+  const DELAY_SEC = 10 * 60; // 10 minutes
+  countdownSec = DELAY_SEC;
+  tickCountdown();
+}
+
+function tickCountdown() {
+  if (!loopRunning) return;
+  updateCountdown();
+  if (countdownSec <= 0) {
+    runLoopTick();
+    return;
+  }
+  countdownSec--;
+  nextEtfTimer = setTimeout(tickCountdown, 1000);
+}
+
+function updateCountdown() {
+  const el = document.getElementById('loopCountdown');
+  if (!el) return;
+  if (!loopRunning) { el.textContent = '—'; return; }
+  if (countdownSec <= 0) { el.textContent = 'Fetching…'; return; }
+  const m = Math.floor(countdownSec / 60);
+  const s = countdownSec % 60;
+  el.textContent = `${m}:${s.toString().padStart(2,'0')} mein next`;
+}
+
+function updateLoopUI() {
+  const btnStart = document.getElementById('btnLoopStart');
+  const btnStop  = document.getElementById('btnLoopStop');
+  if (btnStart) btnStart.disabled = loopRunning;
+  if (btnStop)  btnStop.disabled  = !loopRunning;
+
+  const statusEl = document.getElementById('loopStatus');
+  if (statusEl) {
+    if (loopRunning) {
+      const nextSym = S.etfs[loopIndex]?.sym || '—';
+      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail}`;
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--muted)">⚫ Loop band hai</span>`;
+    }
+  }
+
+  const el = document.getElementById('loopRoundInfo');
+  if (el && loopRound > 0) {
+    el.textContent = `Last round complete: ${S.lastRoundTime||'—'} · Total rounds: ${loopRound}`;
+    el.style.color = 'var(--green)';
+  }
+  renderFetchTab();
+}
+
+function initStatusRows() {
+  const statusList = document.getElementById('fetchStatusList');
+  if (!statusList) return;
+  statusList.innerHTML = '';
+  S.etfs.forEach(e => {
+    const today = todayISO();
+    const hist  = S.prices[e.sym] || [];
+    const td    = hist.find(h => h.date === today);
+    const div   = document.createElement('div');
+    div.className = 'fe-row';
+    div.id = 'frow-' + e.sym;
+    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">${td ? `<span class="fe-ok">✅ ₹${td.price.toFixed(2)}</span>` : '⏳ Waiting…'}</span>`;
+    statusList.appendChild(div);
+  });
+}
+
+// Manual one-shot fetch (old button, still useful)
+async function fetchAllPrices(force = false) {
+  if (loopRunning) { showToast('⚠️ Loop chal rahi hai — pehle band karo'); return; }
+  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo pehle'); return; }
+
   if (!force && !isGoodFetchTime()) {
-    const msg = 'Market abhi khula hai (9:15AM–4PM).\nClosing price ke liye 4 PM ke baad fetch karo.\nAbhi bhi fetch karna hai?';
-    if (!confirm(msg)) return;
+    if (!confirm('Market abhi khula hai.\nAbhi bhi ek baar fetch karna hai?')) return;
   }
 
   fetchAbort = false;
-  setApiStatus('api-loading', '⬇️ Fetching...');
+  setApiStatus('api-loading', '⬇️ Fetching all…');
   document.getElementById('btnFetch').disabled = true;
+  initStatusRows();
 
-  const statusList = document.getElementById('fetchStatusList');
-  statusList.innerHTML = '';
-
-  let ok = 0, skipped = 0, failed = 0;
-  const total = S.etfs.length;
-  const rows = {};
-
-  // Create status rows first
-  S.etfs.forEach(e => {
-    const div = document.createElement('div');
-    div.className = 'fe-row';
-    div.id = 'frow-' + e.sym;
-    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">⏳ Waiting...</span>`;
-    statusList.appendChild(div);
-    rows[e.sym] = div;
-  });
-
-  // Batch fetch with delay to avoid rate limiting
+  let ok = 0, fail = 0;
   for (let i = 0; i < S.etfs.length; i++) {
     if (fetchAbort) break;
     const e = S.etfs[i];
     const stEl = document.getElementById('fst-' + e.sym);
-    if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching...`;
-
-    setBar(Math.round((i / total) * 100));
-
+    if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching…`;
+    setBar(Math.round((i / S.etfs.length) * 100));
     try {
       const price = await fetchYahooPrice(e.sym);
       savePrice(e.sym, price);
       ok++;
       if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span>`;
     } catch(err) {
-      failed++;
-      const errMsg = err.message || 'Unknown';
-      if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${errMsg.slice(0,30)}</span>`;
+      fail++;
+      if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${(err.message||'?').slice(0,25)}</span>`;
     }
-
-    // Small delay between requests (avoid Yahoo rate limiting)
-    if (i < S.etfs.length - 1) await sleep(300);
+    if (i < S.etfs.length - 1) await sleep(400);
   }
 
-  setBar(100);
-  setTimeout(() => setBar(0), 1500);
-
-  // Update state
-  S.lastFetchDate = today;
-  S.lastFetchTime = nowIST().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-  S.fetchedToday = ok;
+  setBar(100); setTimeout(() => setBar(0), 1500);
+  S.lastFetchDate = todayISO();
+  S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  S.fetchedToday  = ok;
   save();
-
   setApiStatus('api-done', `✅ ${ok} fetched`);
   document.getElementById('btnFetch').disabled = false;
-  showToast(`✅ Done! ${ok} prices fetched, ${failed} failed`);
-  renderFetchTab();
-  renderDashboard();
+  showToast(`✅ ${ok} fetched, ${fail} failed`);
+  renderFetchTab(); renderDashboard();
 }
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ══════════════════════════════════════
    FETCH TAB RENDER
 ══════════════════════════════════════ */
 function renderFetchTab() {
   const today = todayISO();
-  const now = nowIST();
 
-  // Last fetch
   const lfEl = document.getElementById('lastFetchTime');
   if (lfEl) {
     if (S.lastFetchDate === today && S.lastFetchTime) {
@@ -686,41 +810,21 @@ function renderFetchTab() {
     }
   }
 
-  // Next fetch time
-  const nfEl = document.getElementById('nextFetchTime');
-  if (nfEl) {
-    const h = now.getHours();
-    if (h < 16) {
-      const diff = 16 * 60 - (h * 60 + now.getMinutes());
-      nfEl.textContent = `${Math.floor(diff/60)}h ${diff%60}m mein (4 PM)`;
-      nfEl.style.color = 'var(--amber)';
-    } else {
-      nfEl.textContent = 'Abhi fetch kar sakte ho!';
-      nfEl.style.color = 'var(--green)';
-    }
-  }
-
-  // Count
   const fcEl = document.getElementById('fetchedCount');
   if (fcEl) {
     const cnt = S.lastFetchDate === today ? (S.fetchedToday || 0) : 0;
     fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
     fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
   }
+
+  updateCountdown();
 }
 
 /* ══════════════════════════════════════
-   AUTO FETCH SCHEDULER
+   AUTO FETCH SCHEDULER (legacy - loop replaces this)
 ══════════════════════════════════════ */
 function scheduleAutoFetch() {
-  setInterval(() => {
-    if (!S.autoFetchEnabled) return;
-    const today = todayIST();
-    if (S.lastFetchDate === today) return; // already done
-    if (isGoodFetchTime()) {
-      fetchAllPrices(false);
-    }
-  }, 15 * 60 * 1000); // check every 15 minutes
+  // Loop system handles everything now — no interval needed
 }
 
 function todayIST() { return todayISO(); }
@@ -1105,16 +1209,8 @@ window.onload = () => {
     if (e.target.id === 'tradeModal') closeModal();
   });
 
-  // Auto-fetch scheduler: check every 15 min
   scheduleAutoFetch();
-
-  // Auto-fetch on load if 4PM-9AM and not yet done today
-  const today = todayISO();
-  if (S.autoFetchEnabled !== false && S.lastFetchDate !== today && isGoodFetchTime()) {
-    setTimeout(() => {
-      if (S.etfs.length > 0) fetchAllPrices(false);
-    }, 2000); // 2 sec delay after load
-  }
+  // Loop auto-start nahi hoga — user manually start karega
 };
 </script>
 </body>
