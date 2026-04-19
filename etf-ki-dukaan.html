@@ -832,16 +832,16 @@ async function fetchYahooPrice(sym) {
         const price = meta.regularMarketPrice || meta.previousClose;
         if (!price || price <= 0) throw new Error('Invalid price');
 
-        // Historical closes extract — IST dates use karo (UTC se galat date aata hai NSE ke liye)
+        // Historical closes extract — IST dates seedha offset se nikalo (toLocaleString bug fix)
         const timestamps = result.timestamp || [];
         const closes = result.indicators?.quote?.[0]?.close || [];
         const historicalData = [];
         for (let i = 0; i < timestamps.length; i++) {
           const c = closes[i];
           if (c && c > 0) {
-            // IST date: UTC+5:30
-            const istDate = new Date(new Date(timestamps[i] * 1000)
-              .toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+            // IST = UTC + 5:30 = UTC + 19800 seconds
+            const istMs = (timestamps[i] + 19800) * 1000;
+            const istDate = new Date(istMs);
             const dateStr = istDate.toISOString().slice(0, 10);
             historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
           }
@@ -1211,7 +1211,7 @@ function buildEtfCard(e, rank) {
         <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
       </div>
       <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:60px;">
-        ${rsi === null ? '<span style="color:var(--amber);">⚠️ Aur data chahiye</span>' : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+        ${rsi === null ? `<span style="color:var(--amber);">⚠️ ${d.days < 2 ? 'Fetch karo' : d.days + 'd data'}</span>` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
       </div>
     </div>
     <div class="ec-bar-wrap">
