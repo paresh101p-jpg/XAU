@@ -541,15 +541,18 @@ async function initFirebaseAuth() {
 
   // Step 1: Check if returning from Google redirect
   try {
-    const result = await auth.getRedirectResult();
-    if (result && result.user) {
-      await onUserSignedIn(result.user);
+    const redirectResult = await Promise.race([
+      auth.getRedirectResult(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('redirect-timeout')), 5000))
+    ]);
+    if (redirectResult && redirectResult.user) {
+      await onUserSignedIn(redirectResult.user);
       return;
     }
   } catch (error) {
-    console.error("Redirect result error:", error.code, error.message);
-    // auth/unauthorized-domain matlab Firebase Console mein domain add nahi ki
-    if (error.code === 'auth/unauthorized-domain') {
+    if (error.message === 'redirect-timeout') {
+      console.warn('getRedirectResult timed out');
+    } else if (error.code === 'auth/unauthorized-domain') {
       overlay.style.display = 'flex';
       overlay.innerHTML = `<div class="auth-box">
         <div class="auth-logo">⚠️</div>
@@ -565,17 +568,30 @@ async function initFirebaseAuth() {
         <button class="auth-skip" onclick="skipAuth()" style="margin-top:10px;">Bina login ke continue karo</button>
       </div>`;
       return;
-    }
-    // Koi aur error — show karo
-    if (error.code && error.code !== 'auth/no-auth-event') {
-      showAuthError(`${error.code}: ${error.message}`);
-      return;
+    } else if (error.code && error.code !== 'auth/no-auth-event') {
+      console.error("Redirect result error:", error.code, error.message);
     }
   }
 
-  // Step 2: Check current auth state
+  // Step 2: Check current auth state — with timeout fallback
   return new Promise((resolve) => {
+    let resolved = false;
+
+    // Timeout: 5 sec mein Firebase respond na kare to login screen dikha do
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        console.warn('Firebase auth timeout — showing login screen');
+        showAuthScreen();
+        enableLoginBtn();
+        resolve();
+      }
+    }, 5000);
+
     const unsub = auth.onAuthStateChanged(async (user) => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timeout);
       unsub();
       if (user && !user.isAnonymous) {
         await onUserSignedIn(user);
