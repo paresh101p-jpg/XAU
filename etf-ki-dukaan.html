@@ -458,20 +458,19 @@ async function signInWithGoogle() {
   try {
     document.getElementById('authOverlay').innerHTML = `
       <div class="auth-box">
-        <div style="font-size:1.4rem;margin-bottom:12px;">⏳</div>
-        <div style="font-size:.8rem;color:var(--text);">Google se sign in ho raha hai...</div>
+        <div style="font-size:1.8rem;margin-bottom:10px;">⏳</div>
+        <div style="font-size:.82rem;color:var(--text);font-weight:700;">Google pe redirect ho raha hai...</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:8px;">Thoda wait karo...</div>
       </div>`;
-    await auth.signInWithPopup(googleProvider);
-    // onAuthStateChanged handles the rest
+    await auth.signInWithRedirect(googleProvider);
   } catch (error) {
     console.error("Google sign-in failed:", error);
-    // Restore overlay on error
     document.getElementById('authOverlay').innerHTML = `
       <div class="auth-box">
         <div class="auth-logo">⚠️</div>
         <div class="auth-title" style="color:var(--red)">Sign In Failed</div>
-        <div class="auth-sub">${error.message}</div>
-        <button class="btn-google" onclick="location.reload()">↩ Wapas Jao</button>
+        <div class="auth-sub" style="color:var(--muted);font-size:.65rem;">${error.message}</div>
+        <button class="btn-google" onclick="location.reload()" style="margin-top:12px;">↩ Dobara Try Karo</button>
         <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
       </div>`;
   }
@@ -531,6 +530,19 @@ let S = {
 };
 let pending = null;
 let fetchAbort = false;
+
+/* Handle Google Redirect Result */
+async function handleRedirectResult() {
+  try {
+    const result = await auth.getRedirectResult();
+    if (result && result.user) {
+      // Successfully signed in via redirect
+      console.log("Redirect sign-in success:", result.user.displayName);
+    }
+  } catch (error) {
+    console.error("Redirect result error:", error);
+  }
+}
 
 /* Firebase Sync Helpers */
 async function initFirebaseAuth() {
@@ -1406,6 +1418,9 @@ window.onload = async () => {
   document.getElementById('hdrDate').textContent = fmtDate(todayISO());
   renderLog();
   renderDashboard();
+
+  // Handle Google redirect result first (returning from Google sign-in page)
+  await handleRedirectResult();
 
   // Firebase init
   await initFirebaseAuth();
