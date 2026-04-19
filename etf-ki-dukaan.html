@@ -682,21 +682,25 @@ function stopLoop() {
   showToast('⏹ Loop band ho gayi.');
 }
 
-// Manual retry for a single failed ETF
 async function retryOne(sym) {
-  const stEl = document.getElementById('fst-' + sym);
-  if (stEl) stEl.innerHTML = `<span class="spinner"></span> Retry…`;
+  // Update status in both fetch tab and dashboard no-price section
+  const stEl  = document.getElementById('fst-' + sym);
+  const npEl  = document.getElementById('np-st-' + sym);
+  const upd = (html) => { if (stEl) stEl.innerHTML = html; if (npEl) npEl.innerHTML = html; };
+  upd(`<span class="spinner"></span> Fetching…`);
   try {
     const price = await fetchYahooPrice(sym);
     savePrice(sym, price);
     save();
     const t = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${t}</span>`;
-    showToast(`✅ ${sym} retry hua — ₹${price.toFixed(2)}`);
-    renderDashboard();
+    showToast(`✅ ${sym} — ₹${price.toFixed(2)}`);
+    renderDashboard(); // refresh so it moves out of "no price" list
   } catch(e) {
-    if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${(e.message||'?').slice(0,30)}</span> <button onclick="retryOne('${sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
-    showToast(`❌ ${sym} phir fail — ${e.message||'?'}`);
+    const msg = (e.message||'?').slice(0,30);
+    if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg}</span> <button onclick="retryOne('${sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
+    if (npEl) npEl.innerHTML = `<span style="color:var(--red);">❌ ${msg}</span>`;
+    showToast(`❌ ${sym} fail — ${msg}`);
   }
 }
 
@@ -970,11 +974,16 @@ function renderDashboard() {
   if (noPrice.length > 0) {
     html += `<div class="sec">⚠️ Price Nahi Hai <span class="badge">${noPrice.length}</span></div><div class="wl">`;
     noPrice.forEach((e, i) => {
-      html += `<div class="wl-row no-price">
-        <div class="wl-rank">${i+1}</div>
-        <div class="wl-info"><div class="wl-name">${e.sym}</div>
-          <div class="wl-meta"><span class="tag tag-np">No Price</span></div></div>
-        <button onclick="switchTab('fetch');setTimeout(()=>fetchAllPrices(false),100)" style="background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:6px;padding:3px 10px;font-size:.58rem;font-weight:700;cursor:pointer;">⬇️ Fetch Karo</button>
+      html += `<div class="wl-row no-price" style="justify-content:space-between;">
+        <div class="wl-rank" style="font-size:.58rem;color:var(--muted);">${i+1}</div>
+        <div class="wl-info">
+          <div class="wl-name">${e.sym}</div>
+          <div class="wl-meta"><span class="tag tag-np">No Price</span><span style="font-size:.52rem;color:var(--muted);">RSI ke liye bhi data nahi</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+          <button onclick="retryOne('${e.sym}')" style="background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:6px;padding:4px 10px;font-size:.6rem;font-weight:700;cursor:pointer;">⬇️ Fetch</button>
+          <div style="font-size:.5rem;color:var(--muted);text-align:right;" id="np-st-${e.sym}"></div>
+        </div>
       </div>`;
     });
     html += `</div>`;
@@ -1019,23 +1028,57 @@ function buildPickCard(r, held, boughtToday) {
 function buildWLRow(r, rank) {
   const up = r.changePct !== null && r.changePct >= 0;
   const heldBadge = r.held ? `<span class="tag tag-held">✅ Held</span>` : '';
+  const oversold = S.rsiOversold || 30;
+
+  // Last update time from price history
+  const hist = (S.prices[r.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+  const lastEntry = hist[0];
+  const today = todayISO();
+  const isToday = lastEntry?.date === today;
+  const updateLabel = isToday
+    ? `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
+    : lastEntry
+      ? `<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`
+      : '';
+
+  // RSI pill color
+  const rsiPillBg = r.rsi === null ? 'var(--bg4)' :
+    r.rsi < oversold ? 'rgba(224,82,82,.18)' :
+    r.rsi > 70 ? 'rgba(232,164,64,.18)' : 'rgba(76,175,130,.12)';
+  const rsiPillBorder = r.rsi === null ? 'var(--border)' :
+    r.rsi < oversold ? 'rgba(224,82,82,.4)' :
+    r.rsi > 70 ? 'rgba(232,164,64,.4)' : 'rgba(76,175,130,.3)';
+  const rsiLabel = r.rsi === null ? 'No data' :
+    r.rsi < oversold ? '📉 Oversold' : r.rsi > 70 ? '📈 Overbought' : 'Neutral';
+
   return `<div class="wl-row ${r.held?'held':''}">
-    <div class="wl-rank">${rank}</div>
+    <div class="wl-rank" style="font-size:.58rem;color:var(--muted);">${rank}</div>
+
     <div class="wl-info">
-      <div class="wl-name">${r.sym}</div>
-      <div class="wl-meta">
-        <span class="wl-sym">${r.days}d data · ${r.lastDate ? fmtDate(r.lastDate) : ''}</span>
-        ${r.rsi !== null && r.rsi < (S.rsiOversold||30) ? `<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">Oversold</span>` : ''}
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <div class="wl-name">${r.sym}</div>
         ${heldBadge}
+        ${r.rsi !== null && r.rsi < oversold ? `<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">🔥 Oversold</span>` : ''}
+      </div>
+      <div class="wl-meta" style="margin-top:3px;gap:6px;">
+        ${updateLabel}
+        <span style="font-size:.52rem;color:var(--muted);">${r.days}d history</span>
       </div>
     </div>
-    <div class="wl-rsi">
-      <div class="wl-rsi-v ${rsiClass(r.rsi)}">${r.rsi !== null ? 'RSI '+r.rsi.toFixed(1) : '—'}</div>
-      <div class="wl-rsi-l">${r.rsi !== null ? (r.rsi<30?'Oversold':r.rsi>70?'Overbought':'Neutral') : 'Need more data'}</div>
+
+    <div style="text-align:center;flex-shrink:0;min-width:68px;">
+      <div style="font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">RSI ${S.rsiPeriod}D</div>
+      <div style="background:${rsiPillBg};border:1px solid ${rsiPillBorder};border-radius:8px;padding:3px 8px;display:inline-block;">
+        <span class="${rsiClass(r.rsi)}" style="font-size:.82rem;font-weight:700;">${r.rsi !== null ? r.rsi.toFixed(1) : '—'}</span>
+      </div>
+      <div style="font-size:.48rem;color:var(--muted);margin-top:2px;">${rsiLabel}</div>
     </div>
-    <div class="wl-px">
-      <div class="wl-px-v">₹ ${r.price.toFixed(2)}</div>
-      <div class="wl-chg ${up?'up':'dn'}">${r.changePct !== null ? (up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%' : '—'}</div>
+
+    <div class="wl-px" style="min-width:80px;">
+      <div style="font-size:.82rem;font-weight:700;color:var(--yellow);">₹${r.price.toFixed(2)}</div>
+      <div class="wl-chg ${up?'up':'dn'}" style="font-size:.6rem;margin-top:1px;">
+        ${r.changePct !== null ? (up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%' : '—'}
+      </div>
     </div>
   </div>`;
 }
