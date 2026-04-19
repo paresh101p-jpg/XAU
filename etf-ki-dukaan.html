@@ -823,55 +823,116 @@ async function tryProxy(proxyFn, yahooUrl) {
 }
 async function fetchYahooPrice(sym) {
   const ticker = sym + '.NS';
-  // 60 din ka history — RSI-14 ke liye plenty of data
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=60d`;
-  let lastErr = null;
+  const now = Math.floor(Date.now() / 1000);
+  const from90 = now - (90 * 24 * 3600);
 
-  function extractHistory(result) {
-    // timestamps can be at result.timestamp or result.chart.result[0].timestamp
-    const timestamps = result.timestamp || result.chart?.result?.[0]?.timestamp || [];
-    const quoteData = result.indicators?.quote?.[0] || result.chart?.result?.[0]?.indicators?.quote?.[0] || {};
-    // Use adjclose if available, else close
-    const adjCloses = result.indicators?.adjclose?.[0]?.adjclose || result.chart?.result?.[0]?.indicators?.adjclose?.[0]?.adjclose || [];
-    const closes = adjCloses.length > 0 ? adjCloses : (quoteData.close || []);
-    const historicalData = [];
+  // ── Helper: V8 JSON parse ──
+  function parseV8(chartResult) {
+    const timestamps = chartResult.timestamp || [];
+    const adjCloses = chartResult.indicators?.adjclose?.[0]?.adjclose || [];
+    const rawCloses = chartResult.indicators?.quote?.[0]?.close || [];
+    const closes = adjCloses.length >= timestamps.length ? adjCloses : rawCloses;
+    const out = {};
     for (let i = 0; i < timestamps.length; i++) {
       const c = closes[i];
-      if (c && c > 0 && timestamps[i]) {
-        // IST = UTC + 5:30 = +19800 seconds
-        const istMs = (timestamps[i] + 19800) * 1000;
-        const dateStr = new Date(istMs).toISOString().slice(0, 10);
-        historicalData.push({ date: dateStr, price: parseFloat(c.toFixed(2)) });
+      if (c > 0 && timestamps[i]) {
+        const d = new Date((timestamps[i] + 19800) * 1000).toISOString().slice(0,10);
+        out[d] = parseFloat(c.toFixed(2));
       }
     }
-    // Deduplicate by date (keep last)
-    const seen = {};
-    historicalData.forEach(h => { seen[h.date] = h.price; });
-    return Object.entries(seen).map(([date, price]) => ({date, price})).sort((a,b) => a.date.localeCompare(b.date));
+    return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
   }
+
+  // ── Helper: CSV parse (Yahoo v7 download) ──
+  function parseCSV(text) {
+    const out = {};
+    text.trim().split('\n').slice(1).forEach(line => {
+      const p = line.split(',');
+      const date = p[0]?.trim();
+      const close = parseFloat(p[4]);
+      if (date?.match(/^\d{4}-\d{2}-\d{2}$/) && close > 0) out[date] = parseFloat(close.toFixed(2));
+    });
+    return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
+  }
+
+  // ── Helper: Stooq CSV parse ──
+  function parseStooq(text) {
+    const out = {};
+    text.trim().split('\n').slice(1).forEach(line => {
+      const p = line.split(',');
+      // Stooq format: Date,Open,High,Low,Close,Volume
+      const date = p[0]?.trim();
+      const close = parseFloat(p[4]);
+      if (date?.match(/^\d{4}-\d{2}-\d{2}$/) && close > 0) out[date] = parseFloat(close.toFixed(2));
+    });
+    return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
+  }
+
+  // ── Helper: wrap result ──
+  function makeResult(history, fallbackPrice) {
+    const today = todayISO();
+    const lastEntry = history[history.length - 1];
+    const price = lastEntry ? lastEntry.price : fallbackPrice;
+    if (lastEntry && lastEntry.date !== today) {
+      history.push({ date: today, price });
+    }
+    return { price, history };
+  }
+
+  const urlV8  = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=90d`;
+  const urlCSV = `https://query1.finance.yahoo.com/v7/finance/download/${ticker}?period1=${from90}&period2=${now}&interval=1d&events=history`;
+  // Stooq uses different ticker format: NIFTYBEES.IN (BSE/NSE)
+  const stooqTicker = sym.toLowerCase() + '.in';
+  const urlStooq = `https://stooq.com/q/d/l/?s=${stooqTicker}&i=d`;
+
+  let lastErr = null;
 
   for (const proxyFn of PROXIES) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const result = await tryProxy(proxyFn, yahooUrl);
-        const meta = result.meta;
-        const price = meta.regularMarketPrice || meta.previousClose;
-        if (!price || price <= 0) throw new Error('Invalid price');
+    // 1) Yahoo V8 JSON
+    try {
+      const res = await fetchWithTimeout(proxyFn(urlV8), 20000);
+      if (!res.ok) throw new Error('V8 HTTP ' + res.status);
+      const text = await res.text();
+      let parsed;
+      try { const o = JSON.parse(text); parsed = typeof o.contents==='string' ? JSON.parse(o.contents) : o; }
+      catch { throw new Error('V8 JSON fail'); }
+      const cr = parsed?.chart?.result?.[0];
+      if (!cr) throw new Error('V8 no result');
+      const price = cr.meta?.regularMarketPrice || cr.meta?.previousClose;
+      if (!price || price <= 0) throw new Error('V8 no price');
+      const history = parseV8(cr);
+      if (history.length >= 10) return makeResult(history, price);
+      throw new Error('V8 only ' + history.length + ' candles');
+    } catch(e) { lastErr = e; }
 
-        const historicalData = extractHistory(result);
+    // 2) Yahoo CSV download
+    try {
+      const res = await fetchWithTimeout(proxyFn(urlCSV), 20000);
+      if (!res.ok) throw new Error('CSV HTTP ' + res.status);
+      const text = await res.text();
+      let csvText = text;
+      try { const o = JSON.parse(text); if (o.contents) csvText = o.contents; } catch {}
+      const history = parseCSV(csvText);
+      if (history.length >= 10) return makeResult(history, null);
+      throw new Error('CSV only ' + history.length + ' rows');
+    } catch(e) { lastErr = e; }
 
-        // Agar history nahi aayi toh error throw karo — dusra proxy try karega
-        if (historicalData.length < 2) throw new Error('No history data');
+    // 3) Stooq
+    try {
+      const res = await fetchWithTimeout(proxyFn(urlStooq), 20000);
+      if (!res.ok) throw new Error('Stooq HTTP ' + res.status);
+      const text = await res.text();
+      let csvText = text;
+      try { const o = JSON.parse(text); if (o.contents) csvText = o.contents; } catch {}
+      const history = parseStooq(csvText);
+      if (history.length >= 10) return makeResult(history, null);
+      throw new Error('Stooq only ' + history.length + ' rows');
+    } catch(e) { lastErr = e; }
 
-        return { price: parseFloat(price.toFixed(2)), history: historicalData };
-      } catch(e) {
-        lastErr = e;
-        if (attempt < 2) await sleep(2000);
-      }
-    }
-    await sleep(1000);
+    await sleep(800);
   }
-  throw new Error(lastErr?.message?.includes('abort') ? 'Timed out' : (lastErr?.message || 'Failed'));
+
+  throw new Error(lastErr?.message || 'Sab sources fail');
 }
 function savePrice(sym, fetchResult) {
   const today = todayISO();
