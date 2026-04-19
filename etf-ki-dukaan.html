@@ -21,33 +21,34 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 @keyframes pop{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
 @keyframes pickGlow{from{box-shadow:0 0 18px rgba(245,200,66,.1)}to{box-shadow:0 0 42px rgba(245,200,66,.3)}}
 @keyframes sellGlow{from{box-shadow:0 0 14px rgba(224,82,82,.1)}to{box-shadow:0 0 38px rgba(224,82,82,.32)}}
-@keyframes pulseR{from{box-shadow:0 0 6px rgba(224,82,82,.4)}to{box-shadow:0 0 20px rgba(224,82,82,.9)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fetchBar{from{width:0%}to{width:100%}}
 
-/* ── HEADER ── */
 .hdr{background:var(--bg2);border-bottom:2px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:60;flex-wrap:wrap;}
 .hdr-title{font-size:1rem;font-weight:700;flex:1;}
 .hdr-title span{color:var(--yellow);}
 .hdr-date{font-size:.6rem;color:var(--muted);}
+.hdr-api-status{font-size:.58rem;padding:3px 9px;border-radius:10px;white-space:nowrap;}
+.api-idle{background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);}
+.api-loading{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.3);animation:pulse 1.2s infinite;}
+.api-done{background:rgba(76,175,130,.12);color:var(--green);border:1px solid rgba(76,175,130,.3);}
+.api-err{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.3);}
 
-/* ── TABS ── */
-.tabs{display:flex;background:var(--bg2);border-bottom:2px solid var(--border);padding:0 16px;}
+.tabs{display:flex;background:var(--bg2);border-bottom:2px solid var(--border);padding:0 16px;overflow-x:auto;}
+.tabs::-webkit-scrollbar{height:0;}
 .tab{padding:10px 16px;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:.15s;white-space:nowrap;}
 .tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
 
-/* ── MAIN ── */
-.main{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+/* Fetch Progress Bar */
+.fetch-prog{height:3px;background:var(--bg3);overflow:hidden;position:sticky;top:44px;z-index:55;}
+.fetch-prog-bar{height:100%;background:linear-gradient(90deg,var(--yellow),var(--amber));width:0%;transition:width .3s;}
 
-/* ── SECTION HDR ── */
+.main{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .sec{font-size:.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin:8px 0 6px;}
 .sec::after{content:'';flex:1;height:1px;background:var(--border);}
 .badge{font-size:.58rem;padding:2px 8px;border-radius:8px;background:var(--yellow-dim);color:var(--yellow);}
 
-/* ── PRICE UPDATE BAR ── */
-.price-bar{background:var(--bg2);border-bottom:2px solid var(--border);padding:8px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.price-bar-info{font-size:.6rem;color:var(--muted);flex:1;}
-.price-bar-info strong{color:var(--text);}
-
-/* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:5px;border:2px solid;border-radius:18px;padding:6px 14px;font-size:.68rem;font-weight:700;cursor:pointer;background:transparent;transition:all .2s;white-space:nowrap;}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 .btn-y{border-color:rgba(245,200,66,.5);color:var(--yellow);}
@@ -59,7 +60,22 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-g{border-color:rgba(76,175,130,.4);color:var(--green);}
 .btn-g:not(:disabled):hover{background:var(--green-dim);}
 
-/* ── PICK CARD ── */
+/* Auto Fetch Panel */
+.auto-panel{background:var(--bg2);border:2px solid rgba(91,155,213,.3);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.ap-title{font-size:.78rem;font-weight:700;color:var(--blue);}
+.ap-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.ap-label{font-size:.62rem;color:var(--muted);}
+.ap-val{font-size:.68rem;color:var(--text);font-weight:700;}
+.fetch-etf-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;padding:2px;}
+.fe-row{display:flex;align-items:center;gap:8px;font-size:.62rem;background:var(--bg3);border-radius:6px;padding:4px 8px;}
+.fe-sym{color:var(--text);font-weight:700;width:110px;flex-shrink:0;}
+.fe-status{flex:1;color:var(--muted);}
+.fe-ok{color:var(--green);}
+.fe-err{color:var(--red);}
+.fe-px{color:var(--yellow);font-weight:700;margin-left:auto;}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+
+/* Pick card */
 .pick-card{background:var(--bg2);border:3px solid rgba(245,200,66,.6);border-radius:16px;overflow:hidden;animation:pickGlow 2s infinite alternate;position:relative;}
 .pick-star{position:absolute;top:10px;right:12px;background:var(--yellow);color:#111;border-radius:20px;padding:3px 10px;font-size:.58rem;font-weight:700;}
 .pick-top{padding:14px 16px 6px;}
@@ -75,15 +91,13 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .rsi-lbl{display:flex;justify-content:space-between;font-size:.5rem;color:var(--muted);margin-top:3px;}
 .pick-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px 14px;}
 
-/* ── NO PICK ── */
 .no-pick{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:26px;text-align:center;}
 .no-pick-icon{font-size:1.8rem;display:block;margin-bottom:8px;}
 .no-pick-msg{font-size:.76rem;color:var(--muted);line-height:2;}
 .no-pick-msg strong{color:var(--text);}
 
-/* ── WATCHLIST ROW ── */
 .wl{display:flex;flex-direction:column;gap:6px;}
-.wl-row{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:10px;transition:border-color .2s;cursor:default;}
+.wl-row{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:10px;transition:border-color .2s;}
 .wl-row:hover{border-color:rgba(245,200,66,.25);}
 .wl-row.held{opacity:.6;border-color:rgba(76,175,130,.3);}
 .wl-row.no-price{border-color:rgba(255,255,255,.06);}
@@ -103,13 +117,10 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .wl-chg{font-size:.58rem;}
 .up{color:var(--green);}
 .dn{color:var(--red);}
+.rsi-os{color:var(--red);}
+.rsi-ob{color:var(--amber);}
+.rsi-n{color:var(--text);}
 
-/* ── RSI COLOR BANDS ── */
-.rsi-os{color:var(--red);}       /* < 30 oversold   */
-.rsi-ob{color:var(--amber);}     /* > 70 overbought */
-.rsi-n {color:var(--text);}      /* 30–70 neutral   */
-
-/* ── HOLDING CARD ── */
 .hc{background:var(--bg2);border:3px solid rgba(76,175,130,.4);border-radius:14px;overflow:hidden;margin-bottom:4px;}
 .hc.sell-active{border-color:rgba(224,82,82,.7);animation:sellGlow 1.5s infinite alternate;}
 .hc-top{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 13px 7px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);}
@@ -126,7 +137,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .sell-row{padding:7px 13px 9px;background:rgba(224,82,82,.07);border-top:1px solid rgba(224,82,82,.2);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 .sell-row-txt{font-size:.66rem;color:var(--red);font-weight:700;}
 
-/* ── TRADE BTNS ── */
 .btn-buy-sm{background:var(--green);color:#000;border:none;border-radius:10px;padding:9px 12px;font-size:.76rem;font-weight:700;cursor:pointer;transition:.2s;}
 .btn-buy-sm:hover{background:#62D49B;}
 .btn-buy-sm:disabled{background:var(--bg3);color:var(--muted);border:2px solid var(--border);cursor:not-allowed;}
@@ -134,30 +144,15 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-sell-now{background:var(--red);color:#fff;border:none;border-radius:8px;padding:5px 13px;font-size:.7rem;font-weight:700;cursor:pointer;}
 .btn-sell-now:hover{background:#F06868;}
 
-/* ── PRICE ENTRY GRID ── */
 .pe-grid{display:flex;flex-direction:column;gap:5px;}
 .pe-row{background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:10px;}
 .pe-row:focus-within{border-color:rgba(245,200,66,.4);}
 .pe-sym{font-size:.75rem;font-weight:700;color:var(--text);width:110px;flex-shrink:0;}
-.pe-name{font-size:.58rem;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pe-cur{font-size:.62rem;color:var(--muted);width:70px;flex-shrink:0;text-align:right;}
+.pe-cur{font-size:.62rem;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pe-inp{background:var(--bg3);border:1.5px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.82rem;font-weight:700;padding:5px 8px;outline:none;width:90px;text-align:right;transition:.15s;}
 .pe-inp:focus{border-color:var(--yellow);}
 .pe-status{width:18px;flex-shrink:0;text-align:center;font-size:.75rem;}
 
-/* ── RSI HISTORY TABLE ── */
-.rsi-hist-wrap{background:var(--bg2);border:2px solid var(--border);border-radius:12px;overflow:hidden;}
-.rsi-hist-hdr{display:grid;grid-template-columns:1fr 80px 70px 60px;padding:7px 12px;background:var(--bg3);border-bottom:1px solid var(--border);}
-.rsi-hist-hdr span{font-size:.52rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-.rsi-hist-row{display:grid;grid-template-columns:1fr 80px 70px 60px;padding:8px 12px;border-bottom:1px solid var(--border);}
-.rsi-hist-row:last-child{border-bottom:none;}
-.rhi-sym{font-size:.72rem;font-weight:700;color:var(--text);}
-.rhi-name{font-size:.55rem;color:var(--muted);}
-.rhi-px{font-size:.72rem;font-weight:700;color:var(--text);text-align:right;}
-.rhi-rsi{font-size:.8rem;font-weight:700;text-align:right;}
-.rhi-days{font-size:.6rem;color:var(--muted);text-align:right;}
-
-/* ── MODAL ── */
 .m-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:110;display:none;align-items:center;justify-content:center;padding:18px;}
 .m-ov.show{display:flex;}
 .m-box{background:var(--bg2);border:2px solid rgba(245,200,66,.4);border-radius:18px;padding:20px;max-width:330px;width:100%;animation:pop .18s ease;}
@@ -176,82 +171,120 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .m-confirm-b{background:var(--green);color:#000;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer;}
 .m-confirm-s{background:var(--red);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer;}
 
-/* ── TOAST ── */
 .toast{position:fixed;bottom:48px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg3);border:2px solid var(--border-mid);color:var(--text);font-size:.7rem;padding:7px 16px;border-radius:9px;z-index:300;transition:transform .22s;white-space:nowrap;max-width:92vw;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* ── LOG BAR ── */
 .log-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:2px solid var(--border);padding:4px 12px;display:flex;align-items:center;gap:5px;overflow-x:auto;z-index:50;height:36px;}
 .log-bar::-webkit-scrollbar{height:0;}
 .lchip{flex-shrink:0;font-size:.58rem;border-radius:4px;padding:2px 7px;white-space:nowrap;}
 .lchip.buy{background:var(--green-dim);color:var(--green);border:1px solid rgba(76,175,130,.22);}
 .lchip.sell{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.2);}
 .le{font-size:.58rem;color:var(--muted);}
-
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
+
+/* API fetch result rows */
+.fetch-result-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.6rem;color:var(--muted);max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
+.fr-ok{color:var(--green);}
+.fr-skip{color:var(--muted);}
+.fr-err{color:var(--red);}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-title">🏪 <span>ETF Ki Dukaan</span></div>
-  <div class="hdr-date" id="hdrDate"></div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="hdr-date" id="hdrDate"></div>
+    <div class="hdr-api-status api-idle" id="apiStatus">💤 Ready</div>
+  </div>
 </div>
+<div class="fetch-prog"><div class="fetch-prog-bar" id="fetchBar"></div></div>
 
-<!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 Dashboard</div>
-  <div class="tab" onclick="switchTab('prices')" id="tab-prices">💰 Prices Daalo</div>
+  <div class="tab" onclick="switchTab('fetch')" id="tab-fetch">🌐 Auto Fetch</div>
+  <div class="tab" onclick="switchTab('prices')" id="tab-prices">✏️ Override Prices</div>
   <div class="tab" onclick="switchTab('holdings')" id="tab-holdings">💼 Holdings</div>
   <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</div>
 </div>
 
-<!-- ═══════ TAB: DASHBOARD ═══════ -->
-<div id="tab-dashboard-content" class="main">
-  <div class="no-pick" id="dashWelcome">
-    <span class="no-pick-icon">🏪</span>
-    <div class="no-pick-msg">
-      <strong>Welcome!</strong><br><br>
-      1️⃣ <strong>Settings</strong> mein ETFs add karo<br>
-      2️⃣ <strong>Prices Daalo</strong> — roz prices update karo<br>
-      3️⃣ Dashboard pe aaj ka pick aur RSI dikhega!
+<!-- ═══ DASHBOARD ═══ -->
+<div id="tab-dashboard-content" class="main"></div>
+
+<!-- ═══ AUTO FETCH ═══ -->
+<div id="tab-fetch-content" class="main" style="display:none;">
+  <div class="auto-panel">
+    <div class="ap-title">🌐 Yahoo Finance se Auto Price Fetch</div>
+    <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
+      NSE ETF prices <strong style="color:var(--text)">Yahoo Finance</strong> se aati hain (<code style="background:var(--bg3);padding:1px 4px;border-radius:3px;">.NS</code> suffix).<br>
+      4 PM ke baad ek baar <strong style="color:var(--yellow)">Auto Fetch</strong> hoga aur next day tak save rahega.
     </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-y" onclick="fetchAllPrices(false)" id="btnFetch">⬇️ Abhi Fetch Karo</button>
+      <button class="btn btn-b" onclick="fetchAllPrices(true)">🔄 Force Re-Fetch</button>
+    </div>
+    <div class="ap-row">
+      <div>
+        <div class="ap-label">Last Fetch</div>
+        <div class="ap-val" id="lastFetchTime">—</div>
+      </div>
+      <div>
+        <div class="ap-label">Next Auto Fetch</div>
+        <div class="ap-val" id="nextFetchTime">—</div>
+      </div>
+      <div>
+        <div class="ap-label">Fetched Today</div>
+        <div class="ap-val" id="fetchedCount">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">📋 Fetch Status — ETF Wise</div>
+  <div id="fetchStatusList" class="fetch-result-box" style="max-height:none;">
+    <div class="fr-skip">Fetch button dabao to yahaan live status dikhegi…</div>
+  </div>
+  
+  <div class="sec" style="margin-top:8px;">ℹ️ Note</div>
+  <div style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:12px;font-size:.62rem;color:var(--muted);line-height:2;">
+    • Yahoo Finance API <strong style="color:var(--text)">free</strong> hai — koi API key nahi chahiye<br>
+    • NSE symbols ke aage <code style="background:var(--bg3);padding:1px 4px;">.NS</code> lagta hai (e.g. <code style="background:var(--bg3);padding:1px 4px;">NIFTYBEES.NS</code>)<br>
+    • Kuch ETFs Yahoo pe list nahi hain — unke liye <strong style="color:var(--text)">Override Prices</strong> tab mein manually enter karo<br>
+    • Market hours: 9:15 AM – 3:30 PM IST. 4 PM ke baad fetch karo for closing price<br>
+    • CORS ke liye <strong style="color:var(--text)">allorigins.win</strong> proxy use hota hai
   </div>
 </div>
 
-<!-- ═══════ TAB: PRICES ═══════ -->
+<!-- ═══ MANUAL PRICES ═══ -->
 <div id="tab-prices-content" class="main" style="display:none;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
-    <div style="font-size:.62rem;color:var(--muted);">Aaj ke <strong style="color:var(--text);">closing prices</strong> daalo. Enter/Tab se next field.</div>
+    <div style="font-size:.62rem;color:var(--muted);">Yahan <strong style="color:var(--yellow)">already fetched prices</strong> dikhte hain (✅). Jo Yahoo pe nahi mila — uska price yahan manually type karo.</div>
     <div style="display:flex;gap:6px;">
-      <button class="btn btn-y" onclick="saveAllPrices()">✅ Save Prices</button>
+      <button class="btn btn-y" onclick="saveAllPrices()">✅ Save All</button>
       <button class="btn btn-r" onclick="clearTodayPrices()">🗑 Clear</button>
     </div>
   </div>
   <div class="pe-grid" id="priceGrid"></div>
 </div>
 
-<!-- ═══════ TAB: HOLDINGS ═══════ -->
+<!-- ═══ HOLDINGS ═══ -->
 <div id="tab-holdings-content" class="main" style="display:none;">
   <div id="holdingsContent"></div>
 </div>
 
-<!-- ═══════ TAB: SETTINGS ═══════ -->
+<!-- ═══ SETTINGS ═══ -->
 <div id="tab-settings-content" class="main" style="display:none;">
   <div class="sec">ETF List</div>
-  <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px;">Ek line mein ek ETF symbol daalo. Max 80 ETFs.</div>
+  <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px;">Ek line mein ek ETF symbol. Yahoo Finance pe <code style="background:var(--bg3);padding:1px 4px;">.NS</code> lagta hai automatically.</div>
   <textarea id="etfListInput" style="width:100%;background:var(--bg2);border:2px solid var(--border-mid);border-radius:10px;color:var(--text);font-size:.72rem;font-weight:700;padding:10px;outline:none;resize:vertical;min-height:200px;line-height:1.9;" placeholder="NIFTYBEES&#10;BANKBEES&#10;ITBEES&#10;..."></textarea>
-  <div style="display:flex;gap:8px;margin-top:8px;">
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
     <button class="btn btn-y" onclick="saveSettings()">✅ Save</button>
     <button class="btn btn-b" onclick="loadDefaultETFs()">↩ Default List</button>
     <button class="btn btn-r" onclick="resetAll()">🗑 Full Reset</button>
   </div>
 
-  <div class="sec" style="margin-top:16px;">RSI Settings</div>
+  <div class="sec" style="margin-top:16px;">RSI & Trade Settings</div>
   <div style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:.68rem;color:var(--muted);">RSI Period</span>
@@ -259,7 +292,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
         style="width:70px;background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.88rem;font-weight:700;padding:5px 8px;outline:none;text-align:center;">
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:.68rem;color:var(--muted);">Oversold Level (Buy)</span>
+      <span style="font-size:.68rem;color:var(--muted);">Oversold Level (Buy Signal)</span>
       <input type="number" id="rsiOversold" value="30" min="10" max="45"
         style="width:70px;background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.88rem;font-weight:700;padding:5px 8px;outline:none;text-align:center;">
     </div>
@@ -267,6 +300,13 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
       <span style="font-size:.68rem;color:var(--muted);">Sell Target (%)</span>
       <input type="number" id="sellTarget" value="4.51" min="1" max="20" step="0.1"
         style="width:70px;background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.88rem;font-weight:700;padding:5px 8px;outline:none;text-align:center;">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:.68rem;color:var(--muted);">Auto Fetch (4 PM se 9 AM)</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="autoFetchEnabled" checked style="width:16px;height:16px;accent-color:var(--yellow);">
+        <span style="font-size:.68rem;color:var(--text);" id="autoFetchLbl">On</span>
+      </label>
     </div>
     <button class="btn btn-y" style="align-self:flex-start;" onclick="saveRSISettings()">✅ Save Settings</button>
   </div>
@@ -293,9 +333,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <div class="log-bar" id="logBar"><span class="le">Trades yahaan dikhenge…</span></div>
 
 <script>
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    DEFAULT ETF LIST
-   ═══════════════════════════════════════ */
+══════════════════════════════════════ */
 const DEFAULT_ETFS = `ITBEES
 NIFTYBEES
 METALIETF
@@ -372,55 +412,78 @@ FLEXIADD
 TNIDETF
 ELM250`;
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    STATE
-   ═══════════════════════════════════════ */
-const LS = 'etf_dukaan_v5';
+══════════════════════════════════════ */
+const LS = 'etf_dukaan_v6';
 let S = {
-  etfs: [],          // [{sym, name}]
-  prices: {},        // {sym: [{date, price}]}  — max 30 days per ETF
+  etfs: [],
+  prices: {},        // {sym: [{date, price}]}
   holdings: [],
   log: [],
   rsiPeriod: 14,
   rsiOversold: 30,
   sellTarget: 4.51,
-  dailyPick: null,   // {sym, date}
+  dailyPick: null,
+  autoFetchEnabled: true,
+  lastFetchDate: null,    // ISO date of last successful fetch
+  lastFetchTime: null,    // HH:MM string
+  fetchedToday: 0,
 };
 let pending = null;
+let fetchAbort = false;
 
 function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {} }
-function load() { try { const r = localStorage.getItem(LS); if (r) S = {...S, ...JSON.parse(r)}; } catch(e) {} }
+function load() {
+  try {
+    const r = localStorage.getItem(LS);
+    if (r) { const p = JSON.parse(r); S = {...S, ...p}; }
+  } catch(e) {}
+}
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    HELPERS
-   ═══════════════════════════════════════ */
+══════════════════════════════════════ */
 function todayISO() {
   return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})).toISOString().slice(0,10);
+}
+function nowIST() {
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
 }
 function fmtDate(iso) {
   if (!iso) return '—';
   const [y,m,d] = iso.split('-');
   return `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${y}`;
 }
-function showToast(msg, dur=3000) {
+function showToast(msg, dur=3500) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), dur);
 }
+function setApiStatus(type, msg) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'hdr-api-status ' + type;
+  el.textContent = msg;
+}
+function setBar(pct) {
+  document.getElementById('fetchBar').style.width = pct + '%';
+}
+
 function switchTab(name) {
-  ['dashboard','prices','holdings','settings'].forEach(t => {
+  ['dashboard','fetch','prices','holdings','settings'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===name);
     document.getElementById('tab-'+t+'-content').style.display = t===name ? 'flex' : 'none';
   });
-  if (name === 'prices')   renderPriceGrid();
-  if (name === 'holdings') renderHoldings();
-  if (name === 'settings') renderSettings();
+  if (name === 'fetch')     renderFetchTab();
+  if (name === 'prices')    renderPriceGrid();
+  if (name === 'holdings')  renderHoldings();
+  if (name === 'settings')  renderSettings();
   if (name === 'dashboard') renderDashboard();
 }
 
-/* ═══════════════════════════════════════
-   RSI CALCULATION (Wilder, period=14)
-   ═══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   RSI
+══════════════════════════════════════ */
 function calcRSI(closes, period) {
   if (!closes || closes.length < period + 1) return null;
   let g = 0, l = 0;
@@ -438,7 +501,6 @@ function calcRSI(closes, period) {
   return parseFloat((100 - 100/(1 + ag/al)).toFixed(2));
 }
 
-/* For each ETF compute RSI from stored daily prices */
 function getETFData(sym) {
   const hist = (S.prices[sym] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
   const closes = hist.map(h => h.price);
@@ -448,8 +510,7 @@ function getETFData(sym) {
   const prev   = hist[hist.length - 2] || null;
   const price = latest ? latest.price : null;
   const changePct = (latest && prev && prev.price > 0)
-    ? ((latest.price - prev.price) / prev.price) * 100
-    : null;
+    ? ((latest.price - prev.price) / prev.price) * 100 : null;
   return { rsi, price, changePct, days: closes.length, lastDate: latest?.date || null };
 }
 
@@ -457,19 +518,15 @@ function getAllRSI() {
   return S.etfs.map(e => {
     const d = getETFData(e.sym);
     const held = S.holdings.some(h => h.sym === e.sym);
-    return { sym: e.sym, name: e.sym, ...d, held };
+    return { sym: e.sym, ...d, held };
   }).filter(r => r.price !== null)
     .sort((a,b) => {
       if (a.rsi === null && b.rsi === null) return 0;
-      if (a.rsi === null) return 1;
-      if (b.rsi === null) return -1;
+      if (a.rsi === null) return 1; if (b.rsi === null) return -1;
       return a.rsi - b.rsi;
     });
 }
 
-/* ═══════════════════════════════════════
-   RSI BAR COLOR
-   ═══════════════════════════════════════ */
 function rsiBg(rsi) {
   if (rsi === null) return '#444';
   if (rsi < 30) return 'linear-gradient(90deg,#E05252,#F07030)';
@@ -483,31 +540,212 @@ function rsiClass(rsi) {
   return 'rsi-n';
 }
 
-/* ═══════════════════════════════════════
-   DASHBOARD RENDER
-   ═══════════════════════════════════════ */
-function renderDashboard() {
-  const cont = document.getElementById('tab-dashboard-content');
-  if (!S.etfs.length) {
-    cont.innerHTML = `<div class="no-pick">
-      <span class="no-pick-icon">⚙️</span>
-      <div class="no-pick-msg"><strong>Koi ETF nahi hai!</strong><br>Settings mein ETF list add karo.</div>
-    </div>`;
+/* ══════════════════════════════════════
+   YAHOO FINANCE FETCH
+══════════════════════════════════════ */
+
+// Fetch single ETF price via allorigins proxy → Yahoo Finance
+async function fetchYahooPrice(sym) {
+  // Yahoo Finance uses .NS suffix for NSE
+  const ticker = sym + '.NS';
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+
+  const res = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
+  if (!res.ok) throw new Error('Network error');
+  const json = await res.json();
+  const data = JSON.parse(json.contents);
+  const result = data?.chart?.result?.[0];
+  if (!result) throw new Error('No data');
+  const meta = result.meta;
+  // regularMarketPrice is current/closing price
+  const price = meta.regularMarketPrice || meta.previousClose;
+  if (!price || price <= 0) throw new Error('Invalid price');
+  return parseFloat(price.toFixed(2));
+}
+
+// Save price to state
+function savePrice(sym, price) {
+  const today = todayISO();
+  if (!S.prices[sym]) S.prices[sym] = [];
+  S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
+  S.prices[sym].push({ date: today, price });
+  S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
+  if (S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
+}
+
+// Is it a good time to fetch? (4 PM to 9 AM next day)
+function isGoodFetchTime() {
+  const now = nowIST();
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const totalMin = h * 60 + m;
+  // 4:00 PM = 960 min, 9:00 AM = 540 min
+  // Good window: >= 16:00 OR <= 09:00
+  return totalMin >= 960 || totalMin <= 540;
+}
+
+// Main fetch function
+async function fetchAllPrices(force = false) {
+  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo pehle'); return; }
+
+  const today = todayISO();
+  
+  // Check if already fetched today (unless force)
+  if (!force && S.lastFetchDate === today && (S.fetchedToday || 0) > 0) {
+    showToast(`✅ Aaj already ${S.fetchedToday} prices fetch ho chuke hain`);
     return;
   }
 
-  const today     = todayISO();
-  const oversold  = S.rsiOversold || 30;
-  const all       = getAllRSI();
-  const heldSyms  = new Set(S.holdings.map(h => h.sym));
-  const under     = all.filter(r => r.rsi !== null && r.rsi < oversold && !r.held);
-  const underAll  = all.filter(r => r.rsi !== null && r.rsi < oversold);
-  const noPrice   = S.etfs.filter(e => !S.prices[e.sym] || !S.prices[e.sym].length);
+  if (!force && !isGoodFetchTime()) {
+    const msg = 'Market abhi khula hai (9:15AM–4PM).\nClosing price ke liye 4 PM ke baad fetch karo.\nAbhi bhi fetch karna hai?';
+    if (!confirm(msg)) return;
+  }
 
-  // Daily pick
+  fetchAbort = false;
+  setApiStatus('api-loading', '⬇️ Fetching...');
+  document.getElementById('btnFetch').disabled = true;
+
+  const statusList = document.getElementById('fetchStatusList');
+  statusList.innerHTML = '';
+
+  let ok = 0, skipped = 0, failed = 0;
+  const total = S.etfs.length;
+  const rows = {};
+
+  // Create status rows first
+  S.etfs.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'fe-row';
+    div.id = 'frow-' + e.sym;
+    div.innerHTML = `<span class="fe-sym">${e.sym}</span><span class="fe-status" id="fst-${e.sym}">⏳ Waiting...</span>`;
+    statusList.appendChild(div);
+    rows[e.sym] = div;
+  });
+
+  // Batch fetch with delay to avoid rate limiting
+  for (let i = 0; i < S.etfs.length; i++) {
+    if (fetchAbort) break;
+    const e = S.etfs[i];
+    const stEl = document.getElementById('fst-' + e.sym);
+    if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching...`;
+
+    setBar(Math.round((i / total) * 100));
+
+    try {
+      const price = await fetchYahooPrice(e.sym);
+      savePrice(e.sym, price);
+      ok++;
+      if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span>`;
+    } catch(err) {
+      failed++;
+      const errMsg = err.message || 'Unknown';
+      if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${errMsg.slice(0,30)}</span>`;
+    }
+
+    // Small delay between requests (avoid Yahoo rate limiting)
+    if (i < S.etfs.length - 1) await sleep(300);
+  }
+
+  setBar(100);
+  setTimeout(() => setBar(0), 1500);
+
+  // Update state
+  S.lastFetchDate = today;
+  S.lastFetchTime = nowIST().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+  S.fetchedToday = ok;
+  save();
+
+  setApiStatus('api-done', `✅ ${ok} fetched`);
+  document.getElementById('btnFetch').disabled = false;
+  showToast(`✅ Done! ${ok} prices fetched, ${failed} failed`);
+  renderFetchTab();
+  renderDashboard();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ══════════════════════════════════════
+   FETCH TAB RENDER
+══════════════════════════════════════ */
+function renderFetchTab() {
+  const today = todayISO();
+  const now = nowIST();
+
+  // Last fetch
+  const lfEl = document.getElementById('lastFetchTime');
+  if (lfEl) {
+    if (S.lastFetchDate === today && S.lastFetchTime) {
+      lfEl.textContent = `Aaj ${S.lastFetchTime}`;
+      lfEl.style.color = 'var(--green)';
+    } else if (S.lastFetchDate) {
+      lfEl.textContent = `${fmtDate(S.lastFetchDate)} ${S.lastFetchTime||''}`;
+      lfEl.style.color = 'var(--amber)';
+    } else {
+      lfEl.textContent = 'Kabhi nahi';
+    }
+  }
+
+  // Next fetch time
+  const nfEl = document.getElementById('nextFetchTime');
+  if (nfEl) {
+    const h = now.getHours();
+    if (h < 16) {
+      const diff = 16 * 60 - (h * 60 + now.getMinutes());
+      nfEl.textContent = `${Math.floor(diff/60)}h ${diff%60}m mein (4 PM)`;
+      nfEl.style.color = 'var(--amber)';
+    } else {
+      nfEl.textContent = 'Abhi fetch kar sakte ho!';
+      nfEl.style.color = 'var(--green)';
+    }
+  }
+
+  // Count
+  const fcEl = document.getElementById('fetchedCount');
+  if (fcEl) {
+    const cnt = S.lastFetchDate === today ? (S.fetchedToday || 0) : 0;
+    fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
+    fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
+  }
+}
+
+/* ══════════════════════════════════════
+   AUTO FETCH SCHEDULER
+══════════════════════════════════════ */
+function scheduleAutoFetch() {
+  setInterval(() => {
+    if (!S.autoFetchEnabled) return;
+    const today = todayIST();
+    if (S.lastFetchDate === today) return; // already done
+    if (isGoodFetchTime()) {
+      fetchAllPrices(false);
+    }
+  }, 15 * 60 * 1000); // check every 15 minutes
+}
+
+function todayIST() { return todayISO(); }
+
+/* ══════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════ */
+function renderDashboard() {
+  const cont = document.getElementById('tab-dashboard-content');
+  if (!S.etfs.length) {
+    cont.innerHTML = `<div class="no-pick"><span class="no-pick-icon">⚙️</span>
+      <div class="no-pick-msg"><strong>Koi ETF nahi hai!</strong><br>Settings mein ETF list add karo.</div></div>`;
+    return;
+  }
+
+  const today = todayISO();
+  const oversold = S.rsiOversold || 30;
+  const all = getAllRSI();
+  const heldSyms = new Set(S.holdings.map(h => h.sym));
+  const under = all.filter(r => r.rsi !== null && r.rsi < oversold && !r.held);
+  const underAll = all.filter(r => r.rsi !== null && r.rsi < oversold);
+  const noPrice = S.etfs.filter(e => !S.prices[e.sym] || !S.prices[e.sym].length);
+
   let pickETF = null;
-  if (S.dailyPick && S.dailyPick.date === today)
-    pickETF = all.find(r => r.sym === S.dailyPick.sym);
+  if (S.dailyPick && S.dailyPick.date === today) pickETF = all.find(r => r.sym === S.dailyPick.sym);
   if (!pickETF && under.length > 0) {
     pickETF = under[0];
     S.dailyPick = { sym: pickETF.sym, date: today };
@@ -516,51 +754,57 @@ function renderDashboard() {
 
   let html = '';
 
-  // ── Aaj Ka Pick ──
+  // Fetch status banner
+  const fetchedToday = S.lastFetchDate === today;
+  if (!fetchedToday) {
+    const good = isGoodFetchTime();
+    html += `<div style="background:${good?'rgba(245,200,66,.08)':'rgba(91,155,213,.08)'};border:2px solid ${good?'rgba(245,200,66,.3)':'rgba(91,155,213,.25)'};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:.65rem;color:${good?'var(--yellow)':'var(--blue)'};">
+        ${good ? '⚡ Aaj ke prices abhi tak fetch nahi hue!' : '⏰ Market band hone ke baad (4 PM) prices auto-fetch honge.'}
+      </div>
+      ${good ? `<button class="btn btn-y" style="font-size:.6rem;padding:5px 12px;" onclick="switchTab('fetch');fetchAllPrices(false)">⬇️ Fetch Now</button>` : ''}
+    </div>`;
+  } else {
+    html += `<div style="background:rgba(76,175,130,.07);border:1px solid rgba(76,175,130,.2);border-radius:10px;padding:8px 14px;font-size:.6rem;color:var(--green);">
+      ✅ Aaj ke prices fetch ho gaye — ${S.lastFetchTime} pe · ${S.fetchedToday} ETFs updated
+    </div>`;
+  }
+
+  // Pick
   html += `<div class="sec" style="margin-top:2px;">🎯 Aaj Ka Pick</div>`;
   if (!all.length) {
     html += `<div class="no-pick"><span class="no-pick-icon">💰</span>
-      <div class="no-pick-msg">Pehle <strong>"Prices Daalo"</strong> tab mein aaj ke prices enter karo.<br>
+      <div class="no-pick-msg">Pehle <strong>"Auto Fetch"</strong> tab se prices fetch karo.<br>
       <span style="font-size:.58rem;opacity:.7;">RSI ke liye ${S.rsiPeriod+1} din ke prices chahiye.</span></div></div>`;
   } else if (!pickETF) {
     html += `<div class="no-pick"><span class="no-pick-icon">😴</span>
-      <div class="no-pick-msg"><strong>Aaj koi ETF oversold nahi.</strong><br>
-      RSI &lt; ${oversold} wala koi ETF nahi mila.<br>Kal phir dekho!</div></div>`;
+      <div class="no-pick-msg"><strong>Aaj koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi ETF nahi mila.<br>Kal phir dekho!</div></div>`;
   } else {
     const boughtTd = S.holdings.some(h => h.sym === pickETF.sym && h.buyDate === today);
     html += buildPickCard(pickETF, heldSyms.has(pickETF.sym), boughtTd);
   }
 
-  // ── RSI < oversold watchlist ──
   if (underAll.length > 0) {
-    html += `<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div>
-    <div class="wl">`;
-    underAll.forEach((r, i) => {
-      html += buildWLRow(r, i+1);
-    });
+    html += `<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
+    underAll.forEach((r, i) => { html += buildWLRow(r, i+1); });
     html += `</div>`;
   }
 
-  // ── All ETFs sorted by RSI ──
   const withRSI = all.filter(r => r.rsi !== null && r.rsi >= oversold);
   if (withRSI.length > 0) {
-    html += `<div class="sec">📊 Baaki ETFs — RSI Sorted <span class="badge">${withRSI.length}</span></div>
-    <div class="wl">`;
-    withRSI.forEach((r, i) => {
-      html += buildWLRow(r, i+1);
-    });
+    html += `<div class="sec">📊 Baaki ETFs — RSI Sorted <span class="badge">${withRSI.length}</span></div><div class="wl">`;
+    withRSI.forEach((r, i) => { html += buildWLRow(r, i+1); });
     html += `</div>`;
   }
 
-  // ── No price ETFs ──
   if (noPrice.length > 0) {
-    html += `<div class="sec">⚠️ Price Nahi Hai <span class="badge">${noPrice.length}</span></div>
-    <div class="wl">`;
+    html += `<div class="sec">⚠️ Price Nahi Hai <span class="badge">${noPrice.length}</span></div><div class="wl">`;
     noPrice.forEach((e, i) => {
       html += `<div class="wl-row no-price">
         <div class="wl-rank">${i+1}</div>
-        <div class="wl-info"><div class="wl-name">${e.sym}</div><div class="wl-meta"><span class="tag tag-np">No Price</span></div></div>
-        <div style="font-size:.6rem;color:var(--muted);">Prices Daalo tab mein enter karo →</div>
+        <div class="wl-info"><div class="wl-name">${e.sym}</div>
+          <div class="wl-meta"><span class="tag tag-np">No Price</span></div></div>
+        <button onclick="switchTab('fetch');setTimeout(()=>fetchAllPrices(false),100)" style="background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:6px;padding:3px 10px;font-size:.58rem;font-weight:700;cursor:pointer;">⬇️ Fetch Karo</button>
       </div>`;
     });
     html += `</div>`;
@@ -576,7 +820,6 @@ function buildPickCard(r, held, boughtToday) {
   const rsiPct = r.rsi !== null ? Math.min(r.rsi, 100) : 0;
   const up = r.changePct !== null && r.changePct >= 0;
   const tgt = r.price * (1 + (S.sellTarget||4.51)/100);
-  const daysLeft = (S.rsiPeriod||14) + 1 - r.days;
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
     <div class="pick-top">
@@ -595,7 +838,7 @@ function buildPickCard(r, held, boughtToday) {
     ${r.rsi !== null ? `<div class="rsi-bar-wrap">
       <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${rsiPct}%;background:${rsiBg(r.rsi)};"></div></div>
       <div class="rsi-lbl"><span>0 Oversold</span><span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span><span>100 Overbought</span></div>
-    </div>` : `<div style="padding:4px 16px 6px;font-size:.6rem;color:var(--amber);">⚠️ RSI ke liye ${daysLeft > 0 ? daysLeft+' aur din ke prices chahiye' : 'data dalo'}</div>`}
+    </div>` : `<div style="padding:4px 16px 6px;font-size:.6rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
     <div class="pick-btns">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
       <button class="btn-sell-sm" disabled>SELL — Not Held</button>
@@ -606,20 +849,19 @@ function buildPickCard(r, held, boughtToday) {
 function buildWLRow(r, rank) {
   const up = r.changePct !== null && r.changePct >= 0;
   const heldBadge = r.held ? `<span class="tag tag-held">✅ Held</span>` : '';
-  const tgt = r.price * (1 + (S.sellTarget||4.51)/100);
   return `<div class="wl-row ${r.held?'held':''}">
     <div class="wl-rank">${rank}</div>
     <div class="wl-info">
       <div class="wl-name">${r.sym}</div>
       <div class="wl-meta">
-        <span class="wl-sym">${r.days}d data</span>
+        <span class="wl-sym">${r.days}d data · ${r.lastDate ? fmtDate(r.lastDate) : ''}</span>
         ${r.rsi !== null && r.rsi < (S.rsiOversold||30) ? `<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">Oversold</span>` : ''}
         ${heldBadge}
       </div>
     </div>
     <div class="wl-rsi">
       <div class="wl-rsi-v ${rsiClass(r.rsi)}">${r.rsi !== null ? 'RSI '+r.rsi.toFixed(1) : '—'}</div>
-      <div class="wl-rsi-l">${r.rsi !== null ? (r.rsi < 30?'Oversold':r.rsi>70?'Overbought':'Neutral') : 'Need more data'}</div>
+      <div class="wl-rsi-l">${r.rsi !== null ? (r.rsi<30?'Oversold':r.rsi>70?'Overbought':'Neutral') : 'Need more data'}</div>
     </div>
     <div class="wl-px">
       <div class="wl-px-v">₹ ${r.price.toFixed(2)}</div>
@@ -628,22 +870,22 @@ function buildWLRow(r, rank) {
   </div>`;
 }
 
-/* ═══════════════════════════════════════
-   PRICE GRID
-   ═══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   MANUAL PRICE GRID
+══════════════════════════════════════ */
 function renderPriceGrid() {
   const today = todayISO();
   const grid = document.getElementById('priceGrid');
   if (!S.etfs.length) {
-    grid.innerHTML = `<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein pehle ETF list daalo.</div></div>`;
+    grid.innerHTML = `<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list daalo.</div></div>`;
     return;
   }
   let html = '';
   S.etfs.forEach((e, idx) => {
     const hist = S.prices[e.sym] || [];
     const todayEntry = hist.find(h => h.date === today);
-    const lastEntry  = hist.filter(h => h.date !== today).sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const curTxt     = todayEntry ? `✅ ₹${todayEntry.price.toFixed(2)}` : (lastEntry ? `Last: ₹${lastEntry.price.toFixed(2)} (${fmtDate(lastEntry.date)})` : 'No price yet');
+    const lastEntry = hist.filter(h => h.date !== today).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const curTxt = todayEntry ? `✅ ₹${todayEntry.price.toFixed(2)}` : (lastEntry ? `Last: ₹${lastEntry.price.toFixed(2)} (${fmtDate(lastEntry.date)})` : 'No price yet');
     html += `<div class="pe-row" id="per-${e.sym}">
       <div class="pe-sym">${e.sym}</div>
       <div class="pe-cur" style="${todayEntry?'color:var(--green)':''}">${curTxt}</div>
@@ -663,63 +905,38 @@ function priceKeyNav(e, sym, idx) {
     e.preventDefault();
     const val = e.target.value;
     if (val) quickSavePrice(sym, val);
-    // Move to next
     const next = S.etfs[idx+1];
-    if (next) {
-      const ni = document.getElementById('pi-'+next.sym);
-      if (ni) { ni.focus(); ni.select(); }
-    }
+    if (next) { const ni = document.getElementById('pi-'+next.sym); if (ni) { ni.focus(); ni.select(); } }
   }
 }
-
 function quickSavePrice(sym, val) {
   const price = parseFloat(val);
   if (!price || price <= 0) return;
   savePrice(sym, price);
+  save();
   const s = document.getElementById('ps-'+sym);
   if (s) s.textContent = '✅';
   const c = document.getElementById('per-'+sym)?.querySelector('.pe-cur');
   if (c) { c.textContent = `✅ ₹${price.toFixed(2)}`; c.style.color = 'var(--green)'; }
 }
-
-function savePrice(sym, price) {
-  const today = todayISO();
-  if (!S.prices[sym]) S.prices[sym] = [];
-  // Remove today's entry if exists, add new
-  S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
-  S.prices[sym].push({ date: today, price });
-  // Keep max 60 days
-  S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
-  if (S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
-  save();
-}
-
 function saveAllPrices() {
   let count = 0;
   S.etfs.forEach(e => {
     const inp = document.getElementById('pi-'+e.sym);
-    if (inp && inp.value) {
-      const price = parseFloat(inp.value);
-      if (price > 0) { savePrice(e.sym, price); count++; }
-    }
+    if (inp && inp.value) { const price = parseFloat(inp.value); if (price > 0) { savePrice(e.sym, price); count++; } }
   });
-  showToast(`✅ ${count} prices save ho gaye!`);
-  renderPriceGrid();
+  save(); showToast(`✅ ${count} prices save ho gaye!`); renderPriceGrid();
 }
-
 function clearTodayPrices() {
   if (!confirm('Aaj ke saare prices delete karein?')) return;
   const today = todayISO();
-  S.etfs.forEach(e => {
-    if (S.prices[e.sym]) S.prices[e.sym] = S.prices[e.sym].filter(h => h.date !== today);
-  });
-  save(); renderPriceGrid();
-  showToast('🗑 Aaj ke prices clear ho gaye');
+  S.etfs.forEach(e => { if (S.prices[e.sym]) S.prices[e.sym] = S.prices[e.sym].filter(h => h.date !== today); });
+  save(); renderPriceGrid(); showToast('🗑 Aaj ke prices clear ho gaye');
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    HOLDINGS
-   ═══════════════════════════════════════ */
+══════════════════════════════════════ */
 function renderHoldings() {
   const cont = document.getElementById('holdingsContent');
   if (!S.holdings.length) {
@@ -731,13 +948,12 @@ function renderHoldings() {
   let html = `<div class="sec">💼 Active Holdings <span class="badge">${S.holdings.length}</span></div>`;
   S.holdings.forEach(h => {
     const d = getETFData(h.sym);
-    const curPx   = d.price || h.buyPrice;
-    const pnl     = (curPx - h.buyPrice) * h.units;
-    const pct     = ((curPx - h.buyPrice) / h.buyPrice) * 100;
-    const tgt     = h.buyPrice * (1 + tgtPct/100);
+    const curPx = d.price || h.buyPrice;
+    const pnl = (curPx - h.buyPrice) * h.units;
+    const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
+    const tgt = h.buyPrice * (1 + tgtPct/100);
     const sellHit = curPx >= tgt;
-    const isP     = pnl >= 0;
-    const invested = h.buyPrice * h.units;
+    const isP = pnl >= 0;
     const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
     html += `<div class="hc ${sellHit?'sell-active':''}">
       <div class="hc-top">
@@ -748,18 +964,16 @@ function renderHoldings() {
       <div class="hc-body">
         <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
         <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
-        <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(invested).toLocaleString('en-IN')}</div></div>
+        <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
       </div>
       <div style="padding:4px 13px 10px;">
         <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
-          ${sellHit
-            ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)`
-            : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
+          ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
         </div>
         ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
       </div>
       ${sellHit ? `<div class="sell-row">
-        <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit! Profit: +₹${Math.abs(pnl).toFixed(2)}</div>
+        <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
         <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
       </div>` : ''}
     </div>`;
@@ -767,59 +981,56 @@ function renderHoldings() {
   cont.innerHTML = html;
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    SETTINGS
-   ═══════════════════════════════════════ */
+══════════════════════════════════════ */
 function renderSettings() {
   document.getElementById('etfListInput').value = S.etfs.map(e => e.sym).join('\n');
   document.getElementById('rsiPeriod').value   = S.rsiPeriod  || 14;
   document.getElementById('rsiOversold').value = S.rsiOversold|| 30;
   document.getElementById('sellTarget').value  = S.sellTarget || 4.51;
+  const chk = document.getElementById('autoFetchEnabled');
+  chk.checked = S.autoFetchEnabled !== false;
+  document.getElementById('autoFetchLbl').textContent = chk.checked ? 'On' : 'Off';
+  chk.onchange = () => { document.getElementById('autoFetchLbl').textContent = chk.checked ? 'On' : 'Off'; };
 
-  const today   = todayISO();
-  const withPx  = S.etfs.filter(e => S.prices[e.sym]?.some(h => h.date === today)).length;
-  const total   = S.etfs.length;
-  let maxDays   = 0;
+  const today = todayISO();
+  const withPx = S.etfs.filter(e => S.prices[e.sym]?.some(h => h.date === today)).length;
+  let maxDays = 0;
   S.etfs.forEach(e => { const l = (S.prices[e.sym]||[]).length; if (l > maxDays) maxDays = l; });
 
   document.getElementById('dataInfo').innerHTML =
-    `Total ETFs: <strong style="color:var(--text)">${total}</strong><br>` +
-    `Aaj prices diye: <strong style="color:var(--green)">${withPx} / ${total}</strong><br>` +
+    `Total ETFs: <strong style="color:var(--text)">${S.etfs.length}</strong><br>` +
+    `Aaj prices hain: <strong style="color:var(--green)">${withPx} / ${S.etfs.length}</strong><br>` +
     `Max price history: <strong style="color:var(--text)">${maxDays} din</strong><br>` +
-    `RSI ke liye chahiye: <strong style="color:var(--text)">${(S.rsiPeriod||14)+1} din</strong><br>` +
+    `Last fetch: <strong style="color:var(--text)">${S.lastFetchDate === today ? 'Aaj '+S.lastFetchTime : S.lastFetchDate||'Kabhi nahi'}</strong><br>` +
     `Holdings: <strong style="color:var(--text)">${S.holdings.length}</strong>`;
 }
-
 function saveSettings() {
   const raw = document.getElementById('etfListInput').value;
   const syms = raw.split('\n').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
-  const unique = [...new Set(syms)];
-  S.etfs = unique.map(sym => ({ sym }));
-  save(); showToast(`✅ ${S.etfs.length} ETFs save ho gaye!`);
-  renderSettings();
+  S.etfs = [...new Set(syms)].map(sym => ({ sym }));
+  save(); showToast(`✅ ${S.etfs.length} ETFs save ho gaye!`); renderSettings();
 }
-
 function loadDefaultETFs() {
   document.getElementById('etfListInput').value = DEFAULT_ETFS;
   showToast('Default list load ho gayi — Save karo!');
 }
-
 function saveRSISettings() {
   S.rsiPeriod   = parseInt(document.getElementById('rsiPeriod').value)   || 14;
   S.rsiOversold = parseInt(document.getElementById('rsiOversold').value)  || 30;
   S.sellTarget  = parseFloat(document.getElementById('sellTarget').value) || 4.51;
+  S.autoFetchEnabled = document.getElementById('autoFetchEnabled').checked;
   save(); showToast('✅ Settings save ho gayi!');
 }
-
 function resetAll() {
   if (!confirm('Sab kuch delete karein — prices, holdings, log?')) return;
-  localStorage.removeItem(LS);
-  location.reload();
+  localStorage.removeItem(LS); location.reload();
 }
 
-/* ═══════════════════════════════════════
-   TRADE MODAL
-   ═══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
 function openModal(sym, price, type) {
   pending = { sym, price, type };
   const isBuy = type === 'buy';
@@ -830,8 +1041,7 @@ function openModal(sym, price, type) {
   const pi = document.getElementById('tradePrice');
   pi.value = price.toFixed(2); pi.readOnly = !isBuy;
   const ui = document.getElementById('tradeUnits');
-  if (!isBuy && h) { ui.value = h.units; ui.readOnly = true; }
-  else { ui.readOnly = false; ui.value = 10; }
+  if (!isBuy && h) { ui.value = h.units; ui.readOnly = true; } else { ui.readOnly = false; ui.value = 10; }
   const tgt = h ? (h.buyPrice * (1 + (S.sellTarget||4.51)/100)).toFixed(2) : '—';
   document.getElementById('mInfo').innerHTML = `
     <div class="mi-row"><span class="mi-k">ETF</span><span class="mi-v">${sym}</span></div>
@@ -870,7 +1080,6 @@ function confirmTrade() {
   }
   closeModal(); save(); renderDashboard(); renderHoldings();
 }
-
 function addLog(e) { S.log.unshift(e); if (S.log.length > 50) S.log.pop(); renderLog(); }
 function renderLog() {
   const el = document.getElementById('logBar');
@@ -880,27 +1089,32 @@ function renderLog() {
   ).join('');
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    INIT
-   ═══════════════════════════════════════ */
+══════════════════════════════════════ */
 window.onload = () => {
   load();
-
-  // First time: load default ETFs
   if (!S.etfs || !S.etfs.length) {
-    S.etfs = DEFAULT_ETFS.split('\n').map(s => s.trim()).filter(Boolean).map(sym => ({sym}));
+    S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
     save();
   }
-
-  // Header date
   document.getElementById('hdrDate').textContent = fmtDate(todayISO());
-
   renderLog();
   renderDashboard();
-
   document.getElementById('tradeModal').addEventListener('click', e => {
     if (e.target.id === 'tradeModal') closeModal();
   });
+
+  // Auto-fetch scheduler: check every 15 min
+  scheduleAutoFetch();
+
+  // Auto-fetch on load if 4PM-9AM and not yet done today
+  const today = todayISO();
+  if (S.autoFetchEnabled !== false && S.lastFetchDate !== today && isGoodFetchTime()) {
+    setTimeout(() => {
+      if (S.etfs.length > 0) fetchAllPrices(false);
+    }, 2000); // 2 sec delay after load
+  }
 };
 </script>
 </body>
