@@ -212,7 +212,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="auto-panel">
     <div class="ap-title">🔄 Rolling Loop — Har ETF 10 Min Baad Update</div>
     <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
-      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">10 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
+      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">5 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>. Tab band tak chalta rahega.
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-g" onclick="startLoop()" id="btnLoopStart">▶️ Loop Shuru Karo</button>
@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     </div>
     <div style="background:var(--bg3);border-radius:6px;padding:7px 10px;">
       <div style="font-size:.55rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;">
-        <span>📋 <strong style="color:var(--text)">75 ETFs × 10 min</strong> = ~12.5 hr mein ek full round</span>
+        <span>📋 <strong style="color:var(--text)">75 ETFs × 5 min</strong> = ~6.25 hr mein ek full round</span>
         <span>🔁 Round complete → phir se ITBEES se shuru</span>
         <span>💾 Har price turant save hoti hai</span>
       </div>
@@ -907,7 +907,7 @@ async function runLoopTick() {
   }
   loopIndex++;
   updateLoopUI();
-  const DELAY_SEC = 10 * 60;
+  const DELAY_SEC = 5 * 60;
   countdownSec = DELAY_SEC;
   tickCountdown();
 }
@@ -1467,6 +1467,14 @@ window.onload = async () => {
   document.getElementById('tradeModal').addEventListener('click', e => {
     if (e.target.id === 'tradeModal') closeModal();
   });
+
+  // Auto start loop on app open
+  setTimeout(() => {
+    if (!loopRunning) {
+      startLoop();
+      showToast('🔄 Auto loop shuru ho gaya!');
+    }
+  }, 1500);
 
   // Listen for real-time changes from other devices
   if (dbRef) {
