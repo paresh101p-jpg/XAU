@@ -187,7 +187,6 @@ body {
 }
 .api-paused-bar.show { display: flex; }
 
-/* ===================== PORTFOLIO SUMMARY ===================== */
 .portfolio-summary {
   background: var(--bg2);
   border-bottom: 2px solid var(--border);
@@ -292,7 +291,6 @@ body {
 }
 .ps-hist-badge span { color: var(--text); }
 
-/* Monthly History Modal */
 .mhist-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.88);
   backdrop-filter: blur(10px); z-index: 180;
@@ -399,7 +397,6 @@ body {
 }
 .mhist-no-data span { font-size: 2rem; display: block; margin-bottom: 8px; }
 
-/* ===================== CAPITAL PLANNER ===================== */
 .cap-toggle {
   width: 100%; background: var(--bg2); border: none; border-bottom: 2px solid var(--border);
   color: var(--text); font-size: 0.82rem;
@@ -510,7 +507,6 @@ body {
 .silver-col {
   background: var(--bg); padding: 20px 18px; display: flex; flex-direction: column; gap: 14px;
 }
-/* ✅ CENTERED: ETF header (Gold BeES / Silver BeES) */
 .etf-head { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .etf-icon { font-size: 1.8rem; }
 .etf-name { text-align: center; }
@@ -592,7 +588,6 @@ body {
 }
 .sec-toggle:hover { background: rgba(245,200,66,0.15); }
 
-/* ✅ CENTERED: Holdings summary cards */
 .holdings-summary {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -617,7 +612,6 @@ body {
 .holdings-stat-value.gold   { color: var(--gold); }
 .holdings-stat-value.silver { color: var(--silver); }
 
-/* ===================== LOT CARDS ===================== */
 .h-list-wrapper {
   display: flex;
   flex-direction: column;
@@ -673,7 +667,6 @@ body {
 .h-cell .hcv.gd { color: var(--gold); }
 .h-cell .hcv.sv { color: var(--silver); }
 
-/* ===================== GOLDEN 3D PIPELINE PROGRESS BAR ===================== */
 .progress-wrapper {
   margin: 12px 12px 10px;
   position: relative;
@@ -723,86 +716,6 @@ body {
     inset 0 -1px 2px rgba(100,60,0,0.4);
   transform: translateX(-50%);
 }
-  .progress-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 2;
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,0.98) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,240,80,0.95) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.9) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,220,40,0.9) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.95) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,248,120,0.9) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,230,60,0.92) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.97) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,245,100,0.88) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.93) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,225,50,0.9) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,255,255,0.96) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,240,90,0.85) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,235,70,0.93) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,255,255,0.88) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,250,130,0.9) 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.95) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,228,65,0.87) 1px, transparent 1px);
-  background-size:
-    6% 50%, 7% 50%, 5% 50%, 8% 50%, 6% 50%,
-    7% 50%, 5% 50%, 9% 50%, 6% 50%, 7% 50%,
-    5% 50%, 8% 50%, 6% 50%, 7% 50%, 5% 50%,
-    9% 50%, 6% 50%, 7% 50%, 5% 50%, 8% 50%;
-  background-repeat: no-repeat;
-  animation:
-    sparkleA 1.7s ease-in-out infinite alternate,
-    sparkleB 2.3s ease-in-out infinite alternate,
-    sparkleC 1.1s ease-in-out infinite alternate;
-}
-
-@keyframes sparkleA {
-  0%   { background-position:
-    3% 20%, 9% 75%, 16% 35%, 22% 80%, 29% 15%,
-    35% 60%, 41% 30%, 47% 85%, 53% 45%, 59% 10%,
-    65% 70%, 71% 25%, 77% 55%, 83% 90%, 89% 40%,
-    94% 65%, 12% 50%, 38% 15%, 63% 80%, 87% 30%;
-    opacity: 0.5;
-  }
-  25%  { opacity: 1; }
-  50%  { background-position:
-    5% 70%, 11% 25%, 18% 80%, 24% 30%, 31% 65%,
-    37% 15%, 43% 75%, 49% 40%, 55% 90%, 61% 55%,
-    67% 20%, 73% 80%, 79% 10%, 85% 50%, 91% 85%,
-    96% 30%, 14% 95%, 40% 60%, 65% 25%, 89% 75%;
-    opacity: 0.7;
-  }
-  75%  { opacity: 0.9; }
-  100% { background-position:
-    4% 45%, 10% 90%, 17% 15%, 23% 60%, 30% 85%,
-    36% 35%, 42% 55%, 48% 10%, 54% 65%, 60% 30%,
-    66% 95%, 72% 50%, 78% 75%, 84% 20%, 90% 60%,
-    95% 10%, 13% 70%, 39% 40%, 64% 55%, 88% 15%;
-    opacity: 0.6;
-  }
-}
-
-@keyframes sparkleB {
-  0%   { transform: scaleY(1) scaleX(1); }
-  30%  { transform: scaleY(1.04) scaleX(1.01); }
-  60%  { transform: scaleY(0.97) scaleX(1.02); }
-  100% { transform: scaleY(1.02) scaleX(0.99); }
-}
-
-@keyframes sparkleC {
-  0%   { filter: brightness(1) blur(0px); }
-  40%  { filter: brightness(1.4) blur(0.3px); }
-  70%  { filter: brightness(0.85) blur(0px); }
-  100% { filter: brightness(1.25) blur(0.2px); }
-}
 .progress-fill.left-expand {
   left: 50%;
   transform: translateX(-100%);
@@ -846,9 +759,9 @@ body {
   bottom: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.72rem;          /* ← bada kiya */
+  font-size: 0.72rem;
   background: linear-gradient(135deg, #1a1500, #2a2000);
-  padding: 4px 12px;           /* ← thoda zyada padding */
+  padding: 4px 12px;
   border-radius: 20px;
   white-space: nowrap;
   color: #FFD700;
@@ -858,18 +771,6 @@ body {
   z-index: 10;
   pointer-events: none;
 }
-.progress-bar-container::after {
-  content: '';
-  position: absolute;
-  top: 2px; left: 3px; right: 3px;
-  height: 6px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%);
-  z-index: 4;
-  pointer-events: none;
-}
-
-/* ===================== PROGRESS LABELS — BIGGER + HIT HIGHLIGHT ===================== */
 .progress-labels {
   display: flex;
   justify-content: space-between;
@@ -1091,16 +992,6 @@ body {
 .btn-alert-dismiss { background: var(--bg3); color: var(--muted); border: 2px solid var(--border); border-radius: 11px; padding: 12px; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
 .btn-alert-dismiss:hover { color: var(--text); }
 
-.lot-signal-info {
-  background: var(--bg3); border: 3px solid var(--border); border-radius: 10px;
-  padding: 8px 12px; font-size: 0.62rem; color: var(--muted);
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-}
-.lot-signal-info .lsi-label { letter-spacing: 1px; text-transform: uppercase; }
-.lot-signal-info .lsi-val   { color: var(--text); }
-.lot-signal-info .lsi-buy   { color: var(--green); }
-.lot-signal-info .lsi-sell  { color: var(--red); }
-
 .toast {
   position: fixed; bottom: 46px; left: 50%; transform: translateX(-50%) translateY(60px);
   background: var(--bg3); border: 3px solid var(--border-mid); color: var(--text);
@@ -1121,6 +1012,14 @@ body {
 .sound-toggle:hover { border-color: var(--gold); color: var(--text); }
 .sound-toggle.on  { border-color: rgba(76,175,130,0.5); color: var(--green); }
 .sound-toggle.off { border-color: rgba(224,82,82,0.4); color: var(--red); }
+
+/* API Source Badge */
+.api-source-badge {
+  font-size: 0.55rem; padding: 1px 7px; border-radius: 6px;
+  background: rgba(212,168,67,0.15); color: var(--gold);
+  border: 1px solid rgba(212,168,67,0.3);
+  white-space: nowrap;
+}
 
 @media(max-width:700px){
   .ps-stats-row { grid-template-columns: repeat(2,1fr); }
@@ -1210,6 +1109,8 @@ body {
         <span class="fsb-val price-flat" id="fsb-sPrice">—</span>
         <span class="fsb-chg flat" id="fsb-sChg"></span>
       </div>
+      <div class="fsb-div"></div>
+      <span class="api-source-badge" id="apiSourceBadge">connecting…</span>
     </div>
     <div class="fsb-right">
       <span class="fsb-ago" id="fsb-ago">—</span>
@@ -1639,11 +1540,12 @@ document.addEventListener('click', () => { const ctx = getAudioCtx(); if (ctx &&
 function playBeep(type) { if (!soundEnabled) return; const ctx = getAudioCtx(); if (!ctx) return; try { if (type === 'buy') { playTone(ctx,523.25,0,0.18,'sine',0.55); playTone(ctx,659.25,0.18,0.22,'sine',0.55); playTone(ctx,783.99,0.38,0.32,'sine',0.6); } else { playTone(ctx,783.99,0,0.18,'sine',0.55); playTone(ctx,523.25,0.18,0.22,'sine',0.55); playTone(ctx,392.00,0.38,0.32,'sine',0.5); } } catch(e) {} }
 function playTone(ctx, freq, startDelay, dur, wave, vol) { const osc = ctx.createOscillator(), gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = wave; osc.frequency.setValueAtTime(freq, ctx.currentTime + startDelay); gain.gain.setValueAtTime(0, ctx.currentTime + startDelay); gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + startDelay + 0.03); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startDelay + dur); osc.start(ctx.currentTime + startDelay); osc.stop(ctx.currentTime + startDelay + dur + 0.05); }
 function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getElementById('soundToggle'), icon = document.getElementById('soundIcon'), txt = document.getElementById('soundTxt'); if (soundEnabled) { btn.className='sound-toggle on'; icon.textContent='🔔'; txt.textContent='Sound ON'; playBeep('buy'); } else { btn.className='sound-toggle off'; icon.textContent='🔕'; txt.textContent='Sound OFF'; } showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF'); }
-const ETF = { G:{sym:'GOLDBEES.NS', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
+const ETF = { G:{sym:'GOLDBEES.NS', nseSym:'GOLDBEES', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', nseSym:'SILVERBEES', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
 let cfg = { buy: 2, sell: 3, ref: 60 };
-let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, fetchFailCount:0 };
+let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0 };
 let editState = { k: null, idx: null };
+
 function getSortedHoldings(k) { return [...st.hold[k]].sort((a,b) => (a.buyPrice||a.price) - (b.buyPrice||b.price)); }
 function getLot1Price(k) { const s = getSortedHoldings(k); return s.length ? (s[0].buyPrice||s[0].price) : null; }
 function getLot1Units(k) { const s = getSortedHoldings(k); return s.length ? s[0].units : 0; }
@@ -1667,58 +1569,178 @@ function calcBuyUnits(k) {
 }
 function updateBtnHints(k) { const p = st.price[k]; const buyU = calcBuyUnits(k), sellU = getLot1Units(k); const buyHint = document.getElementById('buyHint-' + k), sellHint = document.getElementById('sellHint-' + k); const actualAmt = p ? (buyU * p) : 0; if (buyHint) buyHint.textContent = buyU + ' Share · ₹' + Math.round(actualAmt).toLocaleString('en-IN'); if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings'; }
 function updateColSignal(k, signalType) { const tradeBtnsEl = document.getElementById('tradeBtns-' + k); tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active'); if (signalType === 'buy') tradeBtnsEl.classList.add('signal-buy-active'); if (signalType === 'sell') tradeBtnsEl.classList.add('signal-sell-active'); }
-const PROX = [ u => `https://corsproxy.io/?${encodeURIComponent(u)}`, u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, u => `https://corsproxy.org/?${encodeURIComponent(u)}`, u => `https://thingproxy.freeboard.io/fetch/${u}`, u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` ];
-function yahooUrls(sym) { const ts = Date.now(); return [ `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`, `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`, `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=2m&range=1d&_=${ts}`, `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`, `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}` ]; }
-function parseYahoo(j) { const res = j?.chart?.result?.[0]; if (res) { const price = res.meta?.regularMarketPrice||res.meta?.previousClose; const prev = res.meta?.chartPreviousClose||res.meta?.previousClose||price; if (price && price > 0) return {price, prev}; } const q = j?.quoteResponse?.result?.[0]; if (q?.regularMarketPrice) return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose||q.regularMarketPrice }; return null; }
+
+// ======================== NEW MULTI-API PRICE FETCH ========================
+// Priority: NSE India > Yahoo v8 > Yahoo v7 > Groww > AllOrigins fallback
+// Each with multiple CORS proxies
+
+const PROX = [
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://corsproxy.org/?${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
+  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+];
+
+// --- NSE India ---
+function getNseUrl(nseSym) {
+  return `https://www.nseindia.com/api/quote-equity?symbol=${encodeURIComponent(nseSym)}`;
+}
+function parseNse(j) {
+  const p = j?.priceInfo?.lastPrice || j?.priceInfo?.close;
+  const pv = j?.priceInfo?.previousClose || p;
+  if (p && p > 0) return { price: p, prev: pv, src: 'NSE' };
+  return null;
+}
+
+// --- Yahoo Finance ---
+function getYahooUrls(sym) {
+  const ts = Date.now();
+  return [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`,
+    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`
+  ];
+}
+function parseYahoo(j) {
+  const res = j?.chart?.result?.[0];
+  if (res) {
+    const price = res.meta?.regularMarketPrice || res.meta?.previousClose;
+    const prev = res.meta?.chartPreviousClose || res.meta?.previousClose || price;
+    if (price && price > 0) return { price, prev, src: 'Yahoo' };
+  }
+  const q = j?.quoteResponse?.result?.[0];
+  if (q?.regularMarketPrice) return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketPrice, src: 'Yahoo' };
+  return null;
+}
+
+// --- Groww ---
+function getGrowwUrl(nseSym) {
+  return `https://groww.in/v1/api/stocks_data/v1/accord_points/exchange/NSE/segment/EQUITY/latest_prices_ohlc/search?q=${encodeURIComponent(nseSym)}`;
+}
+function parseGroww(j) {
+  const arr = Array.isArray(j) ? j : (j?.data || []);
+  const d = arr[0];
+  if (d?.ltp && d.ltp > 0) return { price: d.ltp, prev: d.close || d.ltp, src: 'Groww' };
+  return null;
+}
+
+// Fast fetch with single proxy+url combo
+async function fetchOnce(url, parseFunc, proxyIdx, timeout = 8000) {
+  try {
+    const r = await fetch(PROX[proxyIdx](url), {
+      signal: AbortSignal.timeout(timeout),
+      cache: 'no-store'
+    });
+    if (!r.ok) return null;
+    const raw = await r.json();
+    const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return parseFunc(j);
+  } catch (_) { return null; }
+}
+
 async function tryFetch(k) {
-  const urls = yahooUrls(ETF[k].sym);
-  if (st.workingProxy !== null) {
-    const px = PROX[st.workingProxy];
-    for (const yu of urls) {
-      try {
-        const r = await fetch(px(yu), { signal: AbortSignal.timeout(8000), cache: 'no-store' });
-        if (!r.ok) continue;
-        const raw = await r.json();
-        const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        const d = parseYahoo(j);
-        if (d) {
-          st.fetchFailCount = 0;  // success, reset failure count
-          return d;
-        }
-      } catch (_) {}
+  if (!apiEnabled) return null;
+
+  const nseSym = ETF[k].nseSym;
+  const yahooSym = ETF[k].sym;
+
+  // Fast path: use last known working proxy+api
+  if (st.workingProxy !== null && st.workingApi) {
+    let d = null;
+    if (st.workingApi === 'nse') {
+      d = await fetchOnce(getNseUrl(nseSym), parseNse, st.workingProxy, 6000);
+    } else if (st.workingApi === 'yahoo') {
+      for (const yu of getYahooUrls(yahooSym)) {
+        d = await fetchOnce(yu, parseYahoo, st.workingProxy, 6000);
+        if (d) break;
+      }
+    } else if (st.workingApi === 'groww') {
+      d = await fetchOnce(getGrowwUrl(nseSym), parseGroww, st.workingProxy, 6000);
     }
+    if (d) {
+      st.fetchFailCount = 0;
+      updateApiSourceBadge(d.src, st.workingProxy);
+      return d;
+    }
+    // Fast path failed, reset and try full scan
     st.workingProxy = null;
+    st.workingApi = null;
   }
+
+  // Full scan: try all APIs x all proxies
+  // API 1: NSE India (most reliable for Indian ETFs)
   for (let pi = 0; pi < PROX.length; pi++) {
-    for (const yu of urls) {
-      try {
-        const r = await fetch(PROX[pi](yu), { signal: AbortSignal.timeout(9000) });
-        if (!r.ok) continue;
-        const raw = await r.json();
-        const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        const d = parseYahoo(j);
-        if (d) {
-          st.workingProxy = pi;
-          st.fetchFailCount = 0;  // success, reset failure count
-          return d;
-        }
-      } catch (_) {}
+    const d = await fetchOnce(getNseUrl(nseSym), parseNse, pi, 8000);
+    if (d) {
+      st.workingProxy = pi; st.workingApi = 'nse';
+      st.fetchFailCount = 0;
+      updateApiSourceBadge('NSE', pi);
+      return d;
     }
   }
-  // 🔁 Sab proxy fail ho gaye — exponential backoff
+
+  // API 2: Yahoo Finance (v8 + v7)
+  for (const yu of getYahooUrls(yahooSym)) {
+    for (let pi = 0; pi < PROX.length; pi++) {
+      const d = await fetchOnce(yu, parseYahoo, pi, 8000);
+      if (d) {
+        st.workingProxy = pi; st.workingApi = 'yahoo';
+        st.fetchFailCount = 0;
+        updateApiSourceBadge('Yahoo', pi);
+        return d;
+      }
+    }
+  }
+
+  // API 3: Groww
+  for (let pi = 0; pi < PROX.length; pi++) {
+    const d = await fetchOnce(getGrowwUrl(nseSym), parseGroww, pi, 7000);
+    if (d) {
+      st.workingProxy = pi; st.workingApi = 'groww';
+      st.fetchFailCount = 0;
+      updateApiSourceBadge('Groww', pi);
+      return d;
+    }
+  }
+
+  // All failed
   st.fetchFailCount = (st.fetchFailCount || 0) + 1;
-  const delay = Math.min(30000, 1000 * Math.pow(2, st.fetchFailCount));
-  console.warn(`All proxies failed for ${k}, retrying in ${delay}ms`);
+  const delay = Math.min(60000, 3000 * Math.pow(2, Math.min(st.fetchFailCount - 1, 4)));
+  setFetchStatus('fail', `❌ Sab APIs fail (attempt ${st.fetchFailCount}) · ${Math.round(delay/1000)}s mein retry`);
+  updateApiSourceBadge('offline', -1);
   await new Promise(r => setTimeout(r, delay));
-  // Retry recursively (maximum 3 attempts already handled by delay, but safe)
   return tryFetch(k);
 }
+
+const PROXY_NAMES = ['corsproxy.io', 'allorigins', 'corsproxy.org', 'thingproxy', 'codetabs'];
+function updateApiSourceBadge(src, proxyIdx) {
+  const el = document.getElementById('apiSourceBadge');
+  if (!el) return;
+  const pName = proxyIdx >= 0 ? PROXY_NAMES[proxyIdx] : '';
+  if (src === 'offline') {
+    el.textContent = '❌ offline';
+    el.style.background = 'rgba(224,82,82,0.15)';
+    el.style.color = 'var(--red)';
+    el.style.borderColor = 'rgba(224,82,82,0.4)';
+  } else {
+    el.textContent = `✓ ${src} · ${pName}`;
+    el.style.background = 'rgba(76,175,130,0.12)';
+    el.style.color = 'var(--green)';
+    el.style.borderColor = 'rgba(76,175,130,0.3)';
+  }
+}
+// ======================== END NEW FETCH ========================
+
 function getPriceDir(k) { const cur=st.price[k],pv=st.prev[k]; if (!cur||!pv) return 'flat'; const chg=cur-pv; if(chg>0.001) return 'up'; if(chg<-0.001) return 'down'; return 'flat'; }
 function updatePriceColor(k) { const dir=getPriceDir(k); document.getElementById('pr-'+k).className = 'price-big price-'+dir; document.getElementById('pb-'+k).className = 'price-block price-'+dir; const sbEl = document.getElementById(k==='G'?'fsb-gPrice':'fsb-sPrice'); if (sbEl) sbEl.className = 'fsb-val price-'+dir; }
 function updateTabTitle() { let bestSignal=null, bestDist=Infinity; for (const k of ['G','S']) { const p=st.price[k]; if (!p) continue; const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100); const tu=st.hold[k].reduce((s,h)=>s+h.units,0); const buyDist=((p-bt)/p*100), sellDist=tu>0?((sv-p)/p*100):Infinity; if (buyDist<=0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; } if (sellDist<=0&&tu>0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`; return; } if (buyDist<bestDist) { bestDist=buyDist; bestSignal={k,type:'BUY',dist:buyDist.toFixed(2)}; } if (tu>0&&sellDist<bestDist) { bestDist=sellDist; bestSignal={k,type:'SELL',dist:sellDist.toFixed(2)}; } } if (bestSignal) { const name=bestSignal.k==='G'?'GOLD':'SILVER', dir=bestSignal.type==='BUY'?'↓':'↑'; document.title=`${ETF[bestSignal.k].icon} ${name} ${bestSignal.type} ${dir}${bestSignal.dist}% · BeES`; } else document.title='⚜️ Gold & Silver BeES'; }
+
 let lastFetchTs=null, agoTimer=null;
-  let lastTickTs = null;
+let lastTickTs = null;
 let tickFailCount = { G: 0, S: 0 };
+
 function updateAgo() {
   if (!lastFetchTs && !lastTickTs) return;
   const now = Date.now();
@@ -1729,12 +1751,56 @@ function updateAgo() {
   const el = document.getElementById('fsb-ago');
   let agoTxt = sec < 60 ? sec + 's ago' : sec < 3600 ? Math.floor(sec / 60) + 'm ' + (sec % 60) + 's ago' : Math.floor(sec / 3600) + 'h ago';
   if (lastTickTs && (!lastFetchTs || lastTickTs > lastFetchTs)) {
-    agoTxt += ' ⚡tick';
+    agoTxt += ' ⚡';
   }
   el.textContent = agoTxt + '  ·  ' + nextSec + 's mein refresh';
 }
-function setFetchStatus(state, statusTxt) { const bar=document.getElementById('fetchStatusBar'); bar.className='fetch-status-bar '+state; document.getElementById('fetchStatusText').textContent=statusTxt; if (st.price.G&&st.prev.G) { const gChg=st.price.G-st.prev.G, gEl=document.getElementById('fsb-gChg'); gEl.textContent=(gChg>=0?'▲':'▼')+Math.abs((gChg/st.prev.G*100)).toFixed(2)+'%'; gEl.className='fsb-chg '+(gChg>=0?'up':'down'); document.getElementById('fsb-gPrice').textContent='₹'+st.price.G.toFixed(2); } if (st.price.S&&st.prev.S) { const sChg=st.price.S-st.prev.S, sEl=document.getElementById('fsb-sChg'); sEl.textContent=(sChg>=0?'▲':'▼')+Math.abs((sChg/st.prev.S*100)).toFixed(2)+'%'; sEl.className='fsb-chg '+(sChg>=0?'up':'down'); document.getElementById('fsb-sPrice').textContent='₹'+st.price.S.toFixed(2); } if (state==='') { lastFetchTs=Date.now(); if (!agoTimer) agoTimer=setInterval(updateAgo,1000); updateAgo(); } }
-async function fetchOne(k) { if (!apiEnabled) return; const d=await tryFetch(k); if (!d) { st.fetchFailCount++; if (st.fetchFailCount>=2) setFetchStatus('fail','Price fetch failed — retrying in '+cfg.ref+'s'); return; } st.fetchFailCount=0; const old=st.price[k]; st.price[k]=d.price; st.prev[k]=d.prev; showTick(k,old,d.price); updatePriceColor(k); updateCard(k); alertCheck(k); saveSt(); const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); document.getElementById('lastUpd').textContent='Updated '+t; setFetchStatus('','✓ Live · '+t); updateTabTitle(); }
+
+function setFetchStatus(state, statusTxt) {
+  const bar=document.getElementById('fetchStatusBar');
+  bar.className='fetch-status-bar '+state;
+  document.getElementById('fetchStatusText').textContent=statusTxt;
+  if (st.price.G&&st.prev.G) {
+    const gChg=st.price.G-st.prev.G, gEl=document.getElementById('fsb-gChg');
+    gEl.textContent=(gChg>=0?'▲':'▼')+Math.abs((gChg/st.prev.G*100)).toFixed(2)+'%';
+    gEl.className='fsb-chg '+(gChg>=0?'up':'down');
+    document.getElementById('fsb-gPrice').textContent='₹'+st.price.G.toFixed(2);
+  }
+  if (st.price.S&&st.prev.S) {
+    const sChg=st.price.S-st.prev.S, sEl=document.getElementById('fsb-sChg');
+    sEl.textContent=(sChg>=0?'▲':'▼')+Math.abs((sChg/st.prev.S*100)).toFixed(2)+'%';
+    sEl.className='fsb-chg '+(sChg>=0?'up':'down');
+    document.getElementById('fsb-sPrice').textContent='₹'+st.price.S.toFixed(2);
+  }
+  if (state==='') {
+    lastFetchTs=Date.now();
+    if (!agoTimer) agoTimer=setInterval(updateAgo,1000);
+    updateAgo();
+  }
+}
+
+async function fetchOne(k) {
+  if (!apiEnabled) return;
+  const d = await tryFetch(k);
+  if (!d) {
+    st.fetchFailCount++;
+    return;
+  }
+  st.fetchFailCount = 0;
+  const old = st.price[k];
+  st.price[k] = d.price;
+  st.prev[k] = d.prev;
+  showTick(k, old, d.price);
+  updatePriceColor(k);
+  updateCard(k);
+  alertCheck(k);
+  saveSt();
+  const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('lastUpd').textContent = 'Updated ' + t;
+  setFetchStatus('', '✓ Live · ' + t);
+  updateTabTitle();
+}
+
 async function tickOne(k) {
   if (!apiEnabled) return;
   const d = await tryFetch(k);
@@ -1756,21 +1822,22 @@ async function tickOne(k) {
   updateCard(k);
   alertCheck(k);
   saveSt();
-  // 🔁 Tick fetch bhi lastFetchTs update karega
   if (!lastFetchTs || Date.now() - lastFetchTs > 5000) {
     lastFetchTs = Date.now();
     updateAgo();
   }
   lastTickTs = Date.now();
-  const t = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = '🔄 ' + t;
   setFetchStatus('', '✓ Live · ' + t);
   updateTabTitle();
 }
+
 function showTick(k, oldP, newP) { if (!oldP||oldP===newP) return; const pb=document.getElementById('pb-'+k), badge=document.getElementById('tick-'+k); if (newP>oldP) { pb.classList.add('price-flash-up'); badge.className='tick-badge up'; badge.textContent='▲ LIVE'; } else { pb.classList.add('price-flash-down'); badge.className='tick-badge down'; badge.textContent='▼ LIVE'; } setTimeout(()=>{ pb.classList.remove('price-flash-up','price-flash-down'); },600); }
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
 function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
 async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
+
 window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000); applyApiState(); if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); } loadManualData(); };
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
