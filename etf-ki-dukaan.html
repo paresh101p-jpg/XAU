@@ -919,17 +919,19 @@ function buildEtfCard(e, rank) {
   const isOs = rsi!==null && rsi<oversold;
   let cardClass = 'etf-card';
   if(isOs) cardClass += rank===1?' os os-1':' os';
-  // determine change class
+  
+  // ✅ FIX: change percent with red/green
   let changeHtml = '';
-  if(e.changePct !== null) {
-    let chgClass = 'zero';
+  if(e.changePct !== null && !isNaN(e.changePct)) {
+    let chgClass = '';
     let arrow = '';
     let absVal = Math.abs(e.changePct).toFixed(2);
-    if(e.changePct > 0) { chgClass = 'positive'; arrow = '▲'; }
-    else if(e.changePct < 0) { chgClass = 'negative'; arrow = '▼'; }
+    if(e.changePct > 0) { chgClass = 'up'; arrow = '▲'; }
+    else if(e.changePct < 0) { chgClass = 'dn'; arrow = '▼'; }
     else { chgClass = 'zero'; arrow = '◆'; }
-    changeHtml = `<div class="ec-chg ${chgClass}">${arrow} ${absVal}%</div>`;
+    changeHtml = `<div class="ec-chg ${chgClass}" style="color: ${e.changePct>0 ? 'var(--green)' : (e.changePct<0 ? 'var(--red)' : 'var(--muted)')};">${arrow} ${absVal}%</div>`;
   }
+  
   let timeStr = '—';
   if(e.ts) {
     const diffMin = Math.floor((Date.now()-e.ts)/60000);
@@ -938,6 +940,7 @@ function buildEtfCard(e, rank) {
     else if(diffMin<60) timeStr=`${t} (${diffMin}m)`;
     else timeStr=t;
   }
+  
   return `<div class="${cardClass}">
     <div class="ec-top">
       <div class="ec-sym">${e.sym}</div>
@@ -964,14 +967,11 @@ function buildPickCard(r, held, boughtToday) {
   const canBuy = !held && !boughtToday;
   const buyTxt = held?'✅ Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
   let changeHtml = '';
-  if(r.changePct !== null) {
-    let chgClass = 'zero';
-    let arrow = '';
+  if(r.changePct !== null && !isNaN(r.changePct)) {
+    let arrow = r.changePct>0 ? '▲' : (r.changePct<0 ? '▼' : '◆');
     let absVal = Math.abs(r.changePct).toFixed(2);
-    if(r.changePct > 0) { chgClass = 'positive'; arrow = '+'; }
-    else if(r.changePct < 0) { chgClass = 'negative'; arrow = '-'; }
-    else { chgClass = 'zero'; arrow = ''; }
-    changeHtml = `<span class="${chgClass}" style="font-weight:700;">${arrow}${absVal}%</span>`;
+    let color = r.changePct>0 ? 'var(--green)' : (r.changePct<0 ? 'var(--red)' : 'var(--muted)');
+    changeHtml = `<span style="color:${color}; font-weight:700;">${arrow} ${absVal}%</span>`;
   } else { changeHtml = '—'; }
   const tgt = r.price*(1+(S.sellTarget||4.51)/100);
   return `<div class="pick-card">
@@ -986,7 +986,7 @@ function buildPickCard(r, held, boughtToday) {
       <div class="ps"><div class="ps-l">Price</div>
         <div class="ps-v" style="color:var(--yellow)">₹${r.price.toFixed(2)}</div></div>
       <div class="ps"><div class="ps-l">Change</div>
-        <div class="ps-v" style="color:${r.changePct>0?'var(--green)':r.changePct<0?'var(--red)':'var(--muted)'}">${changeHtml}</div></div>
+        <div class="ps-v">${changeHtml}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 14px;">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
@@ -998,15 +998,13 @@ function buildPickCard(r, held, boughtToday) {
 // ══ WL ROW with colored change ══
 function buildWLRow(r, rank) {
   let changeHtml = '';
-  if(r.changePct !== null) {
-    let chgClass = '';
-    let arrow = '';
+  if(r.changePct !== null && !isNaN(r.changePct)) {
+    let arrow = r.changePct>0 ? '▲' : (r.changePct<0 ? '▼' : '◆');
     let absVal = Math.abs(r.changePct).toFixed(2);
-    if(r.changePct > 0) { chgClass = 'up'; arrow = '▲'; }
-    else if(r.changePct < 0) { chgClass = 'dn'; arrow = '▼'; }
-    else { chgClass = 'zero'; arrow = '◆'; }
-    changeHtml = `<div class="${chgClass}" style="font-size:.66rem;margin-top:2px;">${arrow} ${absVal}%</div>`;
-  } else { changeHtml = '<div style="font-size:.66rem;color:var(--muted);">—</div>'; }
+    let color = r.changePct>0 ? 'var(--green)' : (r.changePct<0 ? 'var(--red)' : 'var(--muted)');
+    changeHtml = `<div style="color:${color}; font-size:.66rem; margin-top:2px;">${arrow} ${absVal}%</div>`;
+  } else { changeHtml = '<div style="font-size:.66rem; color:var(--muted);">—</div>'; }
+  
   const oversold = S.rsiOversold || 30;
   const rsiPillBg = r.rsi===null?'var(--bg4)':r.rsi<oversold?'rgba(224,82,82,.18)':r.rsi>70?'rgba(232,164,64,.18)':'rgba(76,175,130,.12)';
   const rsiPillBorder = r.rsi===null?'var(--border)':r.rsi<oversold?'rgba(224,82,82,.4)':r.rsi>70?'rgba(232,164,64,.4)':'rgba(76,175,130,.3)';
