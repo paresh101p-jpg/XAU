@@ -22,27 +22,55 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 @keyframes sellGlow{from{box-shadow:0 0 14px rgba(224,82,82,.1)}to{box-shadow:0 0 38px rgba(224,82,82,.32)}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes fetchBar{from{width:0%}to{width:100%}}
+@keyframes syncPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(0.97)}}
 
 /* ── HEADER ── */
-.hdr{background:var(--bg2);border-bottom:2px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:60;flex-wrap:wrap;}
+.hdr{background:var(--bg2);border-bottom:2px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:60;flex-wrap:wrap;}
 .hdr-title{font-size:1.1rem;font-weight:700;flex:1;}
 .hdr-title span{color:var(--yellow);}
 .hdr-date{font-size:.72rem;color:var(--muted);}
-.hdr-api-status{font-size:.66rem;padding:4px 10px;border-radius:10px;white-space:nowrap;font-weight:600;}
-.api-idle{background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);}
-.api-loading{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.3);animation:pulse 1.2s infinite;}
-.api-done{background:rgba(76,175,130,.12);color:var(--green);border:1px solid rgba(76,175,130,.3);}
-.api-err{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.3);}
+
+/* ── SYNC BAR ── */
+.sync-bar{
+  background:var(--bg2);
+  border-bottom:2px solid var(--border);
+  padding:7px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  position:sticky;top:45px;z-index:59;
+}
+.sync-info{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sync-dot.syncing{background:var(--yellow);animation:syncPulse .8s infinite;}
+.sync-dot.ok{background:var(--green);}
+.sync-dot.err{background:var(--red);}
+.sync-dot.idle{background:var(--muted);}
+.sync-txt{font-size:.7rem;color:var(--text);font-weight:600;}
+.sync-sub{font-size:.64rem;color:var(--muted);}
+.countdown-pill{
+  font-size:.68rem;font-weight:700;
+  background:var(--yellow-dim);
+  color:var(--yellow);
+  border:1px solid rgba(245,200,66,.3);
+  border-radius:10px;
+  padding:3px 10px;
+  white-space:nowrap;
+}
+.countdown-pill.syncing{
+  background:rgba(245,200,66,.2);
+  animation:pulse .8s infinite;
+}
+.sync-stats{display:flex;gap:12px;font-size:.66rem;color:var(--muted);}
+.sync-stat-v{color:var(--text);font-weight:700;}
 
 /* ── TABS ── */
 .tabs{display:flex;background:var(--bg2);border-bottom:2px solid var(--border);padding:0 16px;overflow-x:auto;}
 .tabs::-webkit-scrollbar{height:0;}
 .tab{padding:11px 18px;font-size:.8rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:.15s;white-space:nowrap;}
 .tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
-
-.fetch-prog{height:3px;background:var(--bg3);overflow:hidden;position:sticky;top:48px;z-index:55;}
-.fetch-prog-bar{height:100%;background:linear-gradient(90deg,var(--yellow),var(--amber));width:0%;transition:width .3s;}
 
 .main{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .sec{font-size:.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin:8px 0 6px;}
@@ -60,84 +88,29 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-g{border-color:rgba(76,175,130,.4);color:var(--green);}
 .btn-g:not(:disabled):hover{background:var(--green-dim);}
 
-/* ── AUTO PANEL ── */
-.auto-panel{background:var(--bg2);border:2px solid rgba(91,155,213,.3);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
-.ap-title{font-size:.88rem;font-weight:700;color:var(--blue);}
-.ap-label{font-size:.7rem;color:var(--muted);}
-.ap-val{font-size:.78rem;color:var(--text);font-weight:700;}
-
-/* ── FETCH STATUS ROWS ── */
-.fe-row{display:flex;align-items:center;gap:8px;font-size:.7rem;background:var(--bg3);border-radius:6px;padding:5px 10px;}
-.fe-sym{color:var(--text);font-weight:700;width:130px;flex-shrink:0;}
-.fe-ok{color:var(--green);}
-.fe-err{color:var(--red);}
-.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-
 /* ══════════════════════════════════════════
    ETF CARD
 ══════════════════════════════════════════ */
-.etf-cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-
-.etf-card{
-  background:var(--bg2);
-  border:2px solid var(--border);
-  border-radius:12px;
-  padding:10px 12px;
-  position:relative;
-  transition:border-color .2s,box-shadow .2s;
-  min-width:0;
-}
+.etf-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
+.etf-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:10px 12px;position:relative;transition:border-color .2s,box-shadow .2s;min-width:0;}
 .etf-card.os{border-color:rgba(224,82,82,.55);background:rgba(224,82,82,.04);}
 .etf-card.os-1{border-color:rgba(224,82,82,.9);animation:sellGlow 1.4s infinite alternate;}
-.etf-card.ec-fetching{border-color:rgba(245,200,66,.6);}
-
-/* Top row */
 .ec-top{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:7px;}
-.ec-sym{font-size:.88rem;font-weight:800;color:var(--text);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ec-st-badge{font-size:.68rem;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;font-weight:700;}
-.ec-st-fetch{background:rgba(245,200,66,.18);color:var(--yellow);border:1px solid rgba(245,200,66,.4);}
+.ec-sym{font-size:.82rem;font-weight:800;color:var(--text);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ec-st-badge{font-size:.62rem;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;font-weight:700;}
 .ec-st-live{background:rgba(76,175,130,.14);color:var(--green);border:1px solid rgba(76,175,130,.3);}
 .ec-st-pending{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border);}
-.ec-st-stale{background:rgba(232,164,64,.12);color:var(--amber);border:1px solid rgba(232,164,64,.3);}
-
-/* Mid row: price + RSI */
-.ec-mid{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px;}
+.ec-mid{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:4px;}
 .ec-price-block{flex:1;min-width:0;}
-.ec-price{font-size:1.1rem;font-weight:800;color:var(--yellow);line-height:1.1;}
-.ec-no-price{font-size:.78rem;color:var(--muted);}
-.ec-chg{font-size:.68rem;font-weight:700;margin-top:2px;}
-.ec-time{font-size:.58rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ec-price{font-size:1.05rem;font-weight:800;color:var(--yellow);line-height:1.1;}
+.ec-no-price{font-size:.75rem;color:var(--muted);}
+.ec-chg{font-size:.65rem;font-weight:700;margin-top:2px;}
 .ec-rsi-block{text-align:right;flex-shrink:0;}
-.ec-rsi-lbl-txt{font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
-.ec-rsi-val{font-size:1.3rem;font-weight:800;line-height:1;}
-.ec-rsi-zone{font-size:.58rem;font-weight:700;margin-top:2px;}
-
-/* ══ RSI BAR — FIXED ══
-   Left = 100 = RED (Overbought)
-   Right = 0 = GREEN (Oversold)
-
-   Gradient goes: left(red) → right(green)
-   Dark overlay sits on RIGHT side: width = (100 - rsi)%
-   
-   RSI 86.5 → overlay = 13.5% from right → 86.5% red visible from left ✅
-   RSI 30   → overlay = 70% from right → 30% visible (green zone) ✅
-   RSI 10   → overlay = 90% from right → 10% visible (deep green) ✅
-   RSI 0    → overlay = 100% → fully dark ✅
-*/
-/* bar removed */
-
-.ec-os-tag{
-  font-size:.66rem;background:var(--red-dim);color:var(--red);
-  border:1px solid rgba(224,82,82,.3);border-radius:6px;
-  padding:2px 8px;display:inline-block;margin-top:5px;font-weight:700;
-}
-
-/* Section headers */
-.cards-sec-hdr{
-  font-size:.75rem;font-weight:700;padding:6px 12px;
-  border-radius:8px;margin-bottom:8px;
-  display:flex;align-items:center;gap:6px;
-}
+.ec-rsi-lbl{font-size:.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.ec-rsi-val{font-size:1.2rem;font-weight:800;line-height:1;}
+.ec-rsi-zone{font-size:.56rem;font-weight:700;margin-top:2px;}
+.ec-os-tag{font-size:.63rem;background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.3);border-radius:5px;padding:2px 7px;display:inline-block;margin-top:4px;font-weight:700;}
+.cards-sec-hdr{font-size:.75rem;font-weight:700;padding:6px 12px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .csh-os{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.25);}
 .csh-normal{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
 
@@ -151,8 +124,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps{text-align:center;}
 .ps-l{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:1.05rem;font-weight:700;margin-top:3px;}
-
-/* pick bar removed */
 
 /* ── WATCHLIST ROW ── */
 .no-pick{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:26px;text-align:center;}
@@ -242,9 +213,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 
 /* ── SYNC / AUTH ── */
 .sync-status{font-size:.65rem;padding:4px 10px;border-radius:8px;background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);display:inline-flex;align-items:center;gap:5px;}
-.sync-ok{color:var(--green);}
-.btn-google{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#333;border:2px solid #ddd;border-radius:18px;padding:6px 14px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.btn-google:hover{background:#f5f5f5;box-shadow:0 2px 8px rgba(0,0,0,.15);}
 .btn-signout{display:inline-flex;align-items:center;gap:4px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:12px;padding:4px 10px;font-size:.64rem;cursor:pointer;transition:all .2s;}
 .btn-signout:hover{color:var(--red);border-color:rgba(224,82,82,.4);}
 .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -255,6 +223,11 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .auth-divider{font-size:.62rem;color:var(--muted);margin:14px 0;display:flex;align-items:center;gap:8px;}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
 .auth-skip{font-size:.66rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;margin-top:10px;display:block;width:100%;}
+.btn-google{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#333;border:2px solid #ddd;border-radius:18px;padding:6px 14px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-google:hover{background:#f5f5f5;}
+
+/* ── SETTINGS ── */
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -262,51 +235,48 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 </style>
 </head>
 <body>
+
+<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-title">🏪 <span>ETF Ki Dukaan</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <div class="hdr-date" id="hdrDate"></div>
-    <div class="hdr-api-status api-idle" id="apiStatus">💤 Ready</div>
-    <div id="syncStatus" class="sync-status">🔄 Syncing...</div>
+    <div id="syncStatus" class="sync-status">🔄 Connecting...</div>
     <button id="btnSignOut" class="btn-signout" onclick="signOut()" style="display:none;">⎋ Sign Out</button>
   </div>
 </div>
-<div class="fetch-prog"><div class="fetch-prog-bar" id="fetchBar"></div></div>
+
+<!-- AUTO SYNC BAR -->
+<div class="sync-bar">
+  <div class="sync-info">
+    <div class="sync-dot idle" id="syncDot"></div>
+    <div>
+      <div class="sync-txt" id="syncTxt">Google Sheet se connect ho raha hai...</div>
+      <div class="sync-sub" id="syncSub">Sheet se auto data aayega</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div class="sync-stats">
+      <span>Live: <span class="sync-stat-v" id="statLive">0</span></span>
+      <span>Oversold: <span class="sync-stat-v" style="color:var(--red)" id="statOS">0</span></span>
+    </div>
+    <div class="countdown-pill" id="countdownPill">⏳ Starting...</div>
+  </div>
+</div>
+
+<!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 Dashboard</div>
-  <div class="tab" onclick="switchTab('fetch')" id="tab-fetch">🌐 Auto Fetch</div>
+  <div class="tab" onclick="switchTab('allcards')" id="tab-allcards">📋 All ETFs</div>
   <div class="tab" onclick="switchTab('prices')" id="tab-prices">✏️ Override</div>
   <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</div>
 </div>
+
 <div id="tab-dashboard-content" class="main"></div>
-<div id="tab-fetch-content" class="main" style="display:none;">
-  <div class="auto-panel">
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;">
-      <div style="font-size:.72rem;" id="loopStatus"><span style="color:var(--muted)">⚫ Loop band hai</span></div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;">
-        <div><div class="ap-label">Next ETF mein</div><div class="ap-val" id="loopCountdown">—</div></div>
-        <div><div class="ap-label">Last Fetch</div><div class="ap-val" id="lastFetchTime">—</div></div>
-        <div><div class="ap-label">Fetched Today</div><div class="ap-val" id="fetchedCount">—</div></div>
-      </div>
-      <div style="font-size:.66rem;color:var(--muted);" id="loopRoundInfo"></div>
-    </div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 2px;">
-    <div class="sec" style="margin:0;flex:1;">📋 ETF Status</div>
-    <button onclick="initStatusRows()" style="font-size:.62rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:0 4px;">↻ Refresh</button>
-  </div>
-  <div id="fetchStatusList"></div>
-  <div class="sec" style="margin-top:8px;">ℹ️ Note</div>
-  <div style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:13px;font-size:.7rem;color:var(--muted);line-height:2;">
-    • Yahoo Finance API <strong style="color:var(--text)">free</strong> hai — koi API key nahi chahiye<br>
-    • NSE symbols ke aage <code style="background:var(--bg3);padding:1px 4px;">.NS</code> lagta hai automatically<br>
-    • Market hours: 9:15 AM – 3:30 PM IST<br>
-    • CORS ke liye <strong style="color:var(--text)">allorigins.win</strong> proxy use hota hai
-  </div>
-</div>
+<div id="tab-allcards-content" class="main" style="display:none;"></div>
 <div id="tab-prices-content" class="main" style="display:none;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
-    <div style="font-size:.72rem;color:var(--muted);">Jo Yahoo pe nahi mila — uska price yahan manually daalo.</div>
+    <div style="font-size:.72rem;color:var(--muted);">Sheet se price nahi aaya toh yahan manually daalo.</div>
     <div style="display:flex;gap:6px;">
       <button class="btn btn-y" onclick="saveAllPrices()">✅ Save All</button>
       <button class="btn btn-r" onclick="clearTodayPrices()">🗑 Clear</button>
@@ -314,25 +284,18 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   </div>
   <div class="pe-grid" id="priceGrid"></div>
 </div>
-<div id="tab-holdings-content" class="main" style="display:none;">
-  <div id="holdingsContent"></div>
-</div>
 <div id="tab-settings-content" class="main" style="display:none;">
-  <div class="sec">ETF List</div>
-  <div style="font-size:.68rem;color:var(--muted);margin-bottom:8px;">Ek line mein ek ETF symbol.</div>
-  <textarea id="etfListInput" style="width:100%;background:var(--bg2);border:2px solid var(--border-mid);border-radius:10px;color:var(--text);font-size:.8rem;font-weight:700;padding:12px;outline:none;resize:vertical;min-height:200px;line-height:2;" placeholder="NIFTYBEES&#10;BANKBEES&#10;ITBEES&#10;..."></textarea>
+  <div class="sec">Google Sheet CSV URL</div>
+  <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">Apps Script se publish hua CSV URL yahan daalo.</div>
+  <textarea id="sheetUrlInput" style="width:100%;background:var(--bg2);border:2px solid var(--border-mid);border-radius:10px;color:var(--text);font-size:.72rem;padding:12px;outline:none;resize:vertical;min-height:80px;line-height:1.8;"
+    placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv"></textarea>
   <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-    <button class="btn btn-y" onclick="saveSettings()">✅ Save</button>
-    <button class="btn btn-b" onclick="loadDefaultETFs()">↩ Default List</button>
-    <button class="btn btn-r" onclick="resetAll()">🗑 Full Reset</button>
+    <button class="btn btn-y" onclick="saveSheetUrl()">✅ Save & Sync Now</button>
+    <button class="btn btn-b" onclick="forceSyncNow()">🔄 Sync Now</button>
   </div>
+
   <div class="sec" style="margin-top:16px;">RSI & Trade Settings</div>
   <div style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:.76rem;color:var(--muted);">RSI Period</span>
-      <input type="number" id="rsiPeriod" value="14" min="5" max="30"
-        style="width:75px;background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.95rem;font-weight:700;padding:6px 9px;outline:none;text-align:center;">
-    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:.76rem;color:var(--muted);">Oversold Level (Buy Signal)</span>
       <input type="number" id="rsiOversold" value="30" min="10" max="45"
@@ -344,14 +307,26 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
         style="width:75px;background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.95rem;font-weight:700;padding:6px 9px;outline:none;text-align:center;">
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:.76rem;color:var(--muted);">Auto Fetch (4 PM ke baad)</span>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-        <input type="checkbox" id="autoFetchEnabled" checked style="width:18px;height:18px;accent-color:var(--yellow);">
-        <span style="font-size:.76rem;color:var(--text);" id="autoFetchLbl">On</span>
-      </label>
+      <span style="font-size:.76rem;color:var(--muted);">Auto Sync Interval</span>
+      <select id="syncInterval" style="background:var(--bg3);border:2px solid var(--border-mid);border-radius:8px;color:var(--text);font-size:.88rem;font-weight:700;padding:6px 9px;outline:none;">
+        <option value="5">Har 5 min</option>
+        <option value="10">Har 10 min</option>
+        <option value="15">Har 15 min</option>
+        <option value="30">Har 30 min</option>
+        <option value="60">Har 1 ghanta</option>
+      </select>
     </div>
     <button class="btn btn-y" style="align-self:flex-start;" onclick="saveRSISettings()">✅ Save Settings</button>
   </div>
+
+  <div class="sec" style="margin-top:16px;">ETF List (Manual Override)</div>
+  <textarea id="etfListInput" style="width:100%;background:var(--bg2);border:2px solid var(--border-mid);border-radius:10px;color:var(--text);font-size:.8rem;font-weight:700;padding:12px;outline:none;resize:vertical;min-height:180px;line-height:2;" placeholder="NIFTYBEES&#10;BANKBEES&#10;..."></textarea>
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+    <button class="btn btn-y" onclick="saveSettings()">✅ Save ETF List</button>
+    <button class="btn btn-b" onclick="loadDefaultETFs()">↩ Default</button>
+    <button class="btn btn-r" onclick="resetAll()">🗑 Full Reset</button>
+  </div>
+
   <div class="sec" style="margin-top:16px;">Data Info</div>
   <div id="dataInfo" style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:13px;font-size:.7rem;color:var(--muted);line-height:2.1;"></div>
 </div>
@@ -361,11 +336,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="auth-box">
     <div class="auth-logo">🏪</div>
     <div class="auth-title">ETF Ki Dukaan</div>
-    <div class="auth-sub">
-      Google se sign in karo taaki aapka data<br>
-      <strong style="color:var(--text)">har device pe sync</strong> ho!<br><br>
-      Holdings, prices, sab kuch safe rahega ☁️
-    </div>
+    <div class="auth-sub">Google se sign in karo taaki aapka data<br><strong style="color:var(--text)">har device pe sync</strong> ho!<br><br>Holdings, trades, sab kuch safe rahega ☁️</div>
     <button class="btn-google" onclick="signInWithGoogle()">
       <svg width="16" height="16" viewBox="0 0 48 48">
         <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
@@ -376,7 +347,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
       Google se Sign In karo
     </button>
     <div class="auth-divider">ya</div>
-    <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo (sirf is device pe)</button>
+    <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
   </div>
 </div>
 
@@ -393,6 +364,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 <div class="log-bar" id="logBar"><span class="le">Trades yahaan dikhenge…</span></div>
 
@@ -401,6 +373,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
+// ══ GOOGLE SHEET CSV URL ══
+const DEFAULT_SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfGlpbMKdeXr6NsRUuAEcof6JOcbTzHxrmGPhIFRnSwC6Qr4hZHG_YcUt-RL4immC-vYLQNJ9mfLJ8/pub?gid=0&single=true&output=csv';
+
 const DEFAULT_ETFS = `ITBEES
 NIFTYBEES
 METALIETF
@@ -477,6 +452,7 @@ FLEXIADD
 TNIDETF
 ELM250`;
 
+// ══ FIREBASE ══
 const firebaseConfig = {
   apiKey: "AIzaSyArnn7ikT5oypzk12Eklj117DK6ytvCGOw",
   authDomain: "etf-ki-dukaan-4d55c.firebaseapp.com",
@@ -484,7 +460,7 @@ const firebaseConfig = {
   storageBucket: "etf-ki-dukaan-4d55c.firebasestorage.app",
   messagingSenderId: "654660864871",
   appId: "1:654660864871:web:f7aefa5e672d7616f4bdc2",
-  measurementId: "G-NVSQXGE94C"
+  databaseURL: "https://etf-ki-dukaan-4d55c-default-rtdb.firebaseio.com"
 };
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -493,60 +469,295 @@ const googleProvider = new firebase.auth.GoogleAuthProvider();
 let currentUserUID = null;
 let dbRef = null;
 
+// ══ STATE ══
+const LS = 'etf_dukaan_v7';
+let S = {
+  etfs: [],
+  prices: {},       // {sym: [{date, price, rsi14, changePct, ts}]}
+  holdings: [],
+  log: [],
+  rsiOversold: 30,
+  sellTarget: 4.51,
+  dailyPick: null,
+  sheetCsvUrl: DEFAULT_SHEET_CSV,
+  syncIntervalMin: 5,
+  lastSheetSync: null
+};
+let pending = null;
+
+// ══ AUTO SYNC STATE ══
+let syncTimer = null;
+let countdownTimer = null;
+let countdownSec = 0;
+let isSyncing = false;
+
+// ══ HELPERS ══
+function todayISO() { return new Date(Date.now() + 19800000).toISOString().slice(0,10); }
+function nowIST() { return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})); }
+function fmtDate(iso) { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${y}`; }
+function showToast(msg, dur=3200) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+function switchTab(name) {
+  ['dashboard','allcards','prices','settings'].forEach(t=>{
+    const tab=document.getElementById('tab-'+t);
+    const cont=document.getElementById('tab-'+t+'-content');
+    if(tab) tab.classList.toggle('active', t===name);
+    if(cont) cont.style.display = t===name ? 'flex' : 'none';
+  });
+  if(name==='prices') renderPriceGrid();
+  if(name==='settings') renderSettings();
+  if(name==='allcards') renderAllCards();
+  if(name==='dashboard') renderDashboard();
+}
+
+// ══ DATA HELPERS ══
+function getLatestData(sym) {
+  const hist = (S.prices[sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+  const latest = hist[0] || null;
+  const prev = hist[1] || null;
+  const price = latest ? latest.price : null;
+  const rsi = latest ? (latest.rsi14 || null) : null;
+  const changePct = latest ? (latest.changePct || null) : null;
+  return { price, rsi, changePct, lastDate: latest?.date || null, ts: latest?.ts || null, days: hist.length };
+}
+function getAllSorted() {
+  const oversold = S.rsiOversold || 30;
+  return S.etfs.map(e => {
+    const d = getLatestData(e.sym);
+    const held = S.holdings.some(h => h.sym === e.sym);
+    return { sym: e.sym, ...d, held };
+  }).sort((a,b) => {
+    if(a.rsi===null && b.rsi===null) return 0;
+    if(a.rsi===null) return 1;
+    if(b.rsi===null) return -1;
+    return a.rsi - b.rsi;
+  });
+}
+function rsiClass(rsi) {
+  if(rsi===null) return 'rsi-n';
+  if(rsi < (S.rsiOversold||30)) return 'rsi-os';
+  if(rsi > 70) return 'rsi-ob';
+  return 'rsi-n';
+}
+function rsiZoneText(rsi) {
+  if(rsi===null) return '';
+  if(rsi < (S.rsiOversold||30)) return '📉 Oversold';
+  if(rsi > 70) return '📈 Overbought';
+  return 'Neutral';
+}
+
+// ══════════════════════════════════════════
+// GOOGLE SHEET AUTO SYNC — CORE
+// ══════════════════════════════════════════
+async function syncFromSheet(silent=false) {
+  if(isSyncing) return;
+  const url = S.sheetCsvUrl || DEFAULT_SHEET_CSV;
+  if(!url) { updateSyncBar('err','Sheet URL nahi hai','Settings mein URL daalo'); return; }
+
+  isSyncing = true;
+  updateSyncBar('syncing', '🔄 Sheet se sync ho raha hai...', 'Ek second...');
+  const dot = document.getElementById('syncDot');
+  const pill = document.getElementById('countdownPill');
+  if(dot) { dot.className='sync-dot syncing'; }
+  if(pill) { pill.textContent='🔄 Syncing...'; pill.className='countdown-pill syncing'; }
+
+  try {
+    // Cache bust karo — fresh data milega
+    const fetchUrl = url + (url.includes('?') ? '&' : '?') + 'cachebust=' + Date.now();
+    const res = await fetch(fetchUrl);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const csvText = await res.text();
+
+    const rows = csvText.trim().split('\n');
+    if(rows.length < 2) throw new Error('Sheet empty hai');
+
+    // Header row parse karo
+    const headers = rows[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g,''));
+    const symIdx = headers.indexOf('symbol');
+    const priceIdx = headers.indexOf('price');
+    const rsiIdx = headers.indexOf('rsi14');
+    const chgIdx = headers.indexOf('change_pct');
+
+    if(symIdx === -1 || priceIdx === -1) throw new Error('Sheet mein symbol/price column nahi mila');
+
+    let updated = 0;
+    const today = todayISO();
+    const now = Date.now();
+
+    for(let i = 1; i < rows.length; i++) {
+      const cols = rows[i].split(',').map(c => c.trim().replace(/['"]/g,''));
+      let sym = cols[symIdx] || '';
+      // NSE: prefix hata do
+      sym = sym.replace(/^NSE:/i,'').replace(/^BSE:/i,'').trim().toUpperCase();
+      if(!sym || sym === 'ERR') continue;
+
+      const price = parseFloat(cols[priceIdx]);
+      if(!price || price <= 0) continue;
+
+      const rsi14 = rsiIdx >= 0 ? parseFloat(cols[rsiIdx]) : null;
+      const changePct = chgIdx >= 0 ? parseFloat(cols[chgIdx]) : null;
+
+      if(!S.prices[sym]) S.prices[sym] = [];
+      // Aaj ki entry update/add karo
+      const todayEntry = S.prices[sym].find(h => h.date === today);
+      if(todayEntry) {
+        todayEntry.price = parseFloat(price.toFixed(2));
+        if(!isNaN(rsi14)) todayEntry.rsi14 = parseFloat(rsi14.toFixed(2));
+        if(!isNaN(changePct)) todayEntry.changePct = parseFloat(changePct.toFixed(2));
+        todayEntry.ts = now;
+      } else {
+        S.prices[sym].push({
+          date: today,
+          price: parseFloat(price.toFixed(2)),
+          rsi14: !isNaN(rsi14) ? parseFloat(rsi14.toFixed(2)) : null,
+          changePct: !isNaN(changePct) ? parseFloat(changePct.toFixed(2)) : null,
+          ts: now
+        });
+      }
+      // 60 din se purana data hata do
+      S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
+      if(S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
+
+      updated++;
+    }
+
+    S.lastSheetSync = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    save();
+
+    const oversoldCount = getAllSorted().filter(r => r.rsi !== null && r.rsi < (S.rsiOversold||30)).length;
+    updateSyncBar('ok',
+      `✅ ${updated} ETFs synced — ${S.lastSheetSync}`,
+      `Oversold: ${oversoldCount} | Agle sync mein: ${S.syncIntervalMin} min`
+    );
+
+    // Stats update
+    const statLive = document.getElementById('statLive');
+    const statOS = document.getElementById('statOS');
+    if(statLive) statLive.textContent = updated;
+    if(statOS) statOS.textContent = oversoldCount;
+
+    renderDashboard();
+    if(!silent) showToast(`✅ Sheet sync — ${updated} ETFs updated!`);
+
+    // Countdown start
+    startCountdown(S.syncIntervalMin * 60);
+
+  } catch(e) {
+    console.error('Sheet sync error:', e);
+    updateSyncBar('err', '❌ Sync fail: ' + (e.message||'Unknown').slice(0,40), 'Dobara try karega...');
+    startCountdown(60); // 1 min mein retry
+    if(!silent) showToast('❌ Sheet sync fail: ' + (e.message||'').slice(0,30));
+  }
+
+  isSyncing = false;
+  const dotEl = document.getElementById('syncDot');
+  if(dotEl) dotEl.className = 'sync-dot ok';
+}
+
+function updateSyncBar(status, txt, sub) {
+  const dot = document.getElementById('syncDot');
+  const txtEl = document.getElementById('syncTxt');
+  const subEl = document.getElementById('syncSub');
+  if(dot) dot.className = 'sync-dot ' + status;
+  if(txtEl) txtEl.textContent = txt;
+  if(subEl) subEl.textContent = sub;
+}
+
+function startCountdown(sec) {
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownSec = sec;
+  updateCountdownPill();
+  countdownTimer = setInterval(() => {
+    countdownSec--;
+    updateCountdownPill();
+    if(countdownSec <= 0) {
+      clearInterval(countdownTimer);
+      syncFromSheet(true);
+    }
+  }, 1000);
+}
+
+function updateCountdownPill() {
+  const pill = document.getElementById('countdownPill');
+  if(!pill) return;
+  if(isSyncing) { pill.textContent = '🔄 Syncing...'; pill.className='countdown-pill syncing'; return; }
+  const m = Math.floor(countdownSec / 60);
+  const s = countdownSec % 60;
+  const txt = m > 0 ? `🔄 ${m}m ${s.toString().padStart(2,'0')}s mein sync` : `🔄 ${s}s mein sync`;
+  pill.textContent = txt;
+  pill.className = 'countdown-pill';
+}
+
+function forceSyncNow() {
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownSec = 0;
+  syncFromSheet(false);
+}
+
+// ══ SAVE / LOAD ══
+function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {} }
+function saveToFirebase() { if(!dbRef) return; try { dbRef.set(S).catch(e => console.error('Firebase save:', e)); } catch(e) {} }
+function save() { saveLocal(); saveToFirebase(); }
+function load() {
+  try { const d=localStorage.getItem(LS); if(d) S={...S,...JSON.parse(d)}; } catch(e) {}
+  if(!S.etfs||!S.etfs.length) S.etfs=DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
+  if(!S.sheetCsvUrl) S.sheetCsvUrl = DEFAULT_SHEET_CSV;
+}
+
+// ══ FIREBASE AUTH ══
 async function signInWithGoogle() {
   const overlay = document.getElementById('authOverlay');
-  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.85rem;color:var(--text);font-weight:700;">Google se sign in ho raha hai...</div></div>`;
+  overlay.innerHTML=`<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.85rem;color:var(--text);font-weight:700;">Sign in ho raha hai...</div></div>`;
   try {
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    googleProvider.setCustomParameters({prompt:'select_account'});
     const result = await auth.signInWithPopup(googleProvider);
     await onUserSignedIn(result.user);
-  } catch (error) {
-    if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+  } catch(error) {
+    if(error.code==='auth/popup-blocked'||error.code==='auth/popup-closed-by-user') {
       try { await auth.signInWithRedirect(googleProvider); } catch(e2) { showAuthError(e2.message); }
     } else { showAuthError(error.message); }
   }
 }
 function showAuthError(msg) {
-  document.getElementById('authOverlay').innerHTML = `
+  document.getElementById('authOverlay').innerHTML=`
     <div class="auth-box">
       <div class="auth-logo">⚠️</div>
       <div class="auth-title" style="color:var(--red)">Sign In Failed</div>
-      <div class="auth-sub" style="color:var(--muted);word-break:break-word;">${msg}</div>
-      <button class="btn-google" onclick="location.reload()" style="margin-top:14px;">↩ Dobara Try Karo</button>
-      <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
+      <div class="auth-sub" style="word-break:break-word;">${msg}</div>
+      <button class="btn-google" onclick="location.reload()" style="margin-top:14px;">↩ Dobara Try</button>
+      <button class="auth-skip" onclick="skipAuth()">Bina login ke continue</button>
     </div>`;
 }
 function skipAuth() {
-  document.getElementById('authOverlay').style.display = 'none';
-  auth.signInAnonymously().catch(err => console.error("Anon auth failed:", err));
+  document.getElementById('authOverlay').style.display='none';
+  auth.signInAnonymously().catch(e=>console.error('Anon auth failed:',e));
 }
 async function signOut() {
-  if (!confirm('Sign out karna chahte ho?')) return;
-  await auth.signOut();
-  currentUserUID = null; dbRef = null;
-  document.getElementById('syncStatus').textContent = '🔴 Signed Out';
-  document.getElementById('btnSignOut').style.display = 'none';
+  if(!confirm('Sign out karna chahte ho?')) return;
+  await auth.signOut(); currentUserUID=null; dbRef=null;
+  document.getElementById('syncStatus').textContent='🔴 Signed Out';
+  document.getElementById('btnSignOut').style.display='none';
   showAuthScreen();
 }
 async function onUserSignedIn(user) {
   currentUserUID = user.uid;
-  dbRef = database.ref('users/' + currentUserUID + '/data');
-  document.getElementById('authOverlay').style.display = 'none';
-  const displayName = user.displayName || user.email;
-  document.getElementById('syncStatus').innerHTML = '🟢 <span style="color:var(--yellow)">' + displayName + '</span>';
-  document.getElementById('btnSignOut').style.display = 'inline-flex';
+  dbRef = database.ref('users/'+currentUserUID+'/data');
+  document.getElementById('authOverlay').style.display='none';
+  const name = user.displayName||user.email;
+  document.getElementById('syncStatus').innerHTML='🟢 <span style="color:var(--yellow)">'+name+'</span>';
+  document.getElementById('btnSignOut').style.display='inline-flex';
   await loadFromFirebase();
-  renderDashboard(); renderHoldings();
-  setTimeout(() => { if (loopRunning) stopLoop(); startLoop(); showToast('🔄 Auto loop shuru ho gaya!'); }, 1000);
+  renderDashboard();
+  // Auto sync shuru karo
+  setTimeout(() => syncFromSheet(false), 500);
 }
 function showAuthScreen() {
   const overlay = document.getElementById('authOverlay');
-  overlay.style.display = 'flex';
-  overlay.innerHTML = `
+  overlay.style.display='flex';
+  overlay.innerHTML=`
     <div class="auth-box">
       <div class="auth-logo">🏪</div>
       <div class="auth-title">ETF Ki Dukaan</div>
-      <div class="auth-sub">Google se sign in karo taaki aapka data<br><strong style="color:var(--text)">har device pe sync</strong> ho!<br><br>Holdings, prices, sab kuch safe rahega ☁️</div>
+      <div class="auth-sub">Google se sign in karo taaki aapka data<br><strong style="color:var(--text)">har device pe sync</strong> ho!</div>
       <button class="btn-google" onclick="signInWithGoogle()">
         <svg width="16" height="16" viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
@@ -557,483 +768,94 @@ function showAuthScreen() {
         Google se Sign In karo
       </button>
       <div class="auth-divider">ya</div>
-      <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
+      <button class="auth-skip" onclick="skipAuth()">Bina login ke continue</button>
     </div>`;
 }
 async function initFirebaseAuth() {
   const overlay = document.getElementById('authOverlay');
-  overlay.style.display = 'flex';
-  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.85rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
+  overlay.style.display='flex';
+  overlay.innerHTML=`<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.85rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
   try {
     const result = await auth.getRedirectResult();
-    if (result && result.user) { await onUserSignedIn(result.user); return; }
-  } catch (error) { console.error("Redirect result error:", error); }
-  return new Promise((resolve) => {
-    const unsub = auth.onAuthStateChanged(async (user) => {
+    if(result&&result.user) { await onUserSignedIn(result.user); return; }
+  } catch(e) { console.error('Redirect result error:',e); }
+  return new Promise(resolve=>{
+    const unsub = auth.onAuthStateChanged(async user=>{
       unsub();
-      if (user && !user.isAnonymous) { await onUserSignedIn(user); }
-      else { if (user && user.isAnonymous) await auth.signOut(); showAuthScreen(); }
+      if(user&&!user.isAnonymous) { await onUserSignedIn(user); }
+      else { if(user&&user.isAnonymous) await auth.signOut(); showAuthScreen(); }
       resolve();
     });
   });
 }
 async function loadFromFirebase() {
-  if (!dbRef) return;
+  if(!dbRef) return;
   try {
     const snapshot = await dbRef.once('value');
     const fbData = snapshot.val();
-    if (fbData) {
-      S = {...S, ...fbData};
-      if (!S.etfs || S.etfs.length === 0) S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
+    if(fbData) {
+      S = {...S,...fbData};
+      if(!S.etfs||!S.etfs.length) S.etfs=DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
+      if(!S.sheetCsvUrl) S.sheetCsvUrl = DEFAULT_SHEET_CSV;
       saveLocal();
-      showToast('☁️ Data Firebase se load ho gaya');
     }
-  } catch(e) { console.error("Firebase load error", e); }
-}
-function saveToFirebase() {
-  if (!dbRef) return;
-  try { dbRef.set(S).catch(err => console.error("Firebase save error", err)); } catch(e) {}
-}
-function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {} }
-function save() { saveLocal(); saveToFirebase(); }
-
-/* ══ STATE ══ */
-const LS = 'etf_dukaan_v6';
-let S = { etfs:[], prices:{}, holdings:[], log:[], rsiPeriod:14, rsiOversold:30, sellTarget:4.51, dailyPick:null, autoFetchEnabled:true, lastFetchDate:null, lastFetchTime:null, fetchedToday:0 };
-let pending = null, fetchAbort = false;
-
-function load() {
-  try { const d = localStorage.getItem(LS); if (d) S = {...S, ...JSON.parse(d)}; } catch(e) {}
-  if (!S.etfs || !S.etfs.length) S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
+  } catch(e) { console.error('Firebase load:',e); }
 }
 
-/* ══ HELPERS ══ */
-function todayISO() { return new Date(Date.now() + 19800000).toISOString().slice(0,10); }
-function nowIST() { return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})); }
-function fmtDate(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${y}`; }
-function showToast(msg, dur=3500) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
-function setApiStatus(type, msg) { const el=document.getElementById('apiStatus'); el.className='hdr-api-status '+type; el.textContent=msg; }
-function setBar(pct) { document.getElementById('fetchBar').style.width=pct+'%'; }
-function switchTab(name) {
-  ['dashboard','fetch','prices','settings'].forEach(t => {
-    const tabEl=document.getElementById('tab-'+t), contEl=document.getElementById('tab-'+t+'-content');
-    if (tabEl) tabEl.classList.toggle('active',t===name);
-    if (contEl) contEl.style.display=t===name?'flex':'none';
-  });
-  if (name==='fetch') renderFetchTab();
-  if (name==='prices') renderPriceGrid();
-  if (name==='settings') renderSettings();
-  if (name==='dashboard') renderDashboard();
-}
-
-/* ══ RSI ══ */
-function calcRSI(closes, period) {
-  if (!closes || closes.length < 2) return null;
-  const effPeriod = Math.min(period, closes.length - 1);
-  let g=0, l=0;
-  for (let i=1; i<=effPeriod; i++) { const d=closes[i]-closes[i-1]; if (d>0) g+=d; else l-=d; }
-  let ag=g/effPeriod, al=l/effPeriod;
-  for (let i=effPeriod+1; i<closes.length; i++) { const d=closes[i]-closes[i-1]; ag=(ag*(effPeriod-1)+(d>0?d:0))/effPeriod; al=(al*(effPeriod-1)+(d<0?-d:0))/effPeriod; }
-  if (al===0) return 100;
-  return parseFloat((100 - 100/(1+ag/al)).toFixed(2));
-}
-function getETFData(sym) {
-  const hist=(S.prices[sym]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
-  const closes=hist.map(h=>h.price);
-  const period=S.rsiPeriod||14;
-  const rsi=calcRSI(closes,period);
-  const effPeriod=closes.length>=2?Math.min(period,closes.length-1):period;
-  const isPartialRSI=closes.length>=2&&closes.length<period+1;
-  const latest=hist[hist.length-1]||null;
-  const prev=hist[hist.length-2]||null;
-  const price=latest?latest.price:null;
-  const changePct=(latest&&prev&&prev.price>0)?((latest.price-prev.price)/prev.price)*100:null;
-  return {rsi,price,changePct,days:closes.length,lastDate:latest?.date||null,effPeriod,isPartialRSI};
-}
-function getAllRSI() {
-  return S.etfs.map(e=>{const d=getETFData(e.sym);const held=S.holdings.some(h=>h.sym===e.sym);return{sym:e.sym,...d,held};})
-    .sort((a,b)=>{if(a.rsi===null&&b.rsi===null)return 0;if(a.rsi===null)return 1;if(b.rsi===null)return -1;return a.rsi-b.rsi;});
-}
-function rsiClass(rsi) {
-  if (rsi===null) return 'rsi-n';
-  if (rsi<(S.rsiOversold||30)) return 'rsi-os';
-  if (rsi>70) return 'rsi-ob';
-  return 'rsi-n';
-}
-
-/* ══ RSI BAR OVERLAY — FIXED ══
-   Bar gradient: Left=RED(100) → Right=GREEN(0)
-   Dark overlay from RIGHT side, width = (100 - rsi)%
-
-   RSI 86.5 → overlay = 13.5% from right → bar shows 86.5% red from left ✅
-   RSI 70   → overlay = 30% from right → bar shows 70% (orange zone) ✅
-   RSI 30   → overlay = 70% from right → bar shows 30% (green zone) ✅
-   RSI 10   → overlay = 90% from right → bar shows 10% (deep green) ✅
-*/
-function rsiOverlayPct(rsi) {
-  if (rsi === null) return 100;
-  // overlay from RIGHT = (100 - rsi)% — hides the green portion on right
-  return Math.max(0, Math.min(100, 100 - rsi));
-}
-
-function rsiZoneText(rsi) {
-  if (rsi === null) return '';
-  const oversold = S.rsiOversold || 30;
-  if (rsi < oversold) return '📉 Oversold';
-  if (rsi > 70) return '📈 Overbought';
-  return 'Neutral';
-}
-
-/* ══ YAHOO FETCH ══ */
-const PROXIES = [
-  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
-];
-async function fetchWithTimeout(url,ms) {
-  const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),ms);
-  try { const r=await fetch(url,{signal:ctrl.signal}); clearTimeout(tid); return r; } catch(e) { clearTimeout(tid); throw e; }
-}
-async function fetchYahooPrice(sym) {
-  const ticker=sym+'.NS';
-  const now=Math.floor(Date.now()/1000);
-  const from90=now-(90*24*3600);
-  function parseV8(cr) {
-    const ts=cr.timestamp||[];
-    const adjC=cr.indicators?.adjclose?.[0]?.adjclose||[];
-    const rawC=cr.indicators?.quote?.[0]?.close||[];
-    const closes=adjC.length>=ts.length?adjC:rawC;
-    const out={};
-    for (let i=0;i<ts.length;i++) { const c=closes[i]; if(c>0&&ts[i]) { const d=new Date((ts[i]+19800)*1000).toISOString().slice(0,10); out[d]=parseFloat(c.toFixed(2)); } }
-    return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
-  }
-  function parseCSV(text) {
-    const out={};
-    text.trim().split('\n').slice(1).forEach(line=>{ const p=line.split(','); const date=p[0]?.trim(); const close=parseFloat(p[4]); if(date?.match(/^\d{4}-\d{2}-\d{2}$/)&&close>0) out[date]=parseFloat(close.toFixed(2)); });
-    return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
-  }
-  function makeResult(history,fallbackPrice) {
-    const today=todayISO(); const lastEntry=history[history.length-1];
-    const price=lastEntry?lastEntry.price:fallbackPrice;
-    if(lastEntry&&lastEntry.date!==today) history.push({date:today,price});
-    return {price,history};
-  }
-  const urlV8=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=90d`;
-  const urlCSV=`https://query1.finance.yahoo.com/v7/finance/download/${ticker}?period1=${from90}&period2=${now}&interval=1d&events=history`;
-  let lastErr=null;
-  for (const proxyFn of PROXIES) {
-    try {
-      const res=await fetchWithTimeout(proxyFn(urlV8),20000); if(!res.ok) throw new Error('V8 HTTP '+res.status);
-      const text=await res.text(); let parsed;
-      try { const o=JSON.parse(text); parsed=typeof o.contents==='string'?JSON.parse(o.contents):o; } catch { throw new Error('V8 JSON fail'); }
-      const cr=parsed?.chart?.result?.[0]; if(!cr) throw new Error('V8 no result');
-      const price=cr.meta?.regularMarketPrice||cr.meta?.previousClose; if(!price||price<=0) throw new Error('V8 no price');
-      const history=parseV8(cr); if(history.length>=10) return makeResult(history,price);
-      throw new Error('V8 only '+history.length+' candles');
-    } catch(e) { lastErr=e; }
-    try {
-      const res=await fetchWithTimeout(proxyFn(urlCSV),20000); if(!res.ok) throw new Error('CSV HTTP '+res.status);
-      const text=await res.text(); let csvText=text;
-      try { const o=JSON.parse(text); if(o.contents) csvText=o.contents; } catch {}
-      const history=parseCSV(csvText); if(history.length>=10) return makeResult(history,null);
-      throw new Error('CSV only '+history.length+' rows');
-    } catch(e) { lastErr=e; }
-    await sleep(800);
-  }
-  throw new Error(lastErr?.message||'Sab sources fail');
-}
-function savePrice(sym,fetchResult) {
-  const today=todayISO(); const ts=Date.now();
-  if(!S.prices[sym]) S.prices[sym]=[];
-  const price=typeof fetchResult==='object'?fetchResult.price:fetchResult;
-  const history=typeof fetchResult==='object'?(fetchResult.history||[]):[];
-  history.forEach(h=>{ if(!h.date) return; const exists=S.prices[sym].find(p=>p.date===h.date); if(!exists) S.prices[sym].push({date:h.date,price:h.price}); else exists.price=h.price; });
-  S.prices[sym]=S.prices[sym].filter(h=>h.date!==today);
-  S.prices[sym].push({date:today,price,ts});
-  S.prices[sym].sort((a,b)=>a.date.localeCompare(b.date));
-  if(S.prices[sym].length>60) S.prices[sym]=S.prices[sym].slice(-60);
-}
-function isGoodFetchTime() { const now=nowIST(); const totalMin=now.getHours()*60+now.getMinutes(); return totalMin>=960||totalMin<=540; }
-function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
-
-/* ══ LOOP ══ */
-let loopRunning=false,loopIndex=0,loopRound=0,loopOk=0,loopFail=0,nextEtfTimer=null,consecutiveRateLimits=0,lastErr=null,countdownSec=0;
-function getLastTs(sym) { const hist=S.prices[sym]||[]; if(!hist.length) return 0; const withTs=hist.filter(h=>h.ts); if(!withTs.length) return 1; return Math.max(...withTs.map(h=>h.ts)); }
-
-async function startLoop() {
-  if(loopRunning) return;
-  if(!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
-  loopRunning=true; loopIndex=0; loopRound=0; loopOk=0; loopFail=0; fetchAbort=false;
-  initStatusRows(); updateLoopUI(); setApiStatus('api-loading','🔄 Loop ON');
-  showToast('🔄 Rolling loop shuru!'); runLoopTick();
-}
-function stopLoop() {
-  loopRunning=false; fetchAbort=true; if(nextEtfTimer) clearTimeout(nextEtfTimer); nextEtfTimer=null;
-  setApiStatus('api-idle','⏹ Stopped'); setBar(0); updateLoopUI(); showToast('⏹ Loop band ho gayi.');
-}
-async function retryOne(sym) {
-  const stEl=document.getElementById('fst-'+sym);
-  const upd=(html)=>{ if(stEl) stEl.innerHTML=html; };
-  upd(`<span class="spinner"></span> Fetching…`);
-  const cardEl=document.getElementById('etf-card-'+sym);
-  if(cardEl) { cardEl.classList.add('ec-fetching'); const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-fetch" id="ec-st-${sym}"><span class="spinner" style="width:9px;height:9px;border-width:1.5px;"></span> Fetching</span>`; }
-  try {
-    const result=await fetchYahooPrice(sym); const price=result.price;
-    savePrice(sym,result); save();
-    const t=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    if(stEl) stEl.innerHTML=`<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.6rem;">${t}</span>`;
-    const d2=getETFData(sym); const oversold=S.rsiOversold||30; const rsi=d2.rsi;
-    const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
-    if(cardEl) {
-      cardEl.classList.remove('ec-fetching');
-      const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-live" id="ec-st-${sym}">🟢 Live</span>`;
-      const pxEl=document.getElementById('ec-px-'+sym); if(pxEl) pxEl.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
-      const timeEl=document.getElementById('ec-time-'+sym); if(timeEl) timeEl.textContent=`⏱ ${t} (abhi abhi)`;
-      const rsiEl=document.getElementById('ec-rsi-val-'+sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
-      const barEl=document.getElementById('ec-bar-'+sym); if(barEl){barEl.style.width=rsiOverlayPct(rsi)+'%';}
-    }
-    showToast(`✅ ${sym} — ₹${price.toFixed(2)}`); renderDashboard();
-  } catch(e) {
-    const msg=(e.message||'?').slice(0,30);
-    if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${msg}</span> <button onclick="retryOne('${sym}')" style="font-size:.6rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:2px 8px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
-    if(cardEl) { cardEl.classList.remove('ec-fetching'); const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-pending" id="ec-st-${sym}">❌ Failed</span>`; }
-    showToast(`❌ ${sym} fail`);
-  }
-}
-async function runLoopTick() {
-  if(!loopRunning||fetchAbort) return;
-  if(!S.etfs.length) { stopLoop(); return; }
-  const sortedByAge=[...S.etfs].sort((a,b)=>getLastTs(a.sym)-getLastTs(b.sym));
-  const etfToFetch=sortedByAge[0];
-  const oldestTs=getLastTs(sortedByAge[0].sym);
-  const newestTs=getLastTs(sortedByAge[sortedByAge.length-1].sym);
-  if(loopIndex>0&&newestTs>0&&oldestTs>0&&newestTs-oldestTs<60000) {
-    loopRound++; loopOk=0; loopFail=0; S.lastRoundTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); save();
-    showToast(`✅ Round ${loopRound} complete!`); updateLoopUI();
-  }
-  const e=etfToFetch; loopIndex++;
-  const cardEl=document.getElementById('etf-card-'+e.sym);
-  if(cardEl) {
-    cardEl.classList.add('ec-fetching');
-    const stEl2=document.getElementById('ec-st-'+e.sym); if(stEl2) stEl2.outerHTML=`<span class="ec-st-badge ec-st-fetch" id="ec-st-${e.sym}"><span class="spinner" style="width:9px;height:9px;border-width:1.5px;"></span> Fetching</span>`;
-    cardEl.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }
-  const stEl=document.getElementById('fst-'+e.sym);
-  if(stEl) stEl.innerHTML=`<span class="spinner"></span> <span style="color:var(--yellow);font-size:.7rem;font-weight:700;">Fetching…</span>`;
-  const fetchedCount=S.etfs.filter(ex=>getLastTs(ex.sym)>1).length;
-  setBar(Math.round((fetchedCount/S.etfs.length)*100));
-  setApiStatus('api-loading',`🔄 ${e.sym} — ${fetchedCount}/${S.etfs.length}`);
-  try {
-    const result=await fetchYahooPrice(e.sym); const price=result.price;
-    savePrice(e.sym,result); loopOk++;
-    S.lastFetchDate=todayISO(); S.lastFetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    S.fetchedToday=S.etfs.filter(ex=>(S.prices[ex.sym]||[]).some(h=>h.date===todayISO())).length;
-    save();
-    const fetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    const d2=getETFData(e.sym); const oversold=S.rsiOversold||30; const rsi=d2.rsi;
-    const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
-    const cardEl2=document.getElementById('etf-card-'+e.sym);
-    if(cardEl2) {
-      cardEl2.classList.remove('ec-fetching');
-      const stB=document.getElementById('ec-st-'+e.sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-live" id="ec-st-${e.sym}">🟢 Live</span>`;
-      const pxEl2=document.getElementById('ec-px-'+e.sym); if(pxEl2) pxEl2.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
-      const timeEl=document.getElementById('ec-time-'+e.sym); if(timeEl) timeEl.textContent=`⏱ ${fetchTime} (abhi abhi)`;
-      const rsiEl=document.getElementById('ec-rsi-val-'+e.sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
-      const barEl=document.getElementById('ec-bar-'+e.sym); if(barEl){barEl.style.width=rsiOverlayPct(rsi)+'%';}
-    }
-    if(stEl) stEl.innerHTML=`<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.6rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
-    if(document.getElementById('tab-dashboard-content').style.display!=='none') renderDashboard();
-  } catch(err) {
-    loopFail++; lastErr=err;
-    const cardEl3=document.getElementById('etf-card-'+e.sym);
-    if(cardEl3) { cardEl3.classList.remove('ec-fetching'); const stB=document.getElementById('ec-st-'+e.sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-pending" id="ec-st-${e.sym}">❌ Failed</span>`; }
-    if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${(err.message||'?').slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.6rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:2px 8px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
-  }
-  updateLoopUI();
-  const isRateLimit=lastErr&&(lastErr.message||'').toLowerCase().includes('429');
-  if(isRateLimit) { consecutiveRateLimits=(consecutiveRateLimits||0)+1; }
-  else { consecutiveRateLimits=Math.max(0,(consecutiveRateLimits||0)-1); }
-  const DELAY_SEC=consecutiveRateLimits>0?Math.min(300,90+consecutiveRateLimits*60):90;
-  countdownSec=DELAY_SEC; tickCountdown();
-}
-function tickCountdown() { if(!loopRunning) return; updateCountdown(); if(countdownSec<=0){runLoopTick();return;} countdownSec--; nextEtfTimer=setTimeout(tickCountdown,1000); }
-function updateCountdown() { const el=document.getElementById('loopCountdown'); if(!el) return; if(!loopRunning){el.textContent='—';return;} if(countdownSec<=0){el.textContent='Fetching…';return;} const m=Math.floor(countdownSec/60),s=countdownSec%60; el.textContent=`${m}:${s.toString().padStart(2,'0')} mein next`; }
-function updateLoopUI() {
-  const btnStart=document.getElementById('btnLoopStart'),btnStop=document.getElementById('btnLoopStop');
-  if(btnStart) btnStart.disabled=loopRunning; if(btnStop) btnStop.disabled=!loopRunning;
-  const statusEl=document.getElementById('loopStatus');
-  if(statusEl) {
-    if(loopRunning) { statusEl.innerHTML=`<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ✅${loopOk} ❌${loopFail}`; }
-    else { statusEl.innerHTML=`<span style="color:var(--muted)">⚫ Loop band hai</span>`; }
-  }
-  renderFetchTab();
-}
-
-/* ══ BUILD ETF CARD ══ */
-function buildEtfCard(e, rank) {
-  const today=todayISO();
-  const hist=(S.prices[e.sym]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
-  const td=hist.find(h=>h.date===today); const lastEntry=hist[0];
-  const d=getETFData(e.sym); const oversold=S.rsiOversold||30;
-
-  let badgeClass='ec-st-pending',badgeTxt='⏳ Pending';
-  if(td) {
-    const diffMin=td.ts?Math.floor((Date.now()-td.ts)/60000):9999;
-    if(diffMin<120){badgeClass='ec-st-live';badgeTxt='🟢 Live';}
-    else{badgeClass='ec-st-stale';badgeTxt='🕐 Purana';}
-  } else if(lastEntry){badgeClass='ec-st-stale';badgeTxt='🕐 Stale';}
-
-  const lastP=td||lastEntry; let timeStr='—';
-  if(lastP){
-    if(lastP.ts){
-      const t=new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-      const diffMin=Math.floor((Date.now()-lastP.ts)/60000);
-      const diffHr=Math.floor(diffMin/60);
-      if(diffMin<1) timeStr=t+' (abhi abhi)';
-      else if(diffMin<60) timeStr=t+` (${diffMin} min pehle)`;
-      else if(diffHr<24) timeStr=t+` (${diffHr} hr pehle)`;
-      else timeStr=fmtDate(lastP.date);
-    } else { timeStr=fmtDate(lastP.date); }
-  }
-
-  const rsi=d.rsi;
-  const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
-  const isOs=rsi!==null&&rsi<oversold;
-  let cardClass='etf-card';
-  if(isOs) cardClass+=rank===1?' os os-1':' os';
-
-  // overlay from RIGHT = (100-rsi)% — shows rsi% of gradient from left (red side)
-  const overlayPct=rsiOverlayPct(rsi);
-  const up=d.changePct!==null&&d.changePct>=0;
-
-  return `<div class="${cardClass}" id="etf-card-${e.sym}">
-    <div class="ec-top">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <div class="ec-sym">${e.sym}</div>
-        ${isOs?`<span class="ec-os-tag">📉 Oversold</span>`:''}
-      </div>
-      <span class="ec-st-badge ${badgeClass}" id="ec-st-${e.sym}">${badgeTxt}</span>
-    </div>
-
-    <div class="ec-mid">
-      <div class="ec-price-block">
-        <div id="ec-px-${e.sym}">
-          ${td?`<div class="ec-price">₹${td.price.toFixed(2)}</div>`:`<div class="ec-no-price">Price nahi hai</div>`}
-        </div>
-        ${d.changePct!==null?`<div class="ec-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(d.changePct).toFixed(2)}%</div>`:''}
-        <div class="ec-time" id="ec-time-${e.sym}">⏱ ${timeStr}</div>
-      </div>
-      <div class="ec-rsi-block">
-        <div class="ec-rsi-lbl-txt">RSI ${d.isPartialRSI?'~'+d.effPeriod+'D ⚠️':S.rsiPeriod+'D'}</div>
-        <div class="ec-rsi-val" style="color:${rsiColor}" id="ec-rsi-val-${e.sym}">${rsi!==null?rsi.toFixed(1):'—'}</div>
-        <div class="ec-rsi-zone" style="color:${rsiColor}">${rsiZoneText(rsi)}</div>
-      </div>
-    </div>
-
-    <div style="margin-top:6px;font-size:.62rem;color:var(--muted);">${d.days}d · ${d.days>=(S.rsiPeriod||14)?'✓':'⚠️'}</div>
-  </div>`;
-}
-
-function initStatusRows() {
-  const statusList=document.getElementById('fetchStatusList'); if(!statusList) return;
-  const today=todayISO(); const oversold=S.rsiOversold||30;
-  const fetchedToday=S.etfs.filter(e=>(S.prices[e.sym]||[]).some(h=>h.date===today)).length;
-  const etfsSorted=[...S.etfs].sort((a,b)=>{
-    const da=getETFData(a.sym),db=getETFData(b.sym); const ra=da.rsi,rb=db.rsi;
-    const aOs=ra!==null&&ra<oversold,bOs=rb!==null&&rb<oversold;
-    if(aOs&&!bOs) return -1; if(!aOs&&bOs) return 1;
-    if(ra===null&&rb===null) return 0; if(ra===null) return 1; if(rb===null) return -1; return ra-rb;
-  });
-  const osEtfs=etfsSorted.filter(e=>{const d=getETFData(e.sym);return d.rsi!==null&&d.rsi<oversold;});
-  const normalEtfs=etfsSorted.filter(e=>{const d=getETFData(e.sym);return d.rsi===null||d.rsi>=oversold;});
-  let html=`<div style="padding:8px 12px;font-size:.72rem;background:var(--bg3);border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-    <span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span>
-    <span style="color:var(--muted)">${S.etfs.length-fetchedToday} baaki</span>
-  </div>`;
-  if(osEtfs.length>0) {
-    html+=`<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
-    html+=`<div class="etf-cards-grid" style="margin-bottom:12px;">`;
-    osEtfs.forEach((e,i)=>{html+=buildEtfCard(e,i+1);});
-    html+=`</div>`;
-  }
-  if(normalEtfs.length>0) {
-    html+=`<div class="cards-sec-hdr csh-normal">📊 Baaki ETFs — RSI Sorted (${normalEtfs.length})</div>`;
-    html+=`<div class="etf-cards-grid">`;
-    normalEtfs.forEach((e,i)=>{html+=buildEtfCard(e,0);});
-    html+=`</div>`;
-  }
-  statusList.innerHTML=html;
-}
-
-async function fetchAllPrices(force=false) {
-  if(loopRunning){showToast('⚠️ Loop chal rahi hai — pehle band karo');return;}
-  if(!S.etfs.length){showToast('⚠️ Settings mein ETF list daalo pehle');return;}
-  if(!force&&!isGoodFetchTime()){if(!confirm('Market abhi khula hai. Phir bhi fetch karna hai?')) return;}
-  fetchAbort=false; setApiStatus('api-loading','⬇️ Fetching all…');
-  const btnFetchEl=document.getElementById('btnFetch'); if(btnFetchEl) btnFetchEl.disabled=true;
-  initStatusRows(); let ok=0,fail=0;
-  for(let i=0;i<S.etfs.length;i++) {
-    if(fetchAbort) break; const e=S.etfs[i];
-    const stEl=document.getElementById('fst-'+e.sym); if(stEl) stEl.innerHTML=`<span class="spinner"></span> Fetching…`;
-    setBar(Math.round((i/S.etfs.length)*100));
-    try { const result=await fetchYahooPrice(e.sym); savePrice(e.sym,result); ok++; if(stEl) stEl.innerHTML=`<span class="fe-ok">✅ ₹${result.price.toFixed(2)}</span>`; }
-    catch(err) { fail++; if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${(err.message||'?').slice(0,25)}</span>`; }
-    if(i<S.etfs.length-1) await sleep(400);
-  }
-  setBar(100); setTimeout(()=>setBar(0),1500);
-  S.lastFetchDate=todayISO(); S.lastFetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); S.fetchedToday=ok; save();
-  setApiStatus('api-done',`✅ ${ok} fetched`);
-  const btnFetchEl2=document.getElementById('btnFetch'); if(btnFetchEl2) btnFetchEl2.disabled=false;
-  showToast(`✅ ${ok} fetched, ${fail} failed`); renderFetchTab(); renderDashboard();
-}
-function renderFetchTab() {
-  const today=todayISO(); const lfEl=document.getElementById('lastFetchTime');
-  if(lfEl) { if(S.lastFetchDate===today&&S.lastFetchTime){lfEl.textContent=`Aaj ${S.lastFetchTime}`;lfEl.style.color='var(--green)';}else if(S.lastFetchDate){lfEl.textContent=`${fmtDate(S.lastFetchDate)} ${S.lastFetchTime||''}`;lfEl.style.color='var(--amber)';}else{lfEl.textContent='Kabhi nahi';} }
-  const fcEl=document.getElementById('fetchedCount');
-  if(fcEl) { const cnt=S.etfs.filter(e=>(S.prices[e.sym]||[]).some(h=>h.date===todayISO())).length; fcEl.textContent=`${cnt} / ${S.etfs.length} ETFs`; fcEl.style.color=cnt>0?'var(--green)':'var(--muted)'; }
-  updateCountdown();
-}
-
-/* ══ DASHBOARD ══ */
+// ══ DASHBOARD ══
 function renderDashboard() {
-  const cont=document.getElementById('tab-dashboard-content');
-  if(!S.etfs.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg"><strong>Koi ETF nahi hai!</strong><br>Settings mein ETF list add karo.</div></div>`; return; }
-  const today=todayISO(); const oversold=S.rsiOversold||30;
-  const all=getAllRSI(); const heldSyms=new Set(S.holdings.map(h=>h.sym));
-  const under=all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold&&!r.held);
-  let pickETF=null;
+  const cont = document.getElementById('tab-dashboard-content');
+  if(!S.etfs.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list add karo.</div></div>`; return; }
+  const oversold = S.rsiOversold || 30;
+  const all = getAllSorted();
+  const heldSyms = new Set(S.holdings.map(h=>h.sym));
+  const under = all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold&&!r.held);
+
+  // Daily pick
+  const today = todayISO();
+  let pickETF = null;
   if(S.dailyPick&&S.dailyPick.date===today) pickETF=all.find(r=>r.sym===S.dailyPick.sym);
   if(!pickETF&&under.length>0) { pickETF=under[0]; S.dailyPick={sym:pickETF.sym,date:today}; save(); }
-  let html='';
-  const fetchedToday=S.lastFetchDate===today;
-  if(!fetchedToday) {
-    const good=isGoodFetchTime();
-    html+=`<div style="background:${good?'rgba(245,200,66,.08)':'rgba(91,155,213,.08)'};border:2px solid ${good?'rgba(245,200,66,.3)':'rgba(91,155,213,.25)'};border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div style="font-size:.72rem;color:${good?'var(--yellow)':'var(--blue)'};">${good?'⚡ Aaj ke prices abhi tak fetch nahi hue!':'⏰ Market band hone ke baad (4 PM) prices auto-fetch honge.'}</div>
-      ${good?`<button class="btn btn-y" onclick="switchTab('fetch');fetchAllPrices(false)">⬇️ Fetch Now</button>`:''}
+
+  let html = '';
+
+  // Last sync info
+  const hasPrices = all.filter(r=>r.price!==null).length;
+  if(hasPrices === 0) {
+    html+=`<div style="background:rgba(245,200,66,.08);border:2px solid rgba(245,200,66,.3);border-radius:12px;padding:14px;text-align:center;">
+      <div style="font-size:.82rem;color:var(--yellow);font-weight:700;">⏳ Sheet se data load ho raha hai...</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-top:4px;">Thodi der mein automatically aayega</div>
     </div>`;
   } else {
-    html+=`<div style="background:rgba(76,175,130,.07);border:1px solid rgba(76,175,130,.2);border-radius:10px;padding:9px 14px;font-size:.7rem;color:var(--green);">✅ Aaj ke prices fetch ho gaye — ${S.lastFetchTime} pe · ${S.fetchedToday} ETFs updated</div>`;
+    html+=`<div style="background:rgba(76,175,130,.07);border:1px solid rgba(76,175,130,.2);border-radius:10px;padding:9px 14px;font-size:.7rem;color:var(--green);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+      <span>✅ ${hasPrices} ETFs live — Sheet se auto-sync</span>
+      <span style="color:var(--muted);">Last: ${S.lastSheetSync||'—'}</span>
+    </div>`;
   }
-  html+=`<div class="sec">🎯 Aaj Ka Pick</div>`;
-  if(!all.filter(r=>r.price!==null).length) {
-    html+=`<div class="no-pick"><span class="no-pick-icon">💰</span><div class="no-pick-msg">Pehle <strong>"Auto Fetch"</strong> tab se prices fetch karo.</div></div>`;
-  } else if(!pickETF) {
-    html+=`<div class="no-pick"><span class="no-pick-icon">😴</span><div class="no-pick-msg"><strong>Aaj koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi nahi mila.</div></div>`;
+
+  // Pick
+  html += `<div class="sec">🎯 Aaj Ka Pick</div>`;
+  if(!pickETF) {
+    html+=`<div class="no-pick"><span class="no-pick-icon">😴</span><div class="no-pick-msg"><strong>Koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi nahi mila.</div></div>`;
   } else {
-    const boughtTd=S.holdings.some(h=>h.sym===pickETF.sym&&h.buyDate===today);
-    html+=buildPickCard(pickETF,heldSyms.has(pickETF.sym),boughtTd);
+    const boughtTd = S.holdings.some(h=>h.sym===pickETF.sym&&h.buyDate===today);
+    html += buildPickCard(pickETF, heldSyms.has(pickETF.sym), boughtTd);
   }
-  const underAll=all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold);
+
+  // Oversold list
+  const underAll = all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold);
   if(underAll.length>0) {
     html+=`<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
-    underAll.forEach((r,i)=>{html+=buildWLRow(r,i+1);}); html+=`</div>`;
+    underAll.forEach((r,i)=>{ html+=buildWLRow(r,i+1); });
+    html+=`</div>`;
   }
+
+  // Holdings
   if(S.holdings.length>0) {
-    const tgtPct=S.sellTarget||4.51;
+    const tgtPct = S.sellTarget||4.51;
     html+=`<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
     S.holdings.forEach(h=>{
-      const d=getETFData(h.sym); const curPx=d.price||h.buyPrice;
+      const d=getLatestData(h.sym); const curPx=d.price||h.buyPrice;
       const pnl=(curPx-h.buyPrice)*h.units; const pct=((curPx-h.buyPrice)/h.buyPrice)*100;
       const tgt=h.buyPrice*(1+tgtPct/100); const sellHit=curPx>=tgt; const isP=pnl>=0;
       const rem=tgt>curPx?((tgt-curPx)/curPx*100).toFixed(2):'0';
@@ -1047,32 +869,99 @@ function renderDashboard() {
           <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹${curPx.toFixed(2)}</div></div>
           <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹${Math.round(h.buyPrice*h.units).toLocaleString('en-IN')}</div></div>
         </div>
-        <div style="padding:5px 14px 10px;">
-          <div style="font-size:.68rem;color:${sellHit?'var(--red)':'var(--muted)'};">${sellHit?`🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)`:`Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div>
-        </div>
+        <div style="padding:5px 14px 10px;"><div style="font-size:.68rem;color:${sellHit?'var(--red)':'var(--muted)'};">${sellHit?`🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)}`:`Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div></div>
         ${sellHit?`<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div><button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button></div>`:''}
       </div>`;
     });
   }
-  cont.innerHTML=html;
+
+  cont.innerHTML = html;
 }
 
-/* ══ PICK CARD ══ */
+// ══ ALL CARDS TAB ══
+function renderAllCards() {
+  const cont = document.getElementById('tab-allcards-content');
+  const oversold = S.rsiOversold || 30;
+  const all = getAllSorted();
+  const osEtfs = all.filter(r => r.rsi!==null && r.rsi<oversold);
+  const normalEtfs = all.filter(r => r.rsi===null || r.rsi>=oversold);
+  let html = '';
+
+  html+=`<div style="padding:8px 12px;font-size:.72rem;background:var(--bg3);border-radius:8px;display:flex;justify-content:space-between;">
+    <span>Total: <strong style="color:var(--text)">${all.length}</strong></span>
+    <span>Oversold: <strong style="color:var(--red)">${osEtfs.length}</strong></span>
+    <span>Last sync: <strong style="color:var(--green)">${S.lastSheetSync||'—'}</strong></span>
+  </div>`;
+
+  if(osEtfs.length>0) {
+    html+=`<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
+    html+=`<div class="etf-cards-grid">`;
+    osEtfs.forEach((e,i) => { html+=buildEtfCard(e, i+1); });
+    html+=`</div>`;
+  }
+  if(normalEtfs.length>0) {
+    html+=`<div class="cards-sec-hdr csh-normal" style="margin-top:10px;">📊 Baaki ETFs (${normalEtfs.length})</div>`;
+    html+=`<div class="etf-cards-grid">`;
+    normalEtfs.forEach(e => { html+=buildEtfCard(e, 0); });
+    html+=`</div>`;
+  }
+  cont.innerHTML = html;
+}
+
+// ══ ETF CARD ══
+function buildEtfCard(e, rank) {
+  const oversold = S.rsiOversold || 30;
+  const rsi = e.rsi;
+  const rsiColor = rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
+  const isOs = rsi!==null && rsi<oversold;
+  let cardClass = 'etf-card';
+  if(isOs) cardClass += rank===1?' os os-1':' os';
+  const up = e.changePct!==null && e.changePct>=0;
+
+  let timeStr = '—';
+  if(e.ts) {
+    const diffMin = Math.floor((Date.now()-e.ts)/60000);
+    const t = new Date(e.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    if(diffMin<1) timeStr=t+' (abhi)';
+    else if(diffMin<60) timeStr=`${t} (${diffMin}m)`;
+    else timeStr=t;
+  }
+
+  return `<div class="${cardClass}">
+    <div class="ec-top">
+      <div class="ec-sym">${e.sym}</div>
+      <span class="ec-st-badge ${e.price?'ec-st-live':'ec-st-pending'}">${e.price?'🟢':'⏳'}</span>
+    </div>
+    <div class="ec-mid">
+      <div class="ec-price-block">
+        ${e.price?`<div class="ec-price">₹${e.price.toFixed(2)}</div>`:`<div class="ec-no-price">—</div>`}
+        ${e.changePct!==null?`<div class="ec-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(e.changePct).toFixed(2)}%</div>`:''}
+        <div style="font-size:.56rem;color:var(--muted);margin-top:2px;">${timeStr}</div>
+      </div>
+      <div class="ec-rsi-block">
+        <div class="ec-rsi-lbl">RSI 14</div>
+        <div class="ec-rsi-val" style="color:${rsiColor}">${rsi!==null?rsi.toFixed(1):'—'}</div>
+        <div class="ec-rsi-zone" style="color:${rsiColor}">${rsiZoneText(rsi)}</div>
+      </div>
+    </div>
+    ${isOs?`<span class="ec-os-tag">📉 Oversold</span>`:''}
+  </div>`;
+}
+
+// ══ PICK CARD ══
 function buildPickCard(r, held, boughtToday) {
-  const canBuy=!held&&!boughtToday;
-  const buyTxt=held?'✅ Already Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
-  const up=r.changePct!==null&&r.changePct>=0;
-  const tgt=r.price*(1+(S.sellTarget||4.51)/100);
-  // overlay from RIGHT = (100-rsi)%
-  const overlayPct=rsiOverlayPct(r.rsi);
+  const canBuy = !held && !boughtToday;
+  const buyTxt = held?'✅ Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
+  const up = r.changePct!==null && r.changePct>=0;
+  const tgt = r.price*(1+(S.sellTarget||4.51)/100);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
     <div class="pick-top">
       <div class="pick-name">${r.sym}</div>
-      <div class="pick-sub">${r.days} din ka data · Target: ₹${tgt.toFixed(2)} (+${S.sellTarget}%)</div>
+      <div class="pick-sub">Target: ₹${tgt.toFixed(2)} (+${S.sellTarget}%)</div>
     </div>
     <div class="pick-stats">
-      <div class="ps"><div class="ps-l">RSI ${r.isPartialRSI?'~'+r.effPeriod+'D':S.rsiPeriod+'D'}</div>
+      <div class="ps"><div class="ps-l">RSI 14</div>
         <div class="ps-v ${rsiClass(r.rsi)}">${r.rsi!==null?r.rsi.toFixed(1):'N/A'}</div></div>
       <div class="ps"><div class="ps-l">Price</div>
         <div class="ps-v" style="color:var(--yellow)">₹${r.price.toFixed(2)}</div></div>
@@ -1080,7 +969,6 @@ function buildPickCard(r, held, boughtToday) {
         <div class="ps-v" style="color:${r.changePct!==null?(up?'var(--green)':'var(--red)'):'var(--muted)'}">
           ${r.changePct!==null?(up?'+':'')+r.changePct.toFixed(2)+'%':'—'}</div></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 14px;">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
       <button class="btn-sell-sm" disabled>SELL — Not Held</button>
@@ -1088,34 +976,34 @@ function buildPickCard(r, held, boughtToday) {
   </div>`;
 }
 
-/* ══ WL ROW ══ */
+// ══ WL ROW ══
 function buildWLRow(r, rank) {
-  const up=r.changePct!==null&&r.changePct>=0;
-  const oversold=S.rsiOversold||30;
-  const hist=(S.prices[r.sym]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
-  const lastEntry=hist[0]; const today=todayISO(); const isToday=lastEntry?.date===today;
-  const updateLabel=isToday
-    ?(lastEntry?.ts?`<span style="color:var(--green);font-size:.6rem;">🟢 ${new Date(lastEntry.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`
-      :`<span style="color:var(--green);font-size:.6rem;">🟢 Aaj updated</span>`)
-    :lastEntry?`<span style="color:var(--amber);font-size:.6rem;">🕐 ${fmtDate(lastEntry.date)}</span>`:'';
-  const rsiPillBg=r.rsi===null?'var(--bg4)':r.rsi<oversold?'rgba(224,82,82,.18)':r.rsi>70?'rgba(232,164,64,.18)':'rgba(76,175,130,.12)';
-  const rsiPillBorder=r.rsi===null?'var(--border)':r.rsi<oversold?'rgba(224,82,82,.4)':r.rsi>70?'rgba(232,164,64,.4)':'rgba(76,175,130,.3)';
-  const heldBadge=r.held?`<span class="tag tag-held">✅ Held</span>`:'';
+  const up = r.changePct!==null && r.changePct>=0;
+  const oversold = S.rsiOversold || 30;
+  const rsiPillBg = r.rsi===null?'var(--bg4)':r.rsi<oversold?'rgba(224,82,82,.18)':r.rsi>70?'rgba(232,164,64,.18)':'rgba(76,175,130,.12)';
+  const rsiPillBorder = r.rsi===null?'var(--border)':r.rsi<oversold?'rgba(224,82,82,.4)':r.rsi>70?'rgba(232,164,64,.4)':'rgba(76,175,130,.3)';
+  let timeStr = '';
+  if(r.ts) {
+    const diffMin = Math.floor((Date.now()-r.ts)/60000);
+    const t = new Date(r.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    timeStr = diffMin<60?`<span style="color:var(--green);font-size:.6rem;">🟢 ${t}</span>`:`<span style="color:var(--amber);font-size:.6rem;">🕐 ${t}</span>`;
+  }
   return `<div class="wl-row ${r.held?'held':''}">
     <div class="wl-rank">${rank}</div>
     <div class="wl-info">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-        <div class="wl-name">${r.sym}</div>${heldBadge}
-        ${r.rsi!==null&&r.rsi<oversold?`<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">🔥 Oversold</span>`:''}
+        <div class="wl-name">${r.sym}</div>
+        ${r.held?`<span class="tag tag-held">✅ Held</span>`:''}
+        <span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">🔥 Oversold</span>
       </div>
-      <div class="wl-meta">${updateLabel}<span style="font-size:.6rem;color:var(--muted);">${r.days}d data</span></div>
+      <div class="wl-meta">${timeStr}</div>
     </div>
     <div style="text-align:center;flex-shrink:0;min-width:78px;">
-      <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">RSI</div>
+      <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px;">RSI 14</div>
       <div style="background:${rsiPillBg};border:1px solid ${rsiPillBorder};border-radius:8px;padding:4px 10px;display:inline-block;">
         <span class="${rsiClass(r.rsi)}" style="font-size:.9rem;font-weight:800;">${r.rsi!==null?r.rsi.toFixed(1):'—'}</span>
       </div>
-      <div style="font-size:.58rem;color:${rsiClass(r.rsi)==='rsi-os'?'var(--red)':rsiClass(r.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">${rsiZoneText(r.rsi)||'Neutral'}</div>
+      <div style="font-size:.58rem;color:var(--red);margin-top:3px;">${rsiZoneText(r.rsi)}</div>
     </div>
     <div class="wl-px">
       <div style="font-size:.9rem;font-weight:800;color:var(--yellow);">${r.price!==null?'₹'+r.price.toFixed(2):'—'}</div>
@@ -1124,175 +1012,158 @@ function buildWLRow(r, rank) {
   </div>`;
 }
 
-/* ══ PRICE GRID ══ */
+// ══ PRICE GRID (Manual Override) ══
 function renderPriceGrid() {
-  const today=todayISO(); const grid=document.getElementById('priceGrid');
-  if(!S.etfs.length) { grid.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list daalo.</div></div>`; return; }
-  let html='';
+  const today = todayISO();
+  const grid = document.getElementById('priceGrid');
+  let html = '';
   S.etfs.forEach((e,idx)=>{
-    const hist=S.prices[e.sym]||[]; const todayEntry=hist.find(h=>h.date===today);
-    const lastEntry=hist.filter(h=>h.date!==today).sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const curTxt=todayEntry?`✅ ₹${todayEntry.price.toFixed(2)}`:(lastEntry?`Last: ₹${lastEntry.price.toFixed(2)} (${fmtDate(lastEntry.date)})`:'No price yet');
-    html+=`<div class="pe-row" id="per-${e.sym}">
+    const hist = S.prices[e.sym]||[];
+    const todayEntry = hist.find(h=>h.date===today);
+    const curTxt = todayEntry?`✅ ₹${todayEntry.price.toFixed(2)}`:'No price';
+    html+=`<div class="pe-row">
       <div class="pe-sym">${e.sym}</div>
       <div class="pe-cur" style="${todayEntry?'color:var(--green)':''}">${curTxt}</div>
       <input class="pe-inp" type="number" id="pi-${e.sym}" step="0.01" min="0.01"
         placeholder="${todayEntry?todayEntry.price.toFixed(2):'0.00'}" value="${todayEntry?todayEntry.price.toFixed(2):''}"
         onkeydown="priceKeyNav(event,'${e.sym}',${idx})" onchange="quickSavePrice('${e.sym}',this.value)">
-      <div class="pe-status" id="ps-${e.sym}">${todayEntry?'✅':'⬜'}</div>
+      <div class="pe-status">${todayEntry?'✅':'⬜'}</div>
     </div>`;
   });
-  grid.innerHTML=html;
+  grid.innerHTML = html;
 }
 function priceKeyNav(e,sym,idx) {
-  if(e.key==='Enter'||e.key==='Tab') { e.preventDefault(); const val=e.target.value; if(val) quickSavePrice(sym,val); const next=S.etfs[idx+1]; if(next){const ni=document.getElementById('pi-'+next.sym);if(ni){ni.focus();ni.select();}} }
+  if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();const val=e.target.value;if(val)quickSavePrice(sym,val);const next=S.etfs[idx+1];if(next){const ni=document.getElementById('pi-'+next.sym);if(ni){ni.focus();ni.select();}}}
 }
 function quickSavePrice(sym,val) {
-  const price=parseFloat(val); if(!price||price<=0) return;
-  savePrice(sym,price); save();
-  const s=document.getElementById('ps-'+sym); if(s) s.textContent='✅';
-  const c=document.getElementById('per-'+sym)?.querySelector('.pe-cur'); if(c){c.textContent=`✅ ₹${price.toFixed(2)}`;c.style.color='var(--green)';}
+  const price=parseFloat(val);if(!price||price<=0)return;
+  const today=todayISO();const now=Date.now();
+  if(!S.prices[sym]) S.prices[sym]=[];
+  const entry=S.prices[sym].find(h=>h.date===today);
+  if(entry){entry.price=parseFloat(price.toFixed(2));entry.ts=now;}
+  else S.prices[sym].push({date:today,price:parseFloat(price.toFixed(2)),ts:now});
+  save();
+  const s=document.getElementById('ps-'+sym);if(s)s.textContent='✅';
 }
 function saveAllPrices() {
   let count=0;
-  S.etfs.forEach(e=>{const inp=document.getElementById('pi-'+e.sym);if(inp&&inp.value){const price=parseFloat(inp.value);if(price>0){savePrice(e.sym,price);count++;}}});
-  save(); showToast(`✅ ${count} prices save ho gaye!`); renderPriceGrid();
+  S.etfs.forEach(e=>{const inp=document.getElementById('pi-'+e.sym);if(inp&&inp.value){const price=parseFloat(inp.value);if(price>0){quickSavePrice(e.sym,inp.value);count++;}}});
+  save();showToast(`✅ ${count} prices save ho gaye!`);renderPriceGrid();
 }
 function clearTodayPrices() {
-  if(!confirm('Aaj ke saare prices delete karein?')) return;
+  if(!confirm('Aaj ke saare prices delete karein?'))return;
   const today=todayISO();
-  S.etfs.forEach(e=>{if(S.prices[e.sym]) S.prices[e.sym]=S.prices[e.sym].filter(h=>h.date!==today);});
-  save(); renderPriceGrid(); showToast('🗑 Aaj ke prices clear ho gaye');
+  S.etfs.forEach(e=>{if(S.prices[e.sym])S.prices[e.sym]=S.prices[e.sym].filter(h=>h.date!==today);});
+  save();renderPriceGrid();showToast('🗑 Clear ho gaya');
 }
 
-/* ══ HOLDINGS ══ */
-function renderHoldings() {
-  const cont=document.getElementById('holdingsContent');
-  if(!S.holdings.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">💼</span><div class="no-pick-msg"><strong>Koi holding nahi hai.</strong><br>Dashboard pe BUY button se kharidao.</div></div>`; return; }
-  const tgtPct=S.sellTarget||4.51;
-  let html=`<div class="sec">💼 Active Holdings <span class="badge">${S.holdings.length}</span></div>`;
-  S.holdings.forEach(h=>{
-    const d=getETFData(h.sym); const curPx=d.price||h.buyPrice;
-    const pnl=(curPx-h.buyPrice)*h.units; const pct=((curPx-h.buyPrice)/h.buyPrice)*100;
-    const tgt=h.buyPrice*(1+tgtPct/100); const sellHit=curPx>=tgt; const isP=pnl>=0;
-    const rem=tgt>curPx?((tgt-curPx)/curPx*100).toFixed(2):'0';
-    html+=`<div class="hc ${sellHit?'sell-active':''}">
-      <div class="hc-top">
-        <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
-        <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div><div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
-      </div>
-      <div class="hc-body">
-        <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹${h.buyPrice.toFixed(2)}</div></div>
-        <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹${curPx.toFixed(2)}</div></div>
-        <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹${Math.round(h.buyPrice*h.units).toLocaleString('en-IN')}</div></div>
-      </div>
-      <div style="padding:5px 14px 10px;"><div style="font-size:.7rem;color:${sellHit?'var(--red)':'var(--muted)'};">${sellHit?`🎯 SELL TARGET HIT!`:`Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div></div>
-      ${sellHit?`<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target!</div><button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button></div>`:''}
-    </div>`;
-  });
-  cont.innerHTML=html;
-}
-
-/* ══ SETTINGS ══ */
+// ══ SETTINGS ══
 function renderSettings() {
-  document.getElementById('etfListInput').value=S.etfs.map(e=>e.sym).join('\n');
-  document.getElementById('rsiPeriod').value=S.rsiPeriod||14;
-  document.getElementById('rsiOversold').value=S.rsiOversold||30;
-  document.getElementById('sellTarget').value=S.sellTarget||4.51;
-  const chk=document.getElementById('autoFetchEnabled'); chk.checked=S.autoFetchEnabled!==false;
-  document.getElementById('autoFetchLbl').textContent=chk.checked?'On':'Off';
-  chk.onchange=()=>{document.getElementById('autoFetchLbl').textContent=chk.checked?'On':'Off';};
+  document.getElementById('sheetUrlInput').value = S.sheetCsvUrl||DEFAULT_SHEET_CSV;
+  document.getElementById('etfListInput').value = S.etfs.map(e=>e.sym).join('\n');
+  document.getElementById('rsiOversold').value = S.rsiOversold||30;
+  document.getElementById('sellTarget').value = S.sellTarget||4.51;
+  document.getElementById('syncInterval').value = S.syncIntervalMin||5;
   const today=todayISO();
-  const withPx=S.etfs.filter(e=>S.prices[e.sym]?.some(h=>h.date===today)).length;
-  let maxDays=0; S.etfs.forEach(e=>{const l=(S.prices[e.sym]||[]).length;if(l>maxDays)maxDays=l;});
+  const withPx=S.etfs.filter(e=>(S.prices[e.sym]||[]).some(h=>h.date===today)).length;
   document.getElementById('dataInfo').innerHTML=
     `Total ETFs: <strong style="color:var(--text)">${S.etfs.length}</strong><br>`+
-    `Aaj prices hain: <strong style="color:var(--green)">${withPx} / ${S.etfs.length}</strong><br>`+
-    `Max price history: <strong style="color:var(--text)">${maxDays} din</strong><br>`+
-    `Last fetch: <strong style="color:var(--text)">${S.lastFetchDate===today?'Aaj '+S.lastFetchTime:S.lastFetchDate||'Kabhi nahi'}</strong><br>`+
+    `Aaj prices: <strong style="color:var(--green)">${withPx} / ${S.etfs.length}</strong><br>`+
+    `Last Sheet Sync: <strong style="color:var(--text)">${S.lastSheetSync||'Kabhi nahi'}</strong><br>`+
     `Holdings: <strong style="color:var(--text)">${S.holdings.length}</strong>`;
 }
-function saveSettings() {
-  const raw=document.getElementById('etfListInput').value;
-  const syms=raw.split('\n').map(s=>s.trim().toUpperCase()).filter(s=>s.length>0);
-  S.etfs=[...new Set(syms)].map(sym=>({sym})); save(); showToast(`✅ ${S.etfs.length} ETFs save ho gaye!`); renderSettings();
+function saveSheetUrl() {
+  S.sheetCsvUrl = document.getElementById('sheetUrlInput').value.trim();
+  save(); showToast('✅ URL save ho gaya!'); forceSyncNow();
 }
-function loadDefaultETFs() { document.getElementById('etfListInput').value=DEFAULT_ETFS; showToast('Default list load ho gayi — Save karo!'); }
+function saveSettings() {
+  const raw = document.getElementById('etfListInput').value;
+  const syms = raw.split('\n').map(s=>s.trim().toUpperCase()).filter(s=>s.length>0);
+  S.etfs = [...new Set(syms)].map(sym=>({sym})); save(); showToast(`✅ ${S.etfs.length} ETFs save!`); renderSettings();
+}
+function loadDefaultETFs() { document.getElementById('etfListInput').value=DEFAULT_ETFS; }
 function saveRSISettings() {
-  S.rsiPeriod=parseInt(document.getElementById('rsiPeriod').value)||14;
-  S.rsiOversold=parseInt(document.getElementById('rsiOversold').value)||30;
-  S.sellTarget=parseFloat(document.getElementById('sellTarget').value)||4.51;
-  S.autoFetchEnabled=document.getElementById('autoFetchEnabled').checked;
+  S.rsiOversold = parseInt(document.getElementById('rsiOversold').value)||30;
+  S.sellTarget = parseFloat(document.getElementById('sellTarget').value)||4.51;
+  S.syncIntervalMin = parseInt(document.getElementById('syncInterval').value)||5;
   save(); showToast('✅ Settings save ho gayi!');
+  // Restart countdown with new interval
+  startCountdown(S.syncIntervalMin * 60);
 }
 function resetAll() {
-  if(!confirm('Sab kuch delete karein — prices, holdings, log?')) return;
-  localStorage.removeItem(LS); if(dbRef) dbRef.set(null); location.reload();
+  if(!confirm('Sab kuch delete karein?'))return;
+  localStorage.removeItem(LS);if(dbRef)dbRef.set(null);location.reload();
 }
 
-/* ══ MODAL ══ */
+// ══ MODAL ══
 function openModal(sym,price,type) {
-  pending={sym,price,type}; const isBuy=type==='buy';
-  const h=S.holdings.find(x=>x.sym===sym); const d=getETFData(sym);
+  pending={sym,price,type};const isBuy=type==='buy';
+  const h=S.holdings.find(x=>x.sym===sym);const d=getLatestData(sym);
   document.getElementById('mTitle').textContent=isBuy?`🛒 BUY — ${sym}`:`💰 SELL — ${sym}`;
   document.getElementById('priceLbl').textContent=isBuy?'Buy Price (₹)':'Sell Price (₹)';
-  const pi=document.getElementById('tradePrice'); pi.value=price.toFixed(2); pi.readOnly=!isBuy;
+  const pi=document.getElementById('tradePrice');pi.value=price.toFixed(2);pi.readOnly=!isBuy;
   const ui=document.getElementById('tradeUnits');
   if(!isBuy&&h){ui.value=h.units;ui.readOnly=true;}else{ui.readOnly=false;ui.value=10;}
   const tgt=h?(h.buyPrice*(1+(S.sellTarget||4.51)/100)).toFixed(2):'—';
   document.getElementById('mInfo').innerHTML=`
     <div class="mi-row"><span class="mi-k">ETF</span><span class="mi-v">${sym}</span></div>
     <div class="mi-row"><span class="mi-k">Price</span><span class="mi-v">₹${price.toFixed(2)}</span></div>
-    ${d.rsi!==null?`<div class="mi-row"><span class="mi-k">RSI</span><span class="mi-v ${rsiClass(d.rsi)}">RSI ${d.rsi.toFixed(1)}</span></div>`:''}
+    ${d.rsi!==null?`<div class="mi-row"><span class="mi-k">RSI 14</span><span class="mi-v ${rsiClass(d.rsi)}">${d.rsi.toFixed(1)}</span></div>`:''}
     ${h?`<div class="mi-row"><span class="mi-k">Buy Price</span><span class="mi-v">₹${h.buyPrice.toFixed(2)}</span></div>`:''}
-    ${!isBuy&&h?`<div class="mi-row"><span class="mi-k">Sell Target (+${S.sellTarget}%)</span><span class="mi-v" style="color:var(--amber)">₹${tgt}</span></div>`:''}`;
-  const btn=document.getElementById('mConfirm'); btn.textContent=isBuy?'✅ Confirm BUY':'✅ Confirm SELL';
+    ${!isBuy&&h?`<div class="mi-row"><span class="mi-k">Target (+${S.sellTarget}%)</span><span class="mi-v" style="color:var(--amber)">₹${tgt}</span></div>`:''}`;
+  const btn=document.getElementById('mConfirm');btn.textContent=isBuy?'✅ Confirm BUY':'✅ Confirm SELL';
   btn.className=isBuy?'m-confirm-b':'m-confirm-s';
   document.getElementById('tradeModal').classList.add('show');
 }
-function closeModal() { document.getElementById('tradeModal').classList.remove('show'); pending=null; }
+function closeModal(){document.getElementById('tradeModal').classList.remove('show');pending=null;}
 function confirmTrade() {
-  if(!pending) return; const {sym,type}=pending;
+  if(!pending)return;const{sym,type}=pending;
   const price=parseFloat(document.getElementById('tradePrice').value);
   const units=parseInt(document.getElementById('tradeUnits').value);
   if(!price||price<=0||!units||units<1){showToast('⚠️ Valid price aur units daalo!');return;}
-  const today=todayISO(); const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-  if(type==='buy') {
+  const today=todayISO();const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  if(type==='buy'){
     S.holdings=S.holdings.filter(h=>h.sym!==sym);
     S.holdings.push({sym,buyPrice:price,units,buyDate:today,buyTime:time});
-    S.dailyPick={sym,date:today}; addLog({type:'buy',sym,price,units,time});
-    showToast(`✅ BOUGHT ${units} × ${sym} @ ₹${price.toFixed(2)}`);
+    S.dailyPick={sym,date:today};addLog({type:'buy',sym,price,units,time});
+    showToast(`✅ BOUGHT ${units}× ${sym} @ ₹${price.toFixed(2)}`);
   } else {
-    const h=S.holdings.find(x=>x.sym===sym); if(!h){showToast('⚠️ Holding nahi mili!');closeModal();return;}
-    const pnl=(price-h.buyPrice)*h.units; addLog({type:'sell',sym,price,units:h.units,pnl,time});
-    S.holdings=S.holdings.filter(x=>x.sym!==sym); if(S.dailyPick?.sym===sym) S.dailyPick=null;
-    showToast(`✅ SOLD ${h.units} × ${sym} | P&L: ${pnl>=0?'+':''}₹${pnl.toFixed(2)}`);
+    const h=S.holdings.find(x=>x.sym===sym);if(!h){showToast('⚠️ Holding nahi mili!');closeModal();return;}
+    const pnl=(price-h.buyPrice)*h.units;addLog({type:'sell',sym,price,units:h.units,pnl,time});
+    S.holdings=S.holdings.filter(x=>x.sym!==sym);if(S.dailyPick?.sym===sym)S.dailyPick=null;
+    showToast(`✅ SOLD ${h.units}× ${sym} | P&L: ${pnl>=0?'+':''}₹${pnl.toFixed(2)}`);
   }
-  closeModal(); save(); renderDashboard();
+  closeModal();save();renderDashboard();
 }
-function addLog(e) { S.log.unshift(e); if(S.log.length>50) S.log.pop(); renderLog(); }
-function renderLog() {
+function addLog(e){S.log.unshift(e);if(S.log.length>50)S.log.pop();renderLog();}
+function renderLog(){
   const el=document.getElementById('logBar');
   if(!S.log.length){el.innerHTML='<span class="le">Trades yahaan dikhenge…</span>';return;}
   el.innerHTML=S.log.slice(0,25).map(l=>`<div class="lchip ${l.type}">${l.type.toUpperCase()} ${l.units}× ${l.sym} @₹${l.price.toFixed(2)}${l.pnl!==undefined?(l.pnl>=0?' +₹':' -₹')+Math.abs(l.pnl).toFixed(2):''} · ${l.time}</div>`).join('');
 }
 
-/* ══ INIT ══ */
+// ══ INIT ══
 window.onload = async () => {
   load();
-  if(!S.etfs||!S.etfs.length) { S.etfs=DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym})); saveLocal(); }
-  document.getElementById('hdrDate').textContent=fmtDate(todayISO());
+  document.getElementById('hdrDate').textContent = fmtDate(todayISO());
   renderLog(); renderDashboard();
+  // Page visible hone pe sync karo
+  document.addEventListener('visibilitychange', () => {
+    if(!document.hidden) {
+      const lastSyncTs = S.prices[S.etfs[0]?.sym]?.find(h=>h.date===todayISO())?.ts;
+      const minsAgo = lastSyncTs ? Math.floor((Date.now()-lastSyncTs)/60000) : 999;
+      if(minsAgo > (S.syncIntervalMin||5)) syncFromSheet(true);
+    }
+  });
+  document.getElementById('tradeModal').addEventListener('click',e=>{if(e.target.id==='tradeModal')closeModal();});
   await initFirebaseAuth();
-  document.getElementById('tradeModal').addEventListener('click',e=>{if(e.target.id==='tradeModal') closeModal();});
   if(dbRef) {
-    dbRef.on('value',(snapshot)=>{
+    dbRef.on('value', snapshot=>{
       const fbData=snapshot.val();
       if(fbData) {
         const newS={...S,...fbData};
-        if(JSON.stringify(newS)!==JSON.stringify(S)) {
-          S=newS; saveLocal(); renderDashboard(); renderHoldings(); renderPriceGrid(); renderSettings();
-          showToast('🔄 Dusre device se data update ho gaya');
+        if(JSON.stringify(newS)!==JSON.stringify(S)){
+          S=newS;saveLocal();renderDashboard();
         }
       }
     });
