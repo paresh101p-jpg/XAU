@@ -74,7 +74,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 
 /* ══════════════════════════════════════════
-   ETF CARD — READABLE & CLEAR
+   ETF CARD
 ══════════════════════════════════════════ */
 .etf-cards-grid{display:flex;flex-direction:column;gap:10px;}
 
@@ -90,7 +90,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .etf-card.os-1{border-color:rgba(224,82,82,.9);animation:sellGlow 1.4s infinite alternate;}
 .etf-card.ec-fetching{border-color:rgba(245,200,66,.6);}
 
-/* Top row: symbol + badge */
+/* Top row */
 .ec-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
 .ec-sym{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:.5px;}
 .ec-st-badge{font-size:.68rem;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;font-weight:700;}
@@ -99,7 +99,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-st-pending{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border);}
 .ec-st-stale{background:rgba(232,164,64,.12);color:var(--amber);border:1px solid rgba(232,164,64,.3);}
 
-/* Middle row: price + RSI side by side */
+/* Mid row: price + RSI */
 .ec-mid{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px;}
 .ec-price-block{flex:1;}
 .ec-price{font-size:1.45rem;font-weight:800;color:var(--yellow);line-height:1.1;}
@@ -111,7 +111,12 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-rsi-val{font-size:1.55rem;font-weight:800;line-height:1;}
 .ec-rsi-zone{font-size:.66rem;font-weight:700;margin-top:3px;}
 
-/* RSI Bar */
+/* ══ RSI BAR — Fixed: left=0/green, right=100/red ══
+   Bar shows filled portion = RSI value %
+   RSI 30 → 30% filled (green zone)
+   RSI 70 → 70% filled (orange zone)
+   RSI 10 → 10% filled (deep green)
+*/
 .ec-bar-wrap{margin-top:4px;}
 .ec-bar-out{
   background: linear-gradient(to left,
@@ -125,14 +130,14 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);
   position:relative;
 }
+/* Dark overlay from LEFT — covers rsi% so right side green stays visible */
 .ec-bar-in{
-  height:100%;border-radius:0 8px 8px 0;
-  position:absolute;top:0;right:0;
+  height:100%;
+  position:absolute;top:0;left:0;
   background:var(--bg3);
   transition:width .6s ease;
 }
 .ec-bar-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:5px;font-weight:600;}
-.ec-bar-labels span{min-width:20px;text-align:center;}
 
 .ec-os-tag{
   font-size:.66rem;background:var(--red-dim);color:var(--red);
@@ -159,12 +164,19 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps{text-align:center;}
 .ps-l{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:1.05rem;font-weight:700;margin-top:3px;}
+
+/* Pick card RSI bar — same fix */
 .rsi-bar-wrap{padding:8px 18px 6px;}
 .rsi-bar-out{
   background:linear-gradient(to left,#1a8a3a 0%,#4ddb7a 22%,#c8e000 40%,#f5c842 55%,#f5a623 70%,#E05252 100%);
   border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);position:relative;
 }
-.rsi-bar-in{height:100%;border-radius:0 8px 8px 0;position:absolute;top:0;right:0;background:var(--bg3);transition:width .5s;}
+.rsi-bar-in{
+  height:100%;
+  position:absolute;top:0;left:0;
+  background:var(--bg3);
+  transition:width .5s;
+}
 .rsi-lbl{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);margin-top:5px;font-weight:600;}
 
 /* ── WATCHLIST ROW ── */
@@ -673,10 +685,23 @@ function rsiClass(rsi) {
   if (rsi>70) return 'rsi-ob';
   return 'rsi-n';
 }
-function rsiMaskPct(rsi) {
+
+/* ══ RSI BAR HELPERS (FIXED) ══
+   Bar fills RIGHT to LEFT.
+   Right = 0 = green (oversold/buy zone) — always visible base
+   Left  = 100 = red (overbought) — covered by dark overlay
+
+   Overlay sits on LEFT, width = rsi%
+   So: RSI 10 → overlay 10% → 90% green visible ✅
+       RSI 30 → overlay 30% → 70% green visible ✅
+       RSI 70 → overlay 70% → 30% visible (amber/red) ✅
+       RSI 100 → overlay 100% → 0% visible (fully dark) ✅
+*/
+function rsiOverlayPct(rsi) {
   if (rsi === null) return 100;
-  return Math.max(0, 100 - Math.min(100, rsi));
+  return Math.max(0, Math.min(100, rsi));
 }
+
 function rsiZoneText(rsi) {
   if (rsi === null) return '';
   const oversold = S.rsiOversold || 30;
@@ -791,7 +816,7 @@ async function retryOne(sym) {
       const pxEl=document.getElementById('ec-px-'+sym); if(pxEl) pxEl.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
       const timeEl=document.getElementById('ec-time-'+sym); if(timeEl) timeEl.textContent=`⏱ ${t} (abhi abhi)`;
       const rsiEl=document.getElementById('ec-rsi-val-'+sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
-      const barEl=document.getElementById('ec-bar-'+sym); if(barEl){barEl.style.width=rsiMaskPct(rsi)+'%';}
+      const barEl=document.getElementById('ec-bar-'+sym); if(barEl){barEl.style.width=rsiOverlayPct(rsi)+'%';}
     }
     showToast(`✅ ${sym} — ₹${price.toFixed(2)}`); renderDashboard();
   } catch(e) {
@@ -840,7 +865,8 @@ async function runLoopTick() {
       const pxEl2=document.getElementById('ec-px-'+e.sym); if(pxEl2) pxEl2.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
       const timeEl=document.getElementById('ec-time-'+e.sym); if(timeEl) timeEl.textContent=`⏱ ${fetchTime} (abhi abhi)`;
       const rsiEl=document.getElementById('ec-rsi-val-'+e.sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
-      const barEl=document.getElementById('ec-bar-'+e.sym); if(barEl){barEl.style.width=rsiMaskPct(rsi)+'%';}
+      /* ── FIXED: overlay width = (100 - rsi)% from right ── */
+      const barEl=document.getElementById('ec-bar-'+e.sym); if(barEl){barEl.style.width=rsiOverlayPct(rsi)+'%';}
     }
     if(stEl) stEl.innerHTML=`<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.6rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
     if(document.getElementById('tab-dashboard-content').style.display!=='none') renderDashboard();
@@ -870,7 +896,7 @@ function updateLoopUI() {
   renderFetchTab();
 }
 
-/* ══ BUILD ETF CARD — Readable Version ══ */
+/* ══ BUILD ETF CARD ══ */
 function buildEtfCard(e, rank) {
   const today=todayISO();
   const hist=(S.prices[e.sym]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
@@ -902,10 +928,11 @@ function buildEtfCard(e, rank) {
   const rsi=d.rsi;
   const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
   const isOs=rsi!==null&&rsi<oversold;
-  const isOb=rsi!==null&&rsi>70;
   let cardClass='etf-card';
   if(isOs) cardClass+=rank===1?' os os-1':' os';
-  const maskPct=rsiMaskPct(rsi);
+
+  /* overlay width = (100 - rsi)% covers right portion, revealing rsi% from left */
+  const overlayPct=rsiOverlayPct(rsi);
   const up=d.changePct!==null&&d.changePct>=0;
 
   return `<div class="${cardClass}" id="etf-card-${e.sym}">
@@ -934,10 +961,10 @@ function buildEtfCard(e, rank) {
       </div>
     </div>
 
-    <!-- RSI Bar -->
+    <!-- RSI Bar: left=0/green → right=100/red, filled = rsi% from left -->
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
-        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${maskPct}%;"></div>
+        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${overlayPct}%;"></div>
       </div>
       <div class="ec-bar-labels">
         <span style="color:var(--red)">100</span>
@@ -1081,7 +1108,8 @@ function buildPickCard(r, held, boughtToday) {
   const buyTxt=held?'✅ Already Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
   const up=r.changePct!==null&&r.changePct>=0;
   const tgt=r.price*(1+(S.sellTarget||4.51)/100);
-  const maskPct=rsiMaskPct(r.rsi);
+  /* overlay = (100 - rsi)% from right */
+  const overlayPct=rsiOverlayPct(r.rsi);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
     <div class="pick-top">
@@ -1098,8 +1126,14 @@ function buildPickCard(r, held, boughtToday) {
           ${r.changePct!==null?(up?'+':'')+r.changePct.toFixed(2)+'%':'—'}</div></div>
     </div>
     ${r.rsi!==null?`<div class="rsi-bar-wrap">
-      <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${maskPct}%;"></div></div>
-      <div class="rsi-lbl"><span>0 Oversold</span><span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span><span>100 Overbought</span></div>
+      <div class="rsi-bar-out">
+        <div class="rsi-bar-in" style="width:${overlayPct}%;"></div>
+      </div>
+      <div class="rsi-lbl">
+        <span style="color:var(--red)">100 Overbought</span>
+        <span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span>
+        <span style="color:var(--green)">0 Oversold</span>
+      </div>
     </div>`:`<div style="padding:6px 18px;font-size:.68rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 14px;">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
