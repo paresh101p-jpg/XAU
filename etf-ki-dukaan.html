@@ -65,7 +65,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 }
 .sync-stats{display:flex;gap:12px;font-size:.66rem;color:var(--muted);}
 .sync-stat-v{color:var(--text);font-weight:700;}
-/* new: price change counter */
 .price-change-badge{
   background:var(--blue-dim);
   border:1px solid rgba(91,155,213,.4);
@@ -100,9 +99,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-g{border-color:rgba(76,175,130,.4);color:var(--green);}
 .btn-g:not(:disabled):hover{background:var(--green-dim);}
 
-/* ══════════════════════════════════════════
-   ETF CARD - force 5 per row
-══════════════════════════════════════════ */
+/* ══ ETF CARDS: 5 per row ══ */
 .etf-cards-grid{
   display:grid;
   grid-template-columns: repeat(5, 1fr);
@@ -127,6 +124,10 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-price{font-size:1.05rem;font-weight:800;color:var(--yellow);line-height:1.1;}
 .ec-no-price{font-size:.75rem;color:var(--muted);}
 .ec-chg{font-size:.65rem;font-weight:700;margin-top:2px;}
+/* positive / negative / zero colors */
+.ec-chg.positive { color: var(--green); }
+.ec-chg.negative { color: var(--red); }
+.ec-chg.zero { color: var(--muted); }
 .ec-rsi-block{text-align:right;flex-shrink:0;}
 .ec-rsi-lbl{font-size:.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
 .ec-rsi-val{font-size:1.2rem;font-weight:800;line-height:1;}
@@ -135,7 +136,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .cards-sec-hdr{font-size:.75rem;font-weight:700;padding:6px 12px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .csh-os{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.25);}
 .csh-normal{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
-/* Search input */
 .search-box{
   background:var(--bg2);
   border:2px solid var(--border-mid);
@@ -156,7 +156,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 }
 .search-box input::placeholder{ color: var(--muted); }
 
-/* ── PICK CARD ── */
+/* pick card */
 .pick-card{background:var(--bg2);border:3px solid rgba(245,200,66,.6);border-radius:16px;overflow:hidden;animation:pickGlow 2s infinite alternate;position:relative;}
 .pick-star{position:absolute;top:10px;right:12px;background:var(--yellow);color:#111;border-radius:20px;padding:4px 12px;font-size:.7rem;font-weight:700;}
 .pick-top{padding:16px 18px 8px;}
@@ -166,12 +166,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps{text-align:center;}
 .ps-l{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:1.05rem;font-weight:700;margin-top:3px;}
-
-/* ── WATCHLIST ROW ── */
-.no-pick{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:26px;text-align:center;}
-.no-pick-icon{font-size:1.8rem;display:block;margin-bottom:8px;}
-.no-pick-msg{font-size:.82rem;color:var(--muted);line-height:2;}
-.no-pick-msg strong{color:var(--text);}
+/* watchlist row */
 .wl{display:flex;flex-direction:column;gap:6px;}
 .wl-row{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px;transition:border-color .2s;}
 .wl-row:hover{border-color:rgba(245,200,66,.25);}
@@ -188,8 +183,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .rsi-os{color:var(--red);}
 .rsi-ob{color:var(--amber);}
 .rsi-n{color:var(--text);}
-
-/* ── HOLDINGS CARD ── */
+/* holdings */
 .hc{background:var(--bg2);border:3px solid rgba(76,175,130,.4);border-radius:14px;overflow:hidden;margin-bottom:4px;}
 .hc.sell-active{border-color:rgba(224,82,82,.7);animation:sellGlow 1.5s infinite alternate;}
 .hc-top{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 14px 8px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);}
@@ -212,7 +206,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-sell-now{background:var(--red);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.76rem;font-weight:700;cursor:pointer;}
 .btn-sell-now:hover{background:#F06868;}
 
-/* ── PRICE GRID ── */
+/* price grid */
 .pe-grid{display:flex;flex-direction:column;gap:5px;}
 .pe-row{background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px;}
 .pe-row:focus-within{border-color:rgba(245,200,66,.4);}
@@ -222,7 +216,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .pe-inp:focus{border-color:var(--yellow);}
 .pe-status{width:20px;flex-shrink:0;text-align:center;font-size:.8rem;}
 
-/* ── MODAL ── */
+/* modal */
 .m-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:110;display:none;align-items:center;justify-content:center;padding:18px;}
 .m-ov.show{display:flex;}
 .m-box{background:var(--bg2);border:2px solid rgba(245,200,66,.4);border-radius:18px;padding:22px;max-width:340px;width:100%;animation:pop .18s ease;}
@@ -241,11 +235,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .m-confirm-b{background:var(--green);color:#000;border:none;border-radius:9px;padding:10px;font-size:.82rem;font-weight:700;cursor:pointer;}
 .m-confirm-s{background:var(--red);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.82rem;font-weight:700;cursor:pointer;}
 
-/* ── TOAST ── */
 .toast{position:fixed;bottom:48px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg3);border:2px solid var(--border-mid);color:var(--text);font-size:.76rem;padding:8px 18px;border-radius:9px;z-index:300;transition:transform .22s;white-space:nowrap;max-width:92vw;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* ── LOG BAR ── */
 .log-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:2px solid var(--border);padding:4px 12px;display:flex;align-items:center;gap:5px;overflow-x:auto;z-index:50;height:36px;}
 .log-bar::-webkit-scrollbar{height:0;}
 .lchip{flex-shrink:0;font-size:.65rem;border-radius:4px;padding:3px 8px;white-space:nowrap;}
@@ -253,7 +245,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .lchip.sell{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.2);}
 .le{font-size:.65rem;color:var(--muted);}
 
-/* ── SYNC / AUTH ── */
 .sync-status{font-size:.65rem;padding:4px 10px;border-radius:8px;background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);display:inline-flex;align-items:center;gap:5px;}
 .btn-signout{display:inline-flex;align-items:center;gap:4px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:12px;padding:4px 10px;font-size:.64rem;cursor:pointer;transition:all .2s;}
 .btn-signout:hover{color:var(--red);border-color:rgba(224,82,82,.4);}
@@ -267,10 +258,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .auth-skip{font-size:.66rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;margin-top:10px;display:block;width:100%;}
 .btn-google{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#333;border:2px solid #ddd;border-radius:18px;padding:6px 14px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .btn-google:hover{background:#f5f5f5;}
-
-/* ── SETTINGS ── */
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
@@ -278,7 +266,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-title">🏪 <span>ETF Ki Dukaan</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -288,7 +275,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   </div>
 </div>
 
-<!-- AUTO SYNC BAR -->
 <div class="sync-bar">
   <div class="sync-info">
     <div class="sync-dot idle" id="syncDot"></div>
@@ -298,7 +284,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    <!-- NEW: price change counter -->
     <div class="price-change-badge" id="priceChangeBadge">📈 Updated: <span id="priceChangeCount">0</span> ETFs</div>
     <div class="sync-stats">
       <span>Live: <span class="sync-stat-v" id="statLive">0</span></span>
@@ -308,7 +293,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   </div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 Dashboard</div>
   <div class="tab" onclick="switchTab('allcards')" id="tab-allcards">📋 All ETFs</div>
@@ -318,7 +302,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 
 <div id="tab-dashboard-content" class="main"></div>
 <div id="tab-allcards-content" class="main" style="display:none;">
-  <!-- SEARCH BOX -->
   <div class="search-box">
     <span>🔍</span>
     <input type="text" id="etfSearchInput" placeholder="Search ETF (e.g., NIFTYBEES, BANKBEES) ..." oninput="filterETFcards()">
@@ -382,7 +365,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div id="dataInfo" style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:13px;font-size:.7rem;color:var(--muted);line-height:2.1;"></div>
 </div>
 
-<!-- AUTH OVERLAY -->
 <div class="auth-overlay" id="authOverlay" style="display:flex;">
   <div class="auth-box">
     <div class="auth-logo">🏪</div>
@@ -402,7 +384,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="m-ov" id="tradeModal">
   <div class="m-box">
     <div class="m-title" id="mTitle">Trade</div>
@@ -424,9 +405,8 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
-// ══ GOOGLE SHEET CSV URL ══
+// ══ CONFIG ══
 const DEFAULT_SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfGlpbMKdeXr6NsRUuAEcof6JOcbTzHxrmGPhIFRnSwC6Qr4hZHG_YcUt-RL4immC-vYLQNJ9mfLJ8/pub?gid=0&single=true&output=csv';
-
 const DEFAULT_ETFS = `ITBEES
 NIFTYBEES
 METALIETF
@@ -503,7 +483,7 @@ FLEXIADD
 TNIDETF
 ELM250`;
 
-// ══ FIREBASE ══
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyArnn7ikT5oypzk12Eklj117DK6ytvCGOw",
   authDomain: "etf-ki-dukaan-4d55c.firebaseapp.com",
@@ -524,7 +504,7 @@ let dbRef = null;
 const LS = 'etf_dukaan_v7';
 let S = {
   etfs: [],
-  prices: {},       // {sym: [{date, price, rsi14, changePct, ts}]}
+  prices: {},
   holdings: [],
   log: [],
   rsiOversold: 30,
@@ -535,15 +515,8 @@ let S = {
   lastSheetSync: null
 };
 let pending = null;
-
-// ══ AUTO SYNC STATE ══
-let syncTimer = null;
-let countdownTimer = null;
-let countdownSec = 0;
-let isSyncing = false;
-
-// helper to store previous prices for change counter
-let previousPrices = {}; // { sym: price }
+let syncTimer = null, countdownTimer = null, countdownSec = 0, isSyncing = false;
+let previousPrices = {};
 
 // ══ HELPERS ══
 function todayISO() { return new Date(Date.now() + 19800000).toISOString().slice(0,10); }
@@ -562,16 +535,16 @@ function switchTab(name) {
   if(name==='allcards') { renderAllCards(); }
   if(name==='dashboard') renderDashboard();
 }
-
-// ══ DATA HELPERS ══
 function getLatestData(sym) {
   const hist = (S.prices[sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
   const latest = hist[0] || null;
-  const prev = hist[1] || null;
-  const price = latest ? latest.price : null;
-  const rsi = latest ? (latest.rsi14 || null) : null;
-  const changePct = latest ? (latest.changePct || null) : null;
-  return { price, rsi, changePct, lastDate: latest?.date || null, ts: latest?.ts || null, days: hist.length };
+  return {
+    price: latest ? latest.price : null,
+    rsi: latest ? (latest.rsi14 || null) : null,
+    changePct: latest ? (latest.changePct || null) : null,
+    lastDate: latest?.date || null,
+    ts: latest?.ts || null
+  };
 }
 function getAllSorted() {
   const oversold = S.rsiOversold || 30;
@@ -599,62 +572,47 @@ function rsiZoneText(rsi) {
   return 'Neutral';
 }
 
-// ══════════════════════════════════════════
-// GOOGLE SHEET AUTO SYNC — CORE with change counter
-// ══════════════════════════════════════════
+// ══ SYNC FROM SHEET (with fixed change color) ══
 async function syncFromSheet(silent=false) {
   if(isSyncing) return;
   const url = S.sheetCsvUrl || DEFAULT_SHEET_CSV;
   if(!url) { updateSyncBar('err','Sheet URL nahi hai','Settings mein URL daalo'); return; }
-
   isSyncing = true;
   updateSyncBar('syncing', '🔄 Sheet se sync ho raha hai...', 'Ek second...');
   const dot = document.getElementById('syncDot');
   const pill = document.getElementById('countdownPill');
-  if(dot) { dot.className='sync-dot syncing'; }
+  if(dot) dot.className='sync-dot syncing';
   if(pill) { pill.textContent='🔄 Syncing...'; pill.className='countdown-pill syncing'; }
-
   try {
-    // capture old prices for change detection
     const oldPrices = {};
     for(let e of S.etfs){
       const d = getLatestData(e.sym);
       if(d.price) oldPrices[e.sym] = d.price;
     }
-
     const fetchUrl = url + (url.includes('?') ? '&' : '?') + 'cachebust=' + Date.now();
     const res = await fetch(fetchUrl);
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const csvText = await res.text();
-
     const rows = csvText.trim().split('\n');
     if(rows.length < 2) throw new Error('Sheet empty hai');
-
     const headers = rows[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g,''));
     const symIdx = headers.indexOf('symbol');
     const priceIdx = headers.indexOf('price');
     const rsiIdx = headers.indexOf('rsi14');
     const chgIdx = headers.indexOf('change_pct');
-
     if(symIdx === -1 || priceIdx === -1) throw new Error('Sheet mein symbol/price column nahi mila');
-
-    let updated = 0;
+    let updated = 0, changedCount = 0;
     const today = todayISO();
     const now = Date.now();
-    let changedCount = 0;
-
     for(let i = 1; i < rows.length; i++) {
       const cols = rows[i].split(',').map(c => c.trim().replace(/['"]/g,''));
       let sym = cols[symIdx] || '';
       sym = sym.replace(/^NSE:/i,'').replace(/^BSE:/i,'').trim().toUpperCase();
       if(!sym || sym === 'ERR') continue;
-
       const price = parseFloat(cols[priceIdx]);
       if(!price || price <= 0) continue;
-
       const rsi14 = rsiIdx >= 0 ? parseFloat(cols[rsiIdx]) : null;
       const changePct = chgIdx >= 0 ? parseFloat(cols[chgIdx]) : null;
-
       if(!S.prices[sym]) S.prices[sym] = [];
       const todayEntry = S.prices[sym].find(h => h.date === today);
       let priceChanged = false;
@@ -665,7 +623,7 @@ async function syncFromSheet(silent=false) {
         if(!isNaN(changePct)) todayEntry.changePct = parseFloat(changePct.toFixed(2));
         todayEntry.ts = now;
       } else {
-        priceChanged = true; // new entry today
+        priceChanged = true;
         S.prices[sym].push({
           date: today,
           price: parseFloat(price.toFixed(2)),
@@ -674,20 +632,15 @@ async function syncFromSheet(silent=false) {
           ts: now
         });
       }
-      // check if price actually changed from previous stored price (yesterday or earlier)
       const oldPrice = oldPrices[sym];
       if(oldPrice !== undefined && Math.abs(oldPrice - price) > 0.005) priceChanged = true;
       if(priceChanged) changedCount++;
-
       S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
       if(S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
       updated++;
     }
-
     S.lastSheetSync = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     save();
-
-    // update price change badge
     document.getElementById('priceChangeCount').innerText = changedCount;
     const badge = document.getElementById('priceChangeBadge');
     if(changedCount > 0){
@@ -697,36 +650,23 @@ async function syncFromSheet(silent=false) {
       badge.style.background = 'var(--blue-dim)';
       badge.style.borderColor = 'rgba(91,155,213,.4)';
     }
-
     const oversoldCount = getAllSorted().filter(r => r.rsi !== null && r.rsi < (S.rsiOversold||30)).length;
-    updateSyncBar('ok',
-      `✅ ${updated} ETFs synced — ${S.lastSheetSync}`,
-      `Oversold: ${oversoldCount} | Agle sync mein: ${S.syncIntervalMin} min`
-    );
-
-    const statLive = document.getElementById('statLive');
-    const statOS = document.getElementById('statOS');
-    if(statLive) statLive.textContent = updated;
-    if(statOS) statOS.textContent = oversoldCount;
-
+    updateSyncBar('ok', `✅ ${updated} ETFs synced — ${S.lastSheetSync}`, `Oversold: ${oversoldCount} | Agle sync mein: ${S.syncIntervalMin} min`);
+    document.getElementById('statLive').innerText = updated;
+    document.getElementById('statOS').innerText = oversoldCount;
     renderDashboard();
     if(document.getElementById('tab-allcards').classList.contains('active')) renderAllCards();
     if(!silent) showToast(`✅ Sheet sync — ${updated} ETFs updated, ${changedCount} prices changed!`);
-
     startCountdown(S.syncIntervalMin * 60);
-
   } catch(e) {
-    console.error('Sheet sync error:', e);
+    console.error(e);
     updateSyncBar('err', '❌ Sync fail: ' + (e.message||'Unknown').slice(0,40), 'Dobara try karega...');
     startCountdown(60);
     if(!silent) showToast('❌ Sheet sync fail: ' + (e.message||'').slice(0,30));
   }
-
   isSyncing = false;
-  const dotEl = document.getElementById('syncDot');
-  if(dotEl) dotEl.className = 'sync-dot ok';
+  if(document.getElementById('syncDot')) document.getElementById('syncDot').className = 'sync-dot ok';
 }
-
 function updateSyncBar(status, txt, sub) {
   const dot = document.getElementById('syncDot');
   const txtEl = document.getElementById('syncTxt');
@@ -735,7 +675,6 @@ function updateSyncBar(status, txt, sub) {
   if(txtEl) txtEl.textContent = txt;
   if(subEl) subEl.textContent = sub;
 }
-
 function startCountdown(sec) {
   if(countdownTimer) clearInterval(countdownTimer);
   countdownSec = sec;
@@ -749,25 +688,20 @@ function startCountdown(sec) {
     }
   }, 1000);
 }
-
 function updateCountdownPill() {
   const pill = document.getElementById('countdownPill');
   if(!pill) return;
   if(isSyncing) { pill.textContent = '🔄 Syncing...'; pill.className='countdown-pill syncing'; return; }
   const m = Math.floor(countdownSec / 60);
   const s = countdownSec % 60;
-  const txt = m > 0 ? `🔄 ${m}m ${s.toString().padStart(2,'0')}s mein sync` : `🔄 ${s}s mein sync`;
-  pill.textContent = txt;
+  pill.textContent = m > 0 ? `🔄 ${m}m ${s.toString().padStart(2,'0')}s mein sync` : `🔄 ${s}s mein sync`;
   pill.className = 'countdown-pill';
 }
-
 function forceSyncNow() {
   if(countdownTimer) clearInterval(countdownTimer);
   countdownSec = 0;
   syncFromSheet(false);
 }
-
-// ══ SAVE / LOAD ══
 function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {} }
 function saveToFirebase() { if(!dbRef) return; try { dbRef.set(S).catch(e => console.error('Firebase save:', e)); } catch(e) {} }
 function save() { saveLocal(); saveToFirebase(); }
@@ -875,7 +809,7 @@ async function loadFromFirebase() {
   } catch(e) { console.error('Firebase load:',e); }
 }
 
-// ══ DASHBOARD (unchanged) ══
+// ══ DASHBOARD (unchanged but uses new change color via build functions) ══
 function renderDashboard() {
   const cont = document.getElementById('tab-dashboard-content');
   if(!S.etfs.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list add karo.</div></div>`; return; }
@@ -883,14 +817,11 @@ function renderDashboard() {
   const all = getAllSorted();
   const heldSyms = new Set(S.holdings.map(h=>h.sym));
   const under = all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold&&!r.held);
-
   const today = todayISO();
   let pickETF = null;
   if(S.dailyPick&&S.dailyPick.date===today) pickETF=all.find(r=>r.sym===S.dailyPick.sym);
   if(!pickETF&&under.length>0) { pickETF=under[0]; S.dailyPick={sym:pickETF.sym,date:today}; save(); }
-
   let html = '';
-
   const hasPrices = all.filter(r=>r.price!==null).length;
   if(hasPrices === 0) {
     html+=`<div style="background:rgba(245,200,66,.08);border:2px solid rgba(245,200,66,.3);border-radius:12px;padding:14px;text-align:center;">
@@ -903,7 +834,6 @@ function renderDashboard() {
       <span style="color:var(--muted);">Last: ${S.lastSheetSync||'—'}</span>
     </div>`;
   }
-
   html += `<div class="sec">🎯 Aaj Ka Pick</div>`;
   if(!pickETF) {
     html+=`<div class="no-pick"><span class="no-pick-icon">😴</span><div class="no-pick-msg"><strong>Koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi nahi mila.</div></div>`;
@@ -911,14 +841,12 @@ function renderDashboard() {
     const boughtTd = S.holdings.some(h=>h.sym===pickETF.sym&&h.buyDate===today);
     html += buildPickCard(pickETF, heldSyms.has(pickETF.sym), boughtTd);
   }
-
   const underAll = all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold);
   if(underAll.length>0) {
     html+=`<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
     underAll.forEach((r,i)=>{ html+=buildWLRow(r,i+1); });
     html+=`</div>`;
   }
-
   if(S.holdings.length>0) {
     const tgtPct = S.sellTarget||4.51;
     html+=`<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
@@ -942,11 +870,10 @@ function renderDashboard() {
       </div>`;
     });
   }
-
   cont.innerHTML = html;
 }
 
-// ══ ALL CARDS TAB with SEARCH and 5‑col grid ══
+// ══ ALL CARDS with search & 5‑col grid, using colored change ══
 function renderAllCards() {
   const all = getAllSorted();
   const container = document.getElementById('allCardsContainer');
@@ -959,12 +886,10 @@ function renderAllCards() {
   const osEtfs = filtered.filter(r => r.rsi!==null && r.rsi<oversold);
   const normalEtfs = filtered.filter(r => r.rsi===null || r.rsi>=oversold);
   let html = '';
-
   html+=`<div style="padding:8px 12px;font-size:.72rem;background:var(--bg3);border-radius:8px;display:flex;justify-content:space-between;margin-bottom:6px;">
     <span>Showing: <strong style="color:var(--text)">${filtered.length}</strong> / ${all.length}</span>
     <span>Oversold: <strong style="color:var(--red)">${osEtfs.length}</strong></span>
   </div>`;
-
   if(osEtfs.length>0) {
     html+=`<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
     html+=`<div class="etf-cards-grid">`;
@@ -982,12 +907,11 @@ function renderAllCards() {
   }
   container.innerHTML = html;
 }
-
 function filterETFcards(){
   renderAllCards();
 }
 
-// ══ ETF CARD (unchanged) ══
+// ══ ETF CARD with RED/GREEN change ══
 function buildEtfCard(e, rank) {
   const oversold = S.rsiOversold || 30;
   const rsi = e.rsi;
@@ -995,8 +919,17 @@ function buildEtfCard(e, rank) {
   const isOs = rsi!==null && rsi<oversold;
   let cardClass = 'etf-card';
   if(isOs) cardClass += rank===1?' os os-1':' os';
-  const up = e.changePct!==null && e.changePct>=0;
-
+  // determine change class
+  let changeHtml = '';
+  if(e.changePct !== null) {
+    let chgClass = 'zero';
+    let arrow = '';
+    let absVal = Math.abs(e.changePct).toFixed(2);
+    if(e.changePct > 0) { chgClass = 'positive'; arrow = '▲'; }
+    else if(e.changePct < 0) { chgClass = 'negative'; arrow = '▼'; }
+    else { chgClass = 'zero'; arrow = '◆'; }
+    changeHtml = `<div class="ec-chg ${chgClass}">${arrow} ${absVal}%</div>`;
+  }
   let timeStr = '—';
   if(e.ts) {
     const diffMin = Math.floor((Date.now()-e.ts)/60000);
@@ -1005,7 +938,6 @@ function buildEtfCard(e, rank) {
     else if(diffMin<60) timeStr=`${t} (${diffMin}m)`;
     else timeStr=t;
   }
-
   return `<div class="${cardClass}">
     <div class="ec-top">
       <div class="ec-sym">${e.sym}</div>
@@ -1014,7 +946,7 @@ function buildEtfCard(e, rank) {
     <div class="ec-mid">
       <div class="ec-price-block">
         ${e.price?`<div class="ec-price">₹${e.price.toFixed(2)}</div>`:`<div class="ec-no-price">—</div>`}
-        ${e.changePct!==null?`<div class="ec-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(e.changePct).toFixed(2)}%</div>`:''}
+        ${changeHtml}
         <div style="font-size:.56rem;color:var(--muted);margin-top:2px;">${timeStr}</div>
       </div>
       <div class="ec-rsi-block">
@@ -1027,11 +959,20 @@ function buildEtfCard(e, rank) {
   </div>`;
 }
 
-// ══ PICK CARD (unchanged) ══
+// ══ PICK CARD with colored change ══
 function buildPickCard(r, held, boughtToday) {
   const canBuy = !held && !boughtToday;
   const buyTxt = held?'✅ Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
-  const up = r.changePct!==null && r.changePct>=0;
+  let changeHtml = '';
+  if(r.changePct !== null) {
+    let chgClass = 'zero';
+    let arrow = '';
+    let absVal = Math.abs(r.changePct).toFixed(2);
+    if(r.changePct > 0) { chgClass = 'positive'; arrow = '+'; }
+    else if(r.changePct < 0) { chgClass = 'negative'; arrow = '-'; }
+    else { chgClass = 'zero'; arrow = ''; }
+    changeHtml = `<span class="${chgClass}" style="font-weight:700;">${arrow}${absVal}%</span>`;
+  } else { changeHtml = '—'; }
   const tgt = r.price*(1+(S.sellTarget||4.51)/100);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
@@ -1045,8 +986,7 @@ function buildPickCard(r, held, boughtToday) {
       <div class="ps"><div class="ps-l">Price</div>
         <div class="ps-v" style="color:var(--yellow)">₹${r.price.toFixed(2)}</div></div>
       <div class="ps"><div class="ps-l">Change</div>
-        <div class="ps-v" style="color:${r.changePct!==null?(up?'var(--green)':'var(--red)'):'var(--muted)'}">
-          ${r.changePct!==null?(up?'+':'')+r.changePct.toFixed(2)+'%':'—'}</div></div>
+        <div class="ps-v" style="color:${r.changePct>0?'var(--green)':r.changePct<0?'var(--red)':'var(--muted)'}">${changeHtml}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 14px;">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
@@ -1055,9 +995,18 @@ function buildPickCard(r, held, boughtToday) {
   </div>`;
 }
 
-// ══ WL ROW (unchanged) ══
+// ══ WL ROW with colored change ══
 function buildWLRow(r, rank) {
-  const up = r.changePct!==null && r.changePct>=0;
+  let changeHtml = '';
+  if(r.changePct !== null) {
+    let chgClass = '';
+    let arrow = '';
+    let absVal = Math.abs(r.changePct).toFixed(2);
+    if(r.changePct > 0) { chgClass = 'up'; arrow = '▲'; }
+    else if(r.changePct < 0) { chgClass = 'dn'; arrow = '▼'; }
+    else { chgClass = 'zero'; arrow = '◆'; }
+    changeHtml = `<div class="${chgClass}" style="font-size:.66rem;margin-top:2px;">${arrow} ${absVal}%</div>`;
+  } else { changeHtml = '<div style="font-size:.66rem;color:var(--muted);">—</div>'; }
   const oversold = S.rsiOversold || 30;
   const rsiPillBg = r.rsi===null?'var(--bg4)':r.rsi<oversold?'rgba(224,82,82,.18)':r.rsi>70?'rgba(232,164,64,.18)':'rgba(76,175,130,.12)';
   const rsiPillBorder = r.rsi===null?'var(--border)':r.rsi<oversold?'rgba(224,82,82,.4)':r.rsi>70?'rgba(232,164,64,.4)':'rgba(76,175,130,.3)';
@@ -1086,7 +1035,7 @@ function buildWLRow(r, rank) {
     </div>
     <div class="wl-px">
       <div style="font-size:.9rem;font-weight:800;color:var(--yellow);">${r.price!==null?'₹'+r.price.toFixed(2):'—'}</div>
-      <div class="${up?'up':'dn'}" style="font-size:.66rem;margin-top:2px;">${r.changePct!==null?(up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%':'—'}</div>
+      ${changeHtml}
     </div>
   </div>`;
 }
