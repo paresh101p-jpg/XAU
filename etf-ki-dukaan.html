@@ -36,7 +36,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .tabs::-webkit-scrollbar{height:0;}
 .tab{padding:10px 16px;font-size:.72rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:.15s;white-space:nowrap;}
 .tab.active{color:var(--yellow);border-bottom-color:var(--yellow);}
-/* Fetch Progress Bar */
 .fetch-prog{height:3px;background:var(--bg3);overflow:hidden;position:sticky;top:44px;z-index:55;}
 .fetch-prog-bar{height:100%;background:linear-gradient(90deg,var(--yellow),var(--amber));width:0%;transition:width .3s;}
 .main{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
@@ -53,7 +52,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-r:not(:disabled):hover{background:var(--red-dim);}
 .btn-g{border-color:rgba(76,175,130,.4);color:var(--green);}
 .btn-g:not(:disabled):hover{background:var(--green-dim);}
-/* Auto Fetch Panel */
 .auto-panel{background:var(--bg2);border:2px solid rgba(91,155,213,.3);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .ap-title{font-size:.78rem;font-weight:700;color:var(--blue);}
 .ap-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
@@ -67,7 +65,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .fe-err{color:var(--red);}
 .fe-px{color:var(--yellow);font-weight:700;margin-left:auto;}
 .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(245,200,66,.3);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-/* Pick card */
 .pick-card{background:var(--bg2);border:3px solid rgba(245,200,66,.6);border-radius:16px;overflow:hidden;animation:pickGlow 2s infinite alternate;position:relative;}
 .pick-star{position:absolute;top:10px;right:12px;background:var(--yellow);color:#111;border-radius:20px;padding:3px 10px;font-size:.58rem;font-weight:700;}
 .pick-top{padding:14px 16px 6px;}
@@ -77,11 +74,35 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps{text-align:center;}
 .ps-l{font-size:.52rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:.92rem;font-weight:700;margin-top:2px;}
+
+/* ═══════════════════════════════════════════════
+   RSI BAR — GRADIENT: 100(red) → 0(green)
+   Bar background is full gradient, mask covers right portion
+═══════════════════════════════════════════════ */
+/* Pick card RSI bar */
 .rsi-bar-wrap{padding:6px 16px 4px;}
-.rsi-bar-out{background:var(--bg3);border-radius:8px;height:10px;overflow:hidden;border:1px solid var(--border);}
-.rsi-bar-in{height:100%;border-radius:8px;transition:width .5s;}
+.rsi-bar-out{
+  background: linear-gradient(to left,
+    #1a8a3a 0%,
+    #4ddb7a 25%,
+    #c8e000 42%,
+    #f5c842 55%,
+    #f5a623 70%,
+    #E05252 100%
+  );
+  border-radius:8px;height:10px;overflow:hidden;border:1px solid var(--border);
+  position:relative;
+}
+.rsi-bar-in{
+  height:100%;
+  border-radius:0 8px 8px 0;
+  position:absolute;
+  top:0; right:0;
+  background:var(--bg3);
+  transition:width .5s;
+}
 .rsi-lbl{display:flex;justify-content:space-between;font-size:.5rem;color:var(--muted);margin-top:3px;}
-.pick-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px 14px;}
+
 .no-pick{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:26px;text-align:center;}
 .no-pick-icon{font-size:1.8rem;display:block;margin-bottom:8px;}
 .no-pick-msg{font-size:.76rem;color:var(--muted);line-height:2;}
@@ -167,7 +188,10 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
-/* ETF Card Grid */
+
+/* ═══════════════════════════════════════════════
+   ETF CARD GRID — RSI bar: gradient bg + mask
+═══════════════════════════════════════════════ */
 .etf-cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .etf-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:10px 11px;position:relative;transition:border-color .2s,box-shadow .2s;}
 .etf-card.os{border-color:rgba(224,82,82,.55);background:rgba(224,82,82,.05);}
@@ -187,26 +211,41 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-rsi-val{font-size:.78rem;font-weight:700;}
 .ec-rsi-lbl{font-size:.44rem;color:var(--muted);}
 .ec-bar-wrap{margin-top:4px;}
-.ec-bar-out{background:var(--bg3);border-radius:6px;height:5px;overflow:hidden;border:1px solid var(--border);}
-.ec-bar-in{height:100%;border-radius:6px;transition:width .6s ease;}
+/* Gradient bar container */
+.ec-bar-out{
+  background: linear-gradient(to left,
+    #1a8a3a 0%,
+    #4ddb7a 25%,
+    #c8e000 42%,
+    #f5c842 55%,
+    #f5a623 70%,
+    #E05252 100%
+  );
+  border-radius:6px;height:7px;overflow:hidden;border:1px solid var(--border);
+  position:relative;
+}
+/* Mask covers right side = RSI ke opposite area dark ho jaata hai */
+.ec-bar-in{
+  height:100%;
+  border-radius:0 6px 6px 0;
+  position:absolute;
+  top:0; right:0;
+  background:var(--bg3);
+  transition:width .6s ease;
+}
 .ec-bar-labels{display:flex;justify-content:space-between;font-size:.42rem;color:var(--muted);margin-top:2px;}
 .ec-os-tag{font-size:.46rem;background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.3);border-radius:4px;padding:1px 5px;display:inline-block;margin-top:3px;}
-/* Sort badge */
 .ec-rank{position:absolute;top:6px;left:8px;font-size:.44rem;color:var(--muted);font-weight:700;}
-/* Fetch cards section header */
 .cards-sec-hdr{font-size:.6rem;font-weight:700;padding:4px 8px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
 .csh-os{background:rgba(224,82,82,.12);color:var(--red);border:1px solid rgba(224,82,82,.25);}
 .csh-normal{background:var(--bg3);color:var(--muted);border:1px solid var(--border);}
-/* Firebase Sync Status */
 .sync-status{font-size:.58rem;padding:4px 10px;border-radius:8px;background:rgba(91,155,213,.12);color:var(--blue);border:1px solid rgba(91,155,213,.3);display:inline-flex;align-items:center;gap:5px;}
 .sync-ok{color:var(--green);}
-/* Google Sign-In */
 .btn-google{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#333;border:2px solid #ddd;border-radius:18px;padding:5px 12px;font-size:.65rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .btn-google:hover{background:#f5f5f5;box-shadow:0 2px 8px rgba(0,0,0,.15);}
 .btn-google svg{flex-shrink:0;}
 .btn-signout{display:inline-flex;align-items:center;gap:4px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:12px;padding:4px 10px;font-size:.58rem;cursor:pointer;transition:all .2s;}
 .btn-signout:hover{color:var(--red);border-color:rgba(224,82,82,.4);}
-/* Auth overlay */
 .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
 .auth-box{background:var(--bg2);border:2px solid rgba(245,200,66,.4);border-radius:20px;padding:28px 24px;max-width:320px;width:100%;text-align:center;animation:pop .2s ease;}
 .auth-logo{font-size:2.2rem;margin-bottom:8px;}
@@ -234,9 +273,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div class="tab" onclick="switchTab('prices')" id="tab-prices">✏️ Override Prices</div>
   <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Settings</div>
 </div>
-<!-- ═══ DASHBOARD ═══ -->
 <div id="tab-dashboard-content" class="main"></div>
-<!-- ═══ AUTO FETCH ═══ -->
 <div id="tab-fetch-content" class="main" style="display:none;">
   <div class="auto-panel">
     <div class="ap-title">🔄 Rolling Loop — Har ETF 10 Min Baad Update</div>
@@ -272,7 +309,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   <div id="fetchStatusList" class="fetch-result-box" style="max-height:none;">
     <div class="fr-skip">Fetch button dabao to yahaan live status dikhegi…</div>
   </div>
- 
   <div class="sec" style="margin-top:8px;">ℹ️ Note</div>
   <div style="background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:12px;font-size:.62rem;color:var(--muted);line-height:2;">
     • Yahoo Finance API <strong style="color:var(--text)">free</strong> hai — koi API key nahi chahiye<br>
@@ -282,7 +318,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     • CORS ke liye <strong style="color:var(--text)">allorigins.win</strong> proxy use hota hai
   </div>
 </div>
-<!-- ═══ MANUAL PRICES ═══ -->
 <div id="tab-prices-content" class="main" style="display:none;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
     <div style="font-size:.62rem;color:var(--muted);">Yahan <strong style="color:var(--yellow)">already fetched prices</strong> dikhte hain (✅). Jo Yahoo pe nahi mila — uska price yahan manually type karo.</div>
@@ -293,11 +328,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
   </div>
   <div class="pe-grid" id="priceGrid"></div>
 </div>
-<!-- ═══ HOLDINGS ═══ -->
 <div id="tab-holdings-content" class="main" style="display:none;">
   <div id="holdingsContent"></div>
 </div>
-<!-- ═══ SETTINGS ═══ -->
 <div id="tab-settings-content" class="main" style="display:none;">
   <div class="sec">ETF List</div>
   <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px;">Ek line mein ek ETF symbol. Yahoo Finance pe <code style="background:var(--bg3);padding:1px 4px;">.NS</code> lagta hai automatically.</div>
@@ -375,15 +408,11 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <div class="toast" id="toast"></div>
 <div class="log-bar" id="logBar"><span class="le">Trades yahaan dikhenge…</span></div>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
-/* ══════════════════════════════════════
-   DEFAULT ETF LIST
-══════════════════════════════════════ */
 const DEFAULT_ETFS = `ITBEES
 NIFTYBEES
 METALIETF
@@ -460,9 +489,6 @@ FLEXIADD
 TNIDETF
 ELM250`;
 
-/* ══════════════════════════════════════
-   FIREBASE SETUP (Anonymous Auth + Realtime Database)
-══════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyArnn7ikT5oypzk12Eklj117DK6ytvCGOw",
   authDomain: "etf-ki-dukaan-4d55c.firebaseapp.com",
@@ -472,17 +498,13 @@ const firebaseConfig = {
   appId: "1:654660864871:web:f7aefa5e672d7616f4bdc2",
   measurementId: "G-NVSQXGE94C"
 };
-
-// Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-
 let currentUserUID = null;
-let dbRef = null; // Will be set to users/{uid}/data
+let dbRef = null;
 
-/* Google Sign-In */
 async function signInWithGoogle() {
   const overlay = document.getElementById('authOverlay');
   overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.4rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Google se sign in ho raha hai...</div><div style="font-size:.6rem;color:var(--muted);margin-top:6px;">Popup band mat karo</div></div>`;
@@ -491,20 +513,12 @@ async function signInWithGoogle() {
     const result = await auth.signInWithPopup(googleProvider);
     await onUserSignedIn(result.user);
   } catch (error) {
-    console.error("Popup failed, trying redirect:", error.code);
+    console.error("Popup failed:", error.code);
     if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-      // Fallback to redirect
-      try {
-        await auth.signInWithRedirect(googleProvider);
-      } catch(e2) {
-        showAuthError(e2.message);
-      }
-    } else {
-      showAuthError(error.message);
-    }
+      try { await auth.signInWithRedirect(googleProvider); } catch(e2) { showAuthError(e2.message); }
+    } else { showAuthError(error.message); }
   }
 }
-
 function showAuthError(msg) {
   document.getElementById('authOverlay').innerHTML = `
     <div class="auth-box">
@@ -515,118 +529,31 @@ function showAuthError(msg) {
       <button class="auth-skip" onclick="skipAuth()" style="margin-top:8px;">Bina login ke continue karo</button>
     </div>`;
 }
-
 function skipAuth() {
   document.getElementById('authOverlay').style.display = 'none';
-  // Use anonymous auth as fallback
   auth.signInAnonymously().catch(err => console.error("Anon auth failed:", err));
 }
-
 async function signOut() {
   if (!confirm('Sign out karna chahte ho?')) return;
   await auth.signOut();
-  currentUserUID = null;
-  dbRef = null;
+  currentUserUID = null; dbRef = null;
   document.getElementById('syncStatus').textContent = '🔴 Signed Out';
   document.getElementById('syncStatus').classList.remove('sync-ok');
   document.getElementById('btnSignOut').style.display = 'none';
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('authOverlay').innerHTML = `
-    <div class="auth-box">
-      <div class="auth-logo">🏪</div>
-      <div class="auth-title">ETF Ki Dukaan</div>
-      <div class="auth-sub">Google se sign in karo taaki aapka data<br><strong style="color:var(--text)">har device pe sync</strong> ho!</div>
-      <button class="btn-google" onclick="signInWithGoogle()">
-        <svg width="16" height="16" viewBox="0 0 48 48">
-          <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36.5 24 36.5c-5.2 0-9.6-3.4-11.2-8.1l-6.5 5C9.5 39.9 16.3 44 24 44z"/>
-          <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41.2 35.2 44 30 44 24c0-1.3-.2-2.7-.4-4z"/>
-        </svg>
-        Google se Sign In karo
-      </button>
-      <div class="auth-divider">ya</div>
-      <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo</button>
-    </div>`;
+  showAuthScreen();
 }
-
-/* ══════════════════════════════════════
-   STATE
-══════════════════════════════════════ */
-const LS = 'etf_dukaan_v6';
-let S = {
-  etfs: [],
-  prices: {}, 
-  holdings: [],
-  log: [],
-  rsiPeriod: 14,
-  rsiOversold: 30,
-  sellTarget: 4.51,
-  dailyPick: null,
-  autoFetchEnabled: true,
-  lastFetchDate: null,
-  lastFetchTime: null,
-  fetchedToday: 0,
-  firstFetchDone: false,
-};
-let pending = null;
-let fetchAbort = false;
-
-/* Firebase Sync Helpers */
-async function initFirebaseAuth() {
-  // Show loading state first
-  const overlay = document.getElementById('authOverlay');
-  overlay.style.display = 'flex';
-  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
-
-  // Step 1: Check if returning from Google redirect
-  try {
-    const result = await auth.getRedirectResult();
-    if (result && result.user) {
-      await onUserSignedIn(result.user);
-      return;
-    }
-  } catch (error) {
-    console.error("Redirect result error:", error);
-  }
-
-  // Step 2: Check current auth state — Firebase remembers session automatically
-  return new Promise((resolve) => {
-    const unsub = auth.onAuthStateChanged(async (user) => {
-      unsub();
-      if (user && !user.isAnonymous) {
-        // Already logged in — hide overlay and continue
-        await onUserSignedIn(user);
-      } else {
-        // Not logged in — show login screen
-        if (user && user.isAnonymous) await auth.signOut();
-        showAuthScreen();
-      }
-      resolve();
-    });
-  });
-}
-
 async function onUserSignedIn(user) {
   currentUserUID = user.uid;
   dbRef = database.ref('users/' + currentUserUID + '/data');
-  const overlay = document.getElementById('authOverlay');
-  if (overlay) overlay.style.display = 'none';
+  document.getElementById('authOverlay').style.display = 'none';
   const displayName = user.displayName || user.email;
   document.getElementById('syncStatus').innerHTML = '🟢 <span style="color:var(--yellow)">' + displayName + '</span>';
   document.getElementById('syncStatus').classList.add('sync-ok');
   document.getElementById('btnSignOut').style.display = 'inline-flex';
   await loadFromFirebase();
-  renderDashboard();
-  renderHoldings();
-  // Login ke baad seedha loop shuru
-  setTimeout(() => {
-    if (loopRunning) stopLoop();
-    startLoop();
-    showToast('🔄 Auto loop shuru ho gaya!');
-  }, 1000);
+  renderDashboard(); renderHoldings();
+  setTimeout(() => { if (loopRunning) stopLoop(); startLoop(); showToast('🔄 Auto loop shuru ho gaya!'); }, 1000);
 }
-
 function showAuthScreen() {
   const overlay = document.getElementById('authOverlay');
   overlay.style.display = 'flex';
@@ -634,11 +561,7 @@ function showAuthScreen() {
     <div class="auth-box">
       <div class="auth-logo">🏪</div>
       <div class="auth-title">ETF Ki Dukaan</div>
-      <div class="auth-sub">
-        Google se sign in karo taaki aapka data<br>
-        <strong style="color:var(--text)">har device pe sync</strong> ho!<br><br>
-        Holdings, prices, sab kuch safe rahega ☁️
-      </div>
+      <div class="auth-sub">Google se sign in karo taaki aapka data<br><strong style="color:var(--text)">har device pe sync</strong> ho!<br><br>Holdings, prices, sab kuch safe rahega ☁️</div>
       <button class="btn-google" onclick="signInWithGoogle()">
         <svg width="16" height="16" viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
@@ -652,883 +575,534 @@ function showAuthScreen() {
       <button class="auth-skip" onclick="skipAuth()">Bina login ke continue karo (sirf is device pe)</button>
     </div>`;
 }
-
+async function initFirebaseAuth() {
+  const overlay = document.getElementById('authOverlay');
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `<div class="auth-box"><div style="font-size:1.6rem;margin-bottom:10px;">⏳</div><div style="font-size:.78rem;color:var(--text);font-weight:700;">Loading...</div></div>`;
+  try {
+    const result = await auth.getRedirectResult();
+    if (result && result.user) { await onUserSignedIn(result.user); return; }
+  } catch (error) { console.error("Redirect result error:", error); }
+  return new Promise((resolve) => {
+    const unsub = auth.onAuthStateChanged(async (user) => {
+      unsub();
+      if (user && !user.isAnonymous) { await onUserSignedIn(user); }
+      else { if (user && user.isAnonymous) await auth.signOut(); showAuthScreen(); }
+      resolve();
+    });
+  });
+}
 async function loadFromFirebase() {
   if (!dbRef) return;
   try {
     const snapshot = await dbRef.once('value');
     const fbData = snapshot.val();
     if (fbData) {
-      // Merge with local (prefer Firebase if conflict)
       S = {...S, ...fbData};
-      // Keep local defaults if needed
-      if (!S.etfs || S.etfs.length === 0) {
-        S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
-      }
-      saveLocal(); // sync back to localStorage
+      if (!S.etfs || S.etfs.length === 0) S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
+      saveLocal();
       showToast('☁️ Data Firebase se load ho gaya');
     }
-  } catch(e) {
-    console.error("Firebase load error", e);
-  }
+  } catch(e) { console.error("Firebase load error", e); }
 }
-
 function saveToFirebase() {
   if (!dbRef) return;
-  try {
-    dbRef.set(S).catch(err => console.error("Firebase save error", err));
-  } catch(e) {}
+  try { dbRef.set(S).catch(err => console.error("Firebase save error", err)); } catch(e) {}
+}
+function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {} }
+function save() { saveLocal(); saveToFirebase(); }
+
+/* ══ STATE ══ */
+const LS = 'etf_dukaan_v6';
+let S = { etfs:[], prices:{}, holdings:[], log:[], rsiPeriod:14, rsiOversold:30, sellTarget:4.51, dailyPick:null, autoFetchEnabled:true, lastFetchDate:null, lastFetchTime:null, fetchedToday:0, firstFetchDone:false };
+let pending = null, fetchAbort = false;
+
+function load() {
+  try { const d = localStorage.getItem(LS); if (d) S = {...S, ...JSON.parse(d)}; } catch(e) {}
+  if (!S.etfs || !S.etfs.length) S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
 }
 
-function saveLocal() {
-  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e) {}
-}
-
-function save() {
-  saveLocal();
-  saveToFirebase();   // Real-time push to cloud
-}
-
-/* ══════════════════════════════════════
-   HELPERS (baaki code same)
-══════════════════════════════════════ */
-function todayISO() {
-  // IST = UTC + 5:30 = +19800 seconds
-  return new Date(Date.now() + 19800000).toISOString().slice(0,10);
-}
-function nowIST() {
-  return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
-}
-function fmtDate(iso) {
-  if (!iso) return '—';
-  const [y,m,d] = iso.split('-');
-  return `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${y}`;
-}
-function showToast(msg, dur=3500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
-}
-function setApiStatus(type, msg) {
-  const el = document.getElementById('apiStatus');
-  el.className = 'hdr-api-status ' + type;
-  el.textContent = msg;
-}
-function setBar(pct) {
-  document.getElementById('fetchBar').style.width = pct + '%';
-}
+/* ══ HELPERS ══ */
+function todayISO() { return new Date(Date.now() + 19800000).toISOString().slice(0,10); }
+function nowIST() { return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})); }
+function fmtDate(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${y}`; }
+function showToast(msg, dur=3500) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+function setApiStatus(type, msg) { const el=document.getElementById('apiStatus'); el.className='hdr-api-status '+type; el.textContent=msg; }
+function setBar(pct) { document.getElementById('fetchBar').style.width=pct+'%'; }
 function switchTab(name) {
   ['dashboard','fetch','prices','settings'].forEach(t => {
-    const tabEl = document.getElementById('tab-'+t);
-    const contEl = document.getElementById('tab-'+t+'-content');
-    if (tabEl) tabEl.classList.toggle('active', t===name);
-    if (contEl) contEl.style.display = t===name ? 'flex' : 'none';
+    const tabEl=document.getElementById('tab-'+t), contEl=document.getElementById('tab-'+t+'-content');
+    if (tabEl) tabEl.classList.toggle('active',t===name);
+    if (contEl) contEl.style.display=t===name?'flex':'none';
   });
-  if (name === 'fetch') renderFetchTab();
-  if (name === 'prices') renderPriceGrid();
-  if (name === 'settings') renderSettings();
-  if (name === 'dashboard') renderDashboard();
+  if (name==='fetch') renderFetchTab();
+  if (name==='prices') renderPriceGrid();
+  if (name==='settings') renderSettings();
+  if (name==='dashboard') renderDashboard();
 }
 
-/* RSI functions */
+/* ══ RSI ══ */
 function calcRSI(closes, period) {
   if (!closes || closes.length < 2) return null;
-  // Adaptive: agar configured period ka data nahi, to jo available ho use karo
   const effPeriod = Math.min(period, closes.length - 1);
-  let g = 0, l = 0;
-  for (let i = 1; i <= effPeriod; i++) {
-    const d = closes[i] - closes[i-1];
-    if (d > 0) g += d; else l -= d;
-  }
-  let ag = g/effPeriod, al = l/effPeriod;
-  for (let i = effPeriod+1; i < closes.length; i++) {
-    const d = closes[i] - closes[i-1];
-    ag = (ag*(effPeriod-1) + (d>0?d:0)) / effPeriod;
-    al = (al*(effPeriod-1) + (d<0?-d:0)) / effPeriod;
-  }
-  if (al === 0) return 100;
-  return parseFloat((100 - 100/(1 + ag/al)).toFixed(2));
+  let g=0, l=0;
+  for (let i=1; i<=effPeriod; i++) { const d=closes[i]-closes[i-1]; if (d>0) g+=d; else l-=d; }
+  let ag=g/effPeriod, al=l/effPeriod;
+  for (let i=effPeriod+1; i<closes.length; i++) { const d=closes[i]-closes[i-1]; ag=(ag*(effPeriod-1)+(d>0?d:0))/effPeriod; al=(al*(effPeriod-1)+(d<0?-d:0))/effPeriod; }
+  if (al===0) return 100;
+  return parseFloat((100 - 100/(1+ag/al)).toFixed(2));
 }
 function getETFData(sym) {
-  const hist = (S.prices[sym] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
-  const closes = hist.map(h => h.price);
-  const period = S.rsiPeriod || 14;
-  const rsi = calcRSI(closes, period);
-  const effPeriod = closes.length >= 2 ? Math.min(period, closes.length - 1) : period;
-  const isPartialRSI = closes.length >= 2 && closes.length < period + 1;
-  const latest = hist[hist.length - 1] || null;
-  const prev = hist[hist.length - 2] || null;
-  const price = latest ? latest.price : null;
-  const changePct = (latest && prev && prev.price > 0)
-    ? ((latest.price - prev.price) / prev.price) * 100 : null;
-  return { rsi, price, changePct, days: closes.length, lastDate: latest?.date || null, effPeriod, isPartialRSI };
+  const hist=(S.prices[sym]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const closes=hist.map(h=>h.price);
+  const period=S.rsiPeriod||14;
+  const rsi=calcRSI(closes,period);
+  const effPeriod=closes.length>=2?Math.min(period,closes.length-1):period;
+  const isPartialRSI=closes.length>=2&&closes.length<period+1;
+  const latest=hist[hist.length-1]||null;
+  const prev=hist[hist.length-2]||null;
+  const price=latest?latest.price:null;
+  const changePct=(latest&&prev&&prev.price>0)?((latest.price-prev.price)/prev.price)*100:null;
+  return {rsi,price,changePct,days:closes.length,lastDate:latest?.date||null,effPeriod,isPartialRSI};
 }
 function getAllRSI() {
-  return S.etfs.map(e => {
-    const d = getETFData(e.sym);
-    const held = S.holdings.some(h => h.sym === e.sym);
-    return { sym: e.sym, ...d, held };
-  }).sort((a,b) => {
-      if (a.rsi === null && b.rsi === null) return 0;
-      if (a.rsi === null) return 1; if (b.rsi === null) return -1;
-      return a.rsi - b.rsi;
-    });
+  return S.etfs.map(e=>{const d=getETFData(e.sym);const held=S.holdings.some(h=>h.sym===e.sym);return{sym:e.sym,...d,held};})
+    .sort((a,b)=>{if(a.rsi===null&&b.rsi===null)return 0;if(a.rsi===null)return 1;if(b.rsi===null)return -1;return a.rsi-b.rsi;});
 }
 function rsiBg(rsi) {
-  if (rsi === null) return '#444';
-  if (rsi < 30) return 'linear-gradient(90deg,#E05252,#F07030)';
-  if (rsi > 70) return 'linear-gradient(90deg,#E8A440,#F5C842)';
+  if (rsi===null) return '#444';
+  if (rsi<30) return 'linear-gradient(90deg,#E05252,#F07030)';
+  if (rsi>70) return 'linear-gradient(90deg,#E8A440,#F5C842)';
   return 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
 }
 function rsiClass(rsi) {
-  if (rsi === null) return 'rsi-n';
-  if (rsi < (S.rsiOversold||30)) return 'rsi-os';
-  if (rsi > 70) return 'rsi-ob';
+  if (rsi===null) return 'rsi-n';
+  if (rsi<(S.rsiOversold||30)) return 'rsi-os';
+  if (rsi>70) return 'rsi-ob';
   return 'rsi-n';
 }
 
-/* Yahoo Fetch functions (exactly same as original) */
-const PROXIES = [
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-];
-async function fetchWithTimeout(url, ms) {
-  const ctrl = new AbortController();
-  const tid = setTimeout(() => ctrl.abort(), ms);
-  try {
-    const r = await fetch(url, { signal: ctrl.signal });
-    clearTimeout(tid);
-    return r;
-  } catch(e) {
-    clearTimeout(tid);
-    throw e;
-  }
+/* ══ RSI BAR HELPER ══
+   mask width = (100 - RSI) % => covers the "unfilled" right portion
+   So RSI=0 → mask=100% (fully dark, bar at left = green fully visible would show nothing... 
+   wait: bar goes left=100(red) to right=0(green).
+   RSI value fills from LEFT. So RSI=60 → show 60% from left (red/orange/yellow area).
+   mask covers RIGHT portion = (100-RSI)% but that reveals LEFT which is red side.
+   Actually: we want RSI=60 to show up to 60% from LEFT (red end).
+   mask from right = covers (100-60)=40% → shows 60% from left = correct.
+   RSI=0 (oversold/green zone) → mask covers 100% from right → shows 0% = empty bar?
+   
+   CORRECTED LOGIC: 
+   - Bar gradient: LEFT=100(red) → RIGHT=0(green)  
+   - We show up to RSI value from left → fill width = RSI%
+   - mask from right = (100 - RSI)%
+   - RSI=30 → fill 30% from left (in red-orange zone) ✓
+   - RSI=70 → fill 70% from left (red→yellow zone) ✓  
+   - RSI=0 → fill 0% → bar empty (dark) ✓
+   - RSI=100 → fill 100% → full gradient shown ✓
+*/
+function rsiMaskPct(rsi) {
+  if (rsi === null) return 100;
+  // mask covers right portion, revealing left (100=red side)
+  return Math.max(0, 100 - Math.min(100, rsi));
 }
-async function tryProxy(proxyFn, yahooUrl) {
-  const res = await fetchWithTimeout(proxyFn(yahooUrl), 25000);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  let data;
-  try {
-    const outer = JSON.parse(text);
-    data = typeof outer.contents === 'string' ? JSON.parse(outer.contents) : outer;
-  } catch {
-    data = JSON.parse(text);
-  }
-  // Try both flat and nested structure
-  const result = data?.chart?.result?.[0] || (data?.timestamp ? data : null);
-  if (!result) throw new Error('No chart result');
-  return result;
+
+/* ══ YAHOO FETCH ══ */
+const PROXIES = [
+  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+];
+async function fetchWithTimeout(url,ms) {
+  const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),ms);
+  try { const r=await fetch(url,{signal:ctrl.signal}); clearTimeout(tid); return r; } catch(e) { clearTimeout(tid); throw e; }
 }
 async function fetchYahooPrice(sym) {
-  const ticker = sym + '.NS';
-  const now = Math.floor(Date.now() / 1000);
-  const from90 = now - (90 * 24 * 3600);
-
-  // ── Helper: V8 JSON parse ──
-  function parseV8(chartResult) {
-    const timestamps = chartResult.timestamp || [];
-    const adjCloses = chartResult.indicators?.adjclose?.[0]?.adjclose || [];
-    const rawCloses = chartResult.indicators?.quote?.[0]?.close || [];
-    const closes = adjCloses.length >= timestamps.length ? adjCloses : rawCloses;
-    const out = {};
-    for (let i = 0; i < timestamps.length; i++) {
-      const c = closes[i];
-      if (c > 0 && timestamps[i]) {
-        const d = new Date((timestamps[i] + 19800) * 1000).toISOString().slice(0,10);
-        out[d] = parseFloat(c.toFixed(2));
-      }
-    }
+  const ticker=sym+'.NS';
+  const now=Math.floor(Date.now()/1000);
+  const from90=now-(90*24*3600);
+  function parseV8(cr) {
+    const ts=cr.timestamp||[];
+    const adjC=cr.indicators?.adjclose?.[0]?.adjclose||[];
+    const rawC=cr.indicators?.quote?.[0]?.close||[];
+    const closes=adjC.length>=ts.length?adjC:rawC;
+    const out={};
+    for (let i=0;i<ts.length;i++) { const c=closes[i]; if(c>0&&ts[i]) { const d=new Date((ts[i]+19800)*1000).toISOString().slice(0,10); out[d]=parseFloat(c.toFixed(2)); } }
     return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
   }
-
-  // ── Helper: CSV parse (Yahoo v7 download) ──
   function parseCSV(text) {
-    const out = {};
-    text.trim().split('\n').slice(1).forEach(line => {
-      const p = line.split(',');
-      const date = p[0]?.trim();
-      const close = parseFloat(p[4]);
-      if (date?.match(/^\d{4}-\d{2}-\d{2}$/) && close > 0) out[date] = parseFloat(close.toFixed(2));
-    });
+    const out={};
+    text.trim().split('\n').slice(1).forEach(line=>{ const p=line.split(','); const date=p[0]?.trim(); const close=parseFloat(p[4]); if(date?.match(/^\d{4}-\d{2}-\d{2}$/)&&close>0) out[date]=parseFloat(close.toFixed(2)); });
     return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
   }
-
-  // ── Helper: Stooq CSV parse ──
   function parseStooq(text) {
-    const out = {};
-    text.trim().split('\n').slice(1).forEach(line => {
-      const p = line.split(',');
-      // Stooq format: Date,Open,High,Low,Close,Volume
-      const date = p[0]?.trim();
-      const close = parseFloat(p[4]);
-      if (date?.match(/^\d{4}-\d{2}-\d{2}$/) && close > 0) out[date] = parseFloat(close.toFixed(2));
-    });
+    const out={};
+    text.trim().split('\n').slice(1).forEach(line=>{ const p=line.split(','); const date=p[0]?.trim(); const close=parseFloat(p[4]); if(date?.match(/^\d{4}-\d{2}-\d{2}$/)&&close>0) out[date]=parseFloat(close.toFixed(2)); });
     return Object.entries(out).map(([date,price])=>({date,price})).sort((a,b)=>a.date.localeCompare(b.date));
   }
-
-  // ── Helper: wrap result ──
-  function makeResult(history, fallbackPrice) {
-    const today = todayISO();
-    const lastEntry = history[history.length - 1];
-    const price = lastEntry ? lastEntry.price : fallbackPrice;
-    if (lastEntry && lastEntry.date !== today) {
-      history.push({ date: today, price });
-    }
-    return { price, history };
+  function makeResult(history,fallbackPrice) {
+    const today=todayISO(); const lastEntry=history[history.length-1];
+    const price=lastEntry?lastEntry.price:fallbackPrice;
+    if(lastEntry&&lastEntry.date!==today) history.push({date:today,price});
+    return {price,history};
   }
-
-  const urlV8  = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=90d`;
-  const urlCSV = `https://query1.finance.yahoo.com/v7/finance/download/${ticker}?period1=${from90}&period2=${now}&interval=1d&events=history`;
-  // Stooq uses different ticker format: NIFTYBEES.IN (BSE/NSE)
-  const stooqTicker = sym.toLowerCase() + '.in';
-  const urlStooq = `https://stooq.com/q/d/l/?s=${stooqTicker}&i=d`;
-
-  let lastErr = null;
-
+  const urlV8=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=90d`;
+  const urlCSV=`https://query1.finance.yahoo.com/v7/finance/download/${ticker}?period1=${from90}&period2=${now}&interval=1d&events=history`;
+  const stooqTicker=sym.toLowerCase()+'.in';
+  const urlStooq=`https://stooq.com/q/d/l/?s=${stooqTicker}&i=d`;
+  let lastErr=null;
   for (const proxyFn of PROXIES) {
-    // 1) Yahoo V8 JSON
     try {
-      const res = await fetchWithTimeout(proxyFn(urlV8), 20000);
-      if (!res.ok) throw new Error('V8 HTTP ' + res.status);
-      const text = await res.text();
-      let parsed;
-      try { const o = JSON.parse(text); parsed = typeof o.contents==='string' ? JSON.parse(o.contents) : o; }
-      catch { throw new Error('V8 JSON fail'); }
-      const cr = parsed?.chart?.result?.[0];
-      if (!cr) throw new Error('V8 no result');
-      const price = cr.meta?.regularMarketPrice || cr.meta?.previousClose;
-      if (!price || price <= 0) throw new Error('V8 no price');
-      const history = parseV8(cr);
-      if (history.length >= 10) return makeResult(history, price);
-      throw new Error('V8 only ' + history.length + ' candles');
-    } catch(e) { lastErr = e; }
-
-    // 2) Yahoo CSV download
+      const res=await fetchWithTimeout(proxyFn(urlV8),20000); if(!res.ok) throw new Error('V8 HTTP '+res.status);
+      const text=await res.text(); let parsed;
+      try { const o=JSON.parse(text); parsed=typeof o.contents==='string'?JSON.parse(o.contents):o; } catch { throw new Error('V8 JSON fail'); }
+      const cr=parsed?.chart?.result?.[0]; if(!cr) throw new Error('V8 no result');
+      const price=cr.meta?.regularMarketPrice||cr.meta?.previousClose; if(!price||price<=0) throw new Error('V8 no price');
+      const history=parseV8(cr); if(history.length>=10) return makeResult(history,price);
+      throw new Error('V8 only '+history.length+' candles');
+    } catch(e) { lastErr=e; }
     try {
-      const res = await fetchWithTimeout(proxyFn(urlCSV), 20000);
-      if (!res.ok) throw new Error('CSV HTTP ' + res.status);
-      const text = await res.text();
-      let csvText = text;
-      try { const o = JSON.parse(text); if (o.contents) csvText = o.contents; } catch {}
-      const history = parseCSV(csvText);
-      if (history.length >= 10) return makeResult(history, null);
-      throw new Error('CSV only ' + history.length + ' rows');
-    } catch(e) { lastErr = e; }
-
-    // 3) Stooq
+      const res=await fetchWithTimeout(proxyFn(urlCSV),20000); if(!res.ok) throw new Error('CSV HTTP '+res.status);
+      const text=await res.text(); let csvText=text;
+      try { const o=JSON.parse(text); if(o.contents) csvText=o.contents; } catch {}
+      const history=parseCSV(csvText); if(history.length>=10) return makeResult(history,null);
+      throw new Error('CSV only '+history.length+' rows');
+    } catch(e) { lastErr=e; }
     try {
-      const res = await fetchWithTimeout(proxyFn(urlStooq), 20000);
-      if (!res.ok) throw new Error('Stooq HTTP ' + res.status);
-      const text = await res.text();
-      let csvText = text;
-      try { const o = JSON.parse(text); if (o.contents) csvText = o.contents; } catch {}
-      const history = parseStooq(csvText);
-      if (history.length >= 10) return makeResult(history, null);
-      throw new Error('Stooq only ' + history.length + ' rows');
-    } catch(e) { lastErr = e; }
-
+      const res=await fetchWithTimeout(proxyFn(urlStooq),20000); if(!res.ok) throw new Error('Stooq HTTP '+res.status);
+      const text=await res.text(); let csvText=text;
+      try { const o=JSON.parse(text); if(o.contents) csvText=o.contents; } catch {}
+      const history=parseStooq(csvText); if(history.length>=10) return makeResult(history,null);
+      throw new Error('Stooq only '+history.length+' rows');
+    } catch(e) { lastErr=e; }
     await sleep(800);
   }
-
-  throw new Error(lastErr?.message || 'Sab sources fail');
+  throw new Error(lastErr?.message||'Sab sources fail');
 }
-function savePrice(sym, fetchResult) {
-  const today = todayISO();
-  const ts = Date.now();
-  if (!S.prices[sym]) S.prices[sym] = [];
-
-  const price = typeof fetchResult === 'object' ? fetchResult.price : fetchResult;
-  const history = typeof fetchResult === 'object' ? (fetchResult.history || []) : [];
-
-  // Saari history save karo (aaj ki bhi) — RSI-14 pehli fetch mein hi milega
-  history.forEach(h => {
-    if (!h.date) return;
-    const exists = S.prices[sym].find(p => p.date === h.date);
-    if (!exists) {
-      S.prices[sym].push({ date: h.date, price: h.price });
-    } else {
-      exists.price = h.price;
-    }
-  });
-
-  // Aaj ka live price ts ke saath update karo (loop tracking ke liye)
-  S.prices[sym] = S.prices[sym].filter(h => h.date !== today);
-  S.prices[sym].push({ date: today, price, ts });
-  S.prices[sym].sort((a,b) => a.date.localeCompare(b.date));
-  // Max 60 din ka data rakho
-  if (S.prices[sym].length > 60) S.prices[sym] = S.prices[sym].slice(-60);
+function savePrice(sym,fetchResult) {
+  const today=todayISO(); const ts=Date.now();
+  if(!S.prices[sym]) S.prices[sym]=[];
+  const price=typeof fetchResult==='object'?fetchResult.price:fetchResult;
+  const history=typeof fetchResult==='object'?(fetchResult.history||[]):[];
+  history.forEach(h=>{ if(!h.date) return; const exists=S.prices[sym].find(p=>p.date===h.date); if(!exists) S.prices[sym].push({date:h.date,price:h.price}); else exists.price=h.price; });
+  S.prices[sym]=S.prices[sym].filter(h=>h.date!==today);
+  S.prices[sym].push({date:today,price,ts});
+  S.prices[sym].sort((a,b)=>a.date.localeCompare(b.date));
+  if(S.prices[sym].length>60) S.prices[sym]=S.prices[sym].slice(-60);
 }
-
 function timeAgo(ts) {
-  if (!ts) return null;
-  const diffMs = Date.now() - ts;
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffMin < 1) return 'abhi abhi';
-  if (diffMin < 60) return diffMin + ' min pehle';
-  if (diffHr < 24) return diffHr + ' hr pehle';
-  return Math.floor(diffHr/24) + ' din pehle';
+  if(!ts) return null; const diffMs=Date.now()-ts; const diffMin=Math.floor(diffMs/60000); const diffHr=Math.floor(diffMin/60);
+  if(diffMin<1) return 'abhi abhi'; if(diffMin<60) return diffMin+' min pehle'; if(diffHr<24) return diffHr+' hr pehle'; return Math.floor(diffHr/24)+' din pehle';
 }
-function isGoodFetchTime() {
-  const now = nowIST();
-  const h = now.getHours();
-  const m = now.getMinutes();
-  const totalMin = h * 60 + m;
-  return totalMin >= 960 || totalMin <= 540;
-}
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function isGoodFetchTime() { const now=nowIST(); const totalMin=now.getHours()*60+now.getMinutes(); return totalMin>=960||totalMin<=540; }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 
-/* Rolling Loop (same) */
-let loopRunning = false;
-let loopIndex = 0;
-let loopRound = 0;
-let loopOk = 0;
-let loopFail = 0;
-let nextEtfTimer = null;
-let consecutiveRateLimits = 0;
-let lastErr = null;
-let countdownSec = 0;
+/* ══ LOOP ══ */
+let loopRunning=false,loopIndex=0,loopRound=0,loopOk=0,loopFail=0,nextEtfTimer=null,consecutiveRateLimits=0,lastErr=null,countdownSec=0;
+function getLastTs(sym) { const hist=S.prices[sym]||[]; if(!hist.length) return 0; const withTs=hist.filter(h=>h.ts); if(!withTs.length) return 1; return Math.max(...withTs.map(h=>h.ts)); }
 
 async function startLoop() {
-  if (loopRunning) return;
-  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
-  loopRunning = true;
-  loopIndex = 0;
-  loopRound = 0;
-  loopOk = 0;
-  loopFail = 0;
-  fetchAbort = false;
-  initStatusRows();
-  updateLoopUI();
-  setApiStatus('api-loading', '🔄 Loop ON');
-  showToast('🔄 Rolling loop shuru! Har ETF 10 min baad update hoga.');
-  runLoopTick();
+  if(loopRunning) return;
+  if(!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo'); return; }
+  loopRunning=true; loopIndex=0; loopRound=0; loopOk=0; loopFail=0; fetchAbort=false;
+  initStatusRows(); updateLoopUI(); setApiStatus('api-loading','🔄 Loop ON');
+  showToast('🔄 Rolling loop shuru! Har ETF 10 min baad update hoga.'); runLoopTick();
 }
 function stopLoop() {
-  loopRunning = false;
-  fetchAbort = true;
-  if (nextEtfTimer) clearTimeout(nextEtfTimer);
-  nextEtfTimer = null;
-  setApiStatus('api-idle', '⏹ Stopped');
-  setBar(0);
-  updateLoopUI();
-  showToast('⏹ Loop band ho gayi.');
+  loopRunning=false; fetchAbort=true; if(nextEtfTimer) clearTimeout(nextEtfTimer); nextEtfTimer=null;
+  setApiStatus('api-idle','⏹ Stopped'); setBar(0); updateLoopUI(); showToast('⏹ Loop band ho gayi.');
 }
 async function retryOne(sym) {
-  const stEl = document.getElementById('fst-' + sym);
-  const npEl = document.getElementById('np-st-' + sym);
-  const upd = (html) => { if (stEl) stEl.innerHTML = html; if (npEl) npEl.innerHTML = html; };
+  const stEl=document.getElementById('fst-'+sym);
+  const upd=(html)=>{ if(stEl) stEl.innerHTML=html; };
   upd(`<span class="spinner"></span> Fetching…`);
-  // Card state
-  const cardEl = document.getElementById('etf-card-' + sym);
-  if (cardEl) {
-    cardEl.classList.add('ec-fetching');
-    const stBadge = document.getElementById('ec-st-' + sym);
-    if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-fetch" id="ec-st-${sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
-  }
+  const cardEl=document.getElementById('etf-card-'+sym);
+  if(cardEl) { cardEl.classList.add('ec-fetching'); const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-fetch" id="ec-st-${sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`; }
   try {
-    const result = await fetchYahooPrice(sym);
-    const price = result.price;
-    savePrice(sym, result);
-    save();
-    const t = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${t}</span>`;
-    // Update card
-    const d2 = getETFData(sym);
-    const oversold = S.rsiOversold || 30;
-    const rsi = d2.rsi;
-    const rsiPct = rsi !== null ? Math.min(Math.max(rsi,0),100) : 0;
-    const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
-    const rsiBg2 = rsi === null ? '#444' : rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' : rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' : 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
-    if (cardEl) {
+    const result=await fetchYahooPrice(sym); const price=result.price;
+    savePrice(sym,result); save();
+    const t=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    if(stEl) stEl.innerHTML=`<span class="fe-ok">✅ ₹${price.toFixed(2)}</span> <span style="color:var(--muted);font-size:.55rem;">${t}</span>`;
+    const d2=getETFData(sym); const oversold=S.rsiOversold||30; const rsi=d2.rsi;
+    const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
+    if(cardEl) {
       cardEl.classList.remove('ec-fetching');
-      const stBadge = document.getElementById('ec-st-' + sym);
-      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-live" id="ec-st-${sym}">🟢 Live</span>`;
-      const pxEl = document.getElementById('ec-px-' + sym);
-      if (pxEl) pxEl.innerHTML = `<div class="ec-price">₹${price.toFixed(2)}</div>`;
-      const timeEl = document.getElementById('ec-time-' + sym);
-      if (timeEl) timeEl.textContent = `⏱ ${t} (abhi abhi)`;
-      const rsiEl = document.getElementById('ec-rsi-' + sym);
-      if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
-      const barEl = document.getElementById('ec-bar-' + sym);
-      if (barEl) {
-        if (rsi !== null) { barEl.style.width = (100 - rsiPct) + '%'; barEl.style.background = rsiBg2; barEl.style.opacity = '1'; }
-        else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
-      }
+      const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-live" id="ec-st-${sym}">🟢 Live</span>`;
+      const pxEl=document.getElementById('ec-px-'+sym); if(pxEl) pxEl.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
+      const timeEl=document.getElementById('ec-time-'+sym); if(timeEl) timeEl.textContent=`⏱ ${t} (abhi abhi)`;
+      const rsiEl=document.getElementById('ec-rsi-'+sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
+      const barEl=document.getElementById('ec-bar-'+sym);
+      if(barEl) { barEl.style.width=rsiMaskPct(rsi)+'%'; barEl.style.opacity='1'; }
     }
-    showToast(`✅ ${sym} — ₹${price.toFixed(2)}`);
-    renderDashboard();
+    showToast(`✅ ${sym} — ₹${price.toFixed(2)}`); renderDashboard();
   } catch(e) {
-    const msg = (e.message||'?').slice(0,30);
-    if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg}</span> <button onclick="retryOne('${sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
-    if (npEl) npEl.innerHTML = `<span style="color:var(--red);">❌ ${msg}</span>`;
-    if (cardEl) {
-      cardEl.classList.remove('ec-fetching');
-      const stBadge = document.getElementById('ec-st-' + sym);
-      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-pending" id="ec-st-${sym}">❌ Failed</span>`;
-    }
+    const msg=(e.message||'?').slice(0,30);
+    if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${msg}</span> <button onclick="retryOne('${sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
+    if(cardEl) { cardEl.classList.remove('ec-fetching'); const stB=document.getElementById('ec-st-'+sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-pending" id="ec-st-${sym}">❌ Failed</span>`; }
     showToast(`❌ ${sym} fail — ${msg}`);
   }
 }
 async function runLoopTick() {
-  if (!loopRunning || fetchAbort) return;
-  if (!S.etfs.length) { stopLoop(); return; }
-
-  const today = todayISO();
-
-  // PRIORITY: Jo ETF sabse pehle stale hua (oldest timestamp), usse pehle fetch karo
-  // Never-fetched = ts:0 = highest priority
-  function getLastTs(sym) {
-    const hist = S.prices[sym] || [];
-    if (!hist.length) return 0;
-    const withTs = hist.filter(h => h.ts);
-    if (!withTs.length) return 1;
-    return Math.max(...withTs.map(h => h.ts));
+  if(!loopRunning||fetchAbort) return;
+  if(!S.etfs.length) { stopLoop(); return; }
+  const sortedByAge=[...S.etfs].sort((a,b)=>getLastTs(a.sym)-getLastTs(b.sym));
+  const etfToFetch=sortedByAge[0];
+  const oldestTs=getLastTs(sortedByAge[0].sym);
+  const newestTs=getLastTs(sortedByAge[sortedByAge.length-1].sym);
+  if(loopIndex>0&&newestTs>0&&oldestTs>0&&newestTs-oldestTs<60000) {
+    loopRound++; loopOk=0; loopFail=0; S.lastRoundTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); save();
+    showToast(`✅ Round ${loopRound} complete! Phir se shuru…`); updateLoopUI();
   }
-  const sortedByAge = [...S.etfs].sort((a, b) => getLastTs(a.sym) - getLastTs(b.sym));
-  const etfToFetch = sortedByAge[0]; // Always oldest timestamp first
-
-  // Check if round complete (all have been refreshed at least once in a rolling sense)
-  const oldestTs = getLastTs(sortedByAge[0].sym);
-  const newestTs = getLastTs(sortedByAge[sortedByAge.length-1].sym);
-  if (loopIndex > 0 && newestTs > 0 && oldestTs > 0 && newestTs - oldestTs < 60000) {
-    loopRound++;
-    loopOk = 0; loopFail = 0;
-    S.lastRoundTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    save();
-    showToast(`✅ Round ${loopRound} complete! Phir se shuru…`);
-    updateLoopUI();
-  }
-
-  const e = etfToFetch;
-  loopIndex++;
-
-  // Card update — fetching state
-  const cardEl = document.getElementById('etf-card-' + e.sym);
-  if (cardEl) {
+  const e=etfToFetch; loopIndex++;
+  const cardEl=document.getElementById('etf-card-'+e.sym);
+  if(cardEl) {
     cardEl.classList.add('ec-fetching');
-    const stEl = document.getElementById('ec-st-' + e.sym);
-    if (stEl) stEl.outerHTML = `<span class="ec-st-badge ec-st-fetch" id="ec-st-${e.sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
-    const pxEl = document.getElementById('ec-px-' + e.sym);
-    if (pxEl) pxEl.innerHTML = `<div class="ec-no-price" style="color:var(--yellow);animation:pulse 1s infinite;">...</div>`;
-    cardEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+    const stEl=document.getElementById('ec-st-'+e.sym); if(stEl) stEl.outerHTML=`<span class="ec-st-badge ec-st-fetch" id="ec-st-${e.sym}"><span class="spinner" style="width:7px;height:7px;border-width:1.5px;"></span> Fetching</span>`;
+    const pxEl=document.getElementById('ec-px-'+e.sym); if(pxEl) pxEl.innerHTML=`<div class="ec-no-price" style="color:var(--yellow);animation:pulse 1s infinite;">...</div>`;
+    cardEl.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  // Legacy row update (if exists)
-  const stEl = document.getElementById('fst-' + e.sym);
-  if (stEl) stEl.innerHTML = `<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
-
-  const fetchedCount = S.etfs.filter(ex => getLastTs(ex.sym) > 1).length;
-  setBar(Math.round((fetchedCount / S.etfs.length) * 100));
-  setApiStatus('api-loading', `🔄 ${e.sym} — ${fetchedCount}/${S.etfs.length}`);
-
+  const stEl=document.getElementById('fst-'+e.sym);
+  if(stEl) stEl.innerHTML=`<span class="spinner"></span> <span style="color:var(--yellow);font-size:.62rem;font-weight:700;">Fetching…</span>`;
+  const fetchedCount=S.etfs.filter(ex=>getLastTs(ex.sym)>1).length;
+  setBar(Math.round((fetchedCount/S.etfs.length)*100));
+  setApiStatus('api-loading',`🔄 ${e.sym} — ${fetchedCount}/${S.etfs.length}`);
   try {
-    const result = await fetchYahooPrice(e.sym);
-    const price = result.price;
-    savePrice(e.sym, result);
-    loopOk++;
-    S.lastFetchDate = today;
-    S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    S.fetchedToday = S.etfs.filter(ex => (S.prices[ex.sym]||[]).some(h => h.date === today)).length;
+    const result=await fetchYahooPrice(e.sym); const price=result.price;
+    savePrice(e.sym,result); loopOk++;
+    S.lastFetchDate=todayISO(); S.lastFetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    S.fetchedToday=S.etfs.filter(ex=>(S.prices[ex.sym]||[]).some(h=>h.date===todayISO())).length;
     save();
-    const fetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-
-    // Update card
-    const d2 = getETFData(e.sym);
-    const oversold = S.rsiOversold || 30;
-    const rsi = d2.rsi;
-    const rsiPct = rsi !== null ? Math.min(Math.max(rsi,0),100) : 0;
-    const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
-    const rsiBgGrad2 = rsi === null ? '#444' : rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' : rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' : 'linear-gradient(90deg,#4CAF82,#5B9BD5)';
-    const cardEl2 = document.getElementById('etf-card-' + e.sym);
-    if (cardEl2) {
+    const fetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const d2=getETFData(e.sym); const oversold=S.rsiOversold||30; const rsi=d2.rsi;
+    const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
+    const cardEl2=document.getElementById('etf-card-'+e.sym);
+    if(cardEl2) {
       cardEl2.classList.remove('ec-fetching');
-      const stBadge = document.getElementById('ec-st-' + e.sym);
-      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-live" id="ec-st-${e.sym}">🟢 Live</span>`;
-      const pxEl2 = document.getElementById('ec-px-' + e.sym);
-      if (pxEl2) pxEl2.innerHTML = `<div class="ec-price">₹${price.toFixed(2)}</div>`;
-      const timeEl = document.getElementById('ec-time-' + e.sym);
-      if (timeEl) timeEl.textContent = `⏱ ${fetchTime} (abhi abhi)`;
-      const rsiEl = document.getElementById('ec-rsi-' + e.sym);
-      if (rsiEl) { rsiEl.textContent = rsi !== null ? rsi.toFixed(1) : '—'; rsiEl.style.color = rsiColor; }
-      const barEl = document.getElementById('ec-bar-' + e.sym);
-      if (barEl) {
-        if (rsi !== null) { barEl.style.width = (100 - rsiPct) + '%'; barEl.style.background = rsiBgGrad2; barEl.style.opacity = '1'; }
-        else { barEl.style.width = '100%'; barEl.style.background = 'repeating-linear-gradient(90deg,var(--bg4) 0,var(--bg4) 6px,var(--bg3) 6px,var(--bg3) 12px)'; barEl.style.opacity = '.5'; }
-      }
+      const stB=document.getElementById('ec-st-'+e.sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-live" id="ec-st-${e.sym}">🟢 Live</span>`;
+      const pxEl2=document.getElementById('ec-px-'+e.sym); if(pxEl2) pxEl2.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
+      const timeEl=document.getElementById('ec-time-'+e.sym); if(timeEl) timeEl.textContent=`⏱ ${fetchTime} (abhi abhi)`;
+      const rsiEl=document.getElementById('ec-rsi-'+e.sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
+      const barEl=document.getElementById('ec-bar-'+e.sym);
+      if(barEl) { barEl.style.width=rsiMaskPct(rsi)+'%'; barEl.style.opacity='1'; }
     }
-    if (stEl) stEl.innerHTML = `<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
-    if (document.getElementById('tab-dashboard-content').style.display !== 'none') renderDashboard();
+    if(stEl) stEl.innerHTML=`<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.5rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
+    if(document.getElementById('tab-dashboard-content').style.display!=='none') renderDashboard();
   } catch(err) {
-    loopFail++;
-    lastErr = err;
-    const msg = err.message || 'Error';
-    const cardEl3 = document.getElementById('etf-card-' + e.sym);
-    if (cardEl3) {
-      cardEl3.classList.remove('ec-fetching');
-      const stBadge = document.getElementById('ec-st-' + e.sym);
-      if (stBadge) stBadge.outerHTML = `<span class="ec-st-badge ec-st-pending" id="ec-st-${e.sym}">❌ Failed</span>`;
-    }
-    if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
+    loopFail++; lastErr=err; const msg=err.message||'Error';
+    const cardEl3=document.getElementById('etf-card-'+e.sym);
+    if(cardEl3) { cardEl3.classList.remove('ec-fetching'); const stB=document.getElementById('ec-st-'+e.sym); if(stB) stB.outerHTML=`<span class="ec-st-badge ec-st-pending" id="ec-st-${e.sym}">❌ Failed</span>`; }
+    if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${msg.slice(0,30)}</span> <button onclick="retryOne('${e.sym}')" style="font-size:.52rem;background:var(--yellow-dim);border:1px solid rgba(245,200,66,.3);color:var(--yellow);border-radius:4px;padding:1px 6px;cursor:pointer;margin-left:4px;">↻ Retry</button>`;
   }
   updateLoopUI();
-  // Smart delay: 90 sec normal, agar rate limit error aaye to badh jaata hai
-  const isRateLimit = lastErr && (lastErr.message||'').toLowerCase().includes('429');
-  if (isRateLimit) {
-    consecutiveRateLimits = (consecutiveRateLimits || 0) + 1;
-    showToast('⚠️ Rate limit! Gap badh raha hai...');
-  } else {
-    consecutiveRateLimits = Math.max(0, (consecutiveRateLimits || 0) - 1);
-  }
-  const DELAY_SEC = consecutiveRateLimits > 0 ? Math.min(300, 90 + consecutiveRateLimits * 60) : 90;
-  countdownSec = DELAY_SEC;
-  tickCountdown();
+  const isRateLimit=lastErr&&(lastErr.message||'').toLowerCase().includes('429');
+  if(isRateLimit) { consecutiveRateLimits=(consecutiveRateLimits||0)+1; showToast('⚠️ Rate limit! Gap badh raha hai...'); }
+  else { consecutiveRateLimits=Math.max(0,(consecutiveRateLimits||0)-1); }
+  const DELAY_SEC=consecutiveRateLimits>0?Math.min(300,90+consecutiveRateLimits*60):90;
+  countdownSec=DELAY_SEC; tickCountdown();
 }
-function tickCountdown() {
-  if (!loopRunning) return;
-  updateCountdown();
-  if (countdownSec <= 0) {
-    runLoopTick();
-    return;
-  }
-  countdownSec--;
-  nextEtfTimer = setTimeout(tickCountdown, 1000);
-}
-function updateCountdown() {
-  const el = document.getElementById('loopCountdown');
-  if (!el) return;
-  if (!loopRunning) { el.textContent = '—'; return; }
-  if (countdownSec <= 0) { el.textContent = 'Fetching…'; return; }
-  const m = Math.floor(countdownSec / 60);
-  const s = countdownSec % 60;
-  el.textContent = `${m}:${s.toString().padStart(2,'0')} mein next`;
-}
+function tickCountdown() { if(!loopRunning) return; updateCountdown(); if(countdownSec<=0){runLoopTick();return;} countdownSec--; nextEtfTimer=setTimeout(tickCountdown,1000); }
+function updateCountdown() { const el=document.getElementById('loopCountdown'); if(!el) return; if(!loopRunning){el.textContent='—';return;} if(countdownSec<=0){el.textContent='Fetching…';return;} const m=Math.floor(countdownSec/60),s=countdownSec%60; el.textContent=`${m}:${s.toString().padStart(2,'0')} mein next`; }
 function updateLoopUI() {
-  const btnStart = document.getElementById('btnLoopStart');
-  const btnStop = document.getElementById('btnLoopStop');
-  if (btnStart) btnStart.disabled = loopRunning;
-  if (btnStop) btnStop.disabled = !loopRunning;
-  const statusEl = document.getElementById('loopStatus');
-  if (statusEl) {
-    if (loopRunning) {
-      const nextSym = S.etfs[loopIndex]?.sym || '—';
-      const delayMin = Math.round((consecutiveRateLimits > 0 ? Math.min(300, 90 + consecutiveRateLimits*60) : 90)/60*10)/10;
-      statusEl.innerHTML = `<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail} · ⏱${delayMin}m gap`;
-    } else {
-      statusEl.innerHTML = `<span style="color:var(--muted)">⚫ Loop band hai</span>`;
-    }
+  const btnStart=document.getElementById('btnLoopStart'),btnStop=document.getElementById('btnLoopStop');
+  if(btnStart) btnStart.disabled=loopRunning; if(btnStop) btnStop.disabled=!loopRunning;
+  const statusEl=document.getElementById('loopStatus');
+  if(statusEl) {
+    if(loopRunning) { const delayMin=Math.round((consecutiveRateLimits>0?Math.min(300,90+consecutiveRateLimits*60):90)/60*10)/10; statusEl.innerHTML=`<span style="color:var(--green)">🟢 Loop chal rahi hai</span> · Round ${loopRound+1} · ${loopIndex}/${S.etfs.length} done · ✅${loopOk} ❌${loopFail} · ⏱${delayMin}m gap`; }
+    else { statusEl.innerHTML=`<span style="color:var(--muted)">⚫ Loop band hai</span>`; }
   }
-  const el = document.getElementById('loopRoundInfo');
-  if (el && loopRound > 0) {
-    el.textContent = `Last round complete: ${S.lastRoundTime||'—'} · Total rounds: ${loopRound}`;
-    el.style.color = 'var(--green)';
-  }
+  const el=document.getElementById('loopRoundInfo');
+  if(el&&loopRound>0) { el.textContent=`Last round complete: ${S.lastRoundTime||'—'} · Total rounds: ${loopRound}`; el.style.color='var(--green)'; }
   renderFetchTab();
 }
-/* ── helpers for card rendering ── */
-function getLastTs(sym) {
-  const hist = S.prices[sym] || [];
-  if (!hist.length) return 0;
-  const withTs = hist.filter(h => h.ts);
-  if (!withTs.length) return 1;
-  return Math.max(...withTs.map(h => h.ts));
-}
 
+/* ══ BUILD ETF CARD ══ */
 function buildEtfCard(e, rank) {
-  const today = todayISO();
-  const hist = (S.prices[e.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
-  const td = hist.find(h => h.date === today);
-  const lastEntry = hist[0];
-  const d = getETFData(e.sym);
-  const oversold = S.rsiOversold || 30;
-
-  // Status badge
-  let badgeClass = 'ec-st-pending', badgeTxt = '⏳ Pending';
-  if (td) {
-    const diffMin = td.ts ? Math.floor((Date.now() - td.ts) / 60000) : 9999;
-    if (diffMin < 60) { badgeClass='ec-st-live'; badgeTxt='🟢 Live'; }
-    else { badgeClass='ec-st-stale'; badgeTxt='🕐 Old'; }
-  } else if (lastEntry) {
-    badgeClass='ec-st-stale'; badgeTxt='🕐 Stale';
+  const today=todayISO();
+  const hist=(S.prices[e.sym]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const td=hist.find(h=>h.date===today); const lastEntry=hist[0];
+  const d=getETFData(e.sym); const oversold=S.rsiOversold||30;
+  let badgeClass='ec-st-pending',badgeTxt='⏳ Pending';
+  if(td) { const diffMin=td.ts?Math.floor((Date.now()-td.ts)/60000):9999; if(diffMin<60){badgeClass='ec-st-live';badgeTxt='🟢 Live';}else{badgeClass='ec-st-stale';badgeTxt='🕐 Old';} }
+  else if(lastEntry) { badgeClass='ec-st-stale';badgeTxt='🕐 Stale'; }
+  const lastP=td||lastEntry;
+  let timeStr='Kabhi nahi';
+  if(lastP) {
+    if(lastP.ts) { const t=new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); const diffMin=Math.floor((Date.now()-lastP.ts)/60000); const diffHr=Math.floor(diffMin/60); if(diffMin<1) timeStr=t+' (abhi abhi)'; else if(diffMin<60) timeStr=t+` (${diffMin}m pehle)`; else if(diffHr<24) timeStr=t+` (${diffHr}h pehle)`; else timeStr=fmtDate(lastP.date); }
+    else { timeStr=fmtDate(lastP.date); }
   }
-
-  // Time display
-  const lastP = td || lastEntry;
-  let timeStr = 'Kabhi nahi';
-  if (lastP) {
-    if (lastP.ts) {
-      const t = new Date(lastP.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-      const diffMin = Math.floor((Date.now() - lastP.ts) / 60000);
-      const diffHr = Math.floor(diffMin / 60);
-      if (diffMin < 1) timeStr = t + ' (abhi abhi)';
-      else if (diffMin < 60) timeStr = t + ` (${diffMin}m pehle)`;
-      else if (diffHr < 24) timeStr = t + ` (${diffHr}h pehle)`;
-      else timeStr = fmtDate(lastP.date);
-    } else { timeStr = fmtDate(lastP.date); }
-  }
-
-  // RSI
-  const rsi = d.rsi;
-  const rsiPct = rsi !== null ? Math.min(Math.max(rsi, 0), 100) : 0;
-  const rsiColor = rsi === null ? 'var(--muted)' : rsi < oversold ? 'var(--red)' : rsi > 70 ? 'var(--amber)' : 'var(--green)';
-  const rsiBgGrad = rsi === null ? '#444' :
-    rsi < oversold ? 'linear-gradient(90deg,#E05252,#F07030)' :
-    rsi > 70 ? 'linear-gradient(90deg,#E8A440,#F5C842)' :
-    'linear-gradient(90deg,#4CAF82,#5B9BD5)';
-  const isOs = rsi !== null && rsi < oversold;
-
-  // Card class
-  let cardClass = 'etf-card';
-  if (isOs) cardClass += rank === 1 ? ' os os-1' : ' os';
-
+  const rsi=d.rsi;
+  const rsiColor=rsi===null?'var(--muted)':rsi<oversold?'var(--red)':rsi>70?'var(--amber)':'var(--green)';
+  const isOs=rsi!==null&&rsi<oversold;
+  let cardClass='etf-card';
+  if(isOs) cardClass+=rank===1?' os os-1':' os';
+  const maskPct=rsiMaskPct(rsi);
   return `<div class="${cardClass}" id="etf-card-${e.sym}">
     <div class="ec-top">
       <div>
         <div class="ec-sym">${e.sym}</div>
-        ${isOs ? `<span class="ec-os-tag">📉 Oversold</span>` : ''}
+        ${isOs?`<span class="ec-os-tag">📉 Oversold</span>`:''}
       </div>
       <span class="ec-st-badge ${badgeClass}" id="ec-st-${e.sym}">${badgeTxt}</span>
     </div>
     <div id="ec-px-${e.sym}">
-      ${td ? `<div class="ec-price">₹${td.price.toFixed(2)}</div>` : `<div class="ec-no-price">—</div>`}
+      ${td?`<div class="ec-price">₹${td.price.toFixed(2)}</div>`:`<div class="ec-no-price">—</div>`}
     </div>
     <div class="ec-time" id="ec-time-${e.sym}">⏱ ${timeStr}</div>
     <div class="ec-rsi-row">
       <div>
-        <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${d.isPartialRSI ? '~'+d.effPeriod+'D' : S.rsiPeriod+'D'}</div>
-        <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi !== null ? rsi.toFixed(1) : '—'}</div>
+        <div style="font-size:.44rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">RSI ${d.isPartialRSI?'~'+d.effPeriod+'D':S.rsiPeriod+'D'}</div>
+        <div class="ec-rsi-val" style="color:${rsiColor};" id="ec-rsi-${e.sym}">${rsi!==null?rsi.toFixed(1):'—'}</div>
       </div>
       <div style="font-size:.46rem;color:${rsiColor};text-align:right;max-width:60px;">
-        ${rsi === null ? `` : rsi < oversold ? '📉 Oversold' : rsi > 70 ? '📈 Overbought' : 'Neutral'}
+        ${rsi===null?'':rsi<oversold?'📉 Oversold':rsi>70?'📈 Overbought':'Neutral'}
       </div>
     </div>
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
-        ${rsi !== null
-          ? `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${100 - rsiPct}%;background:${rsiBgGrad};"></div>`
-          : `<div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:0%;background:#444;"></div>`
-        }
+        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${maskPct}%;"></div>
       </div>
-      <div class="ec-bar-labels"><span>100</span><span style="color:var(--amber);">70</span><span style="color:var(--red);">30</span><span>0</span></div>
+      <div class="ec-bar-labels">
+        <span>100</span>
+        <span style="color:var(--amber);">70</span>
+        <span style="color:var(--red);">30</span>
+        <span>0</span>
+      </div>
     </div>
   </div>`;
 }
 
 function initStatusRows() {
-  const statusList = document.getElementById('fetchStatusList');
-  if (!statusList) return;
-  const today = todayISO();
-  const oversold = S.rsiOversold || 30;
-
-  const fetchedToday = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today)).length;
-
-  // Sort: RSI < oversold first (lowest RSI first = most oversold), then rest by RSI, null at bottom
-  const etfsSorted = [...S.etfs].sort((a, b) => {
-    const da = getETFData(a.sym), db = getETFData(b.sym);
-    const ra = da.rsi, rb = db.rsi;
-    const aOs = ra !== null && ra < oversold;
-    const bOs = rb !== null && rb < oversold;
-    if (aOs && !bOs) return -1;
-    if (!aOs && bOs) return 1;
-    if (ra === null && rb === null) return 0;
-    if (ra === null) return 1;
-    if (rb === null) return -1;
-    return ra - rb;
+  const statusList=document.getElementById('fetchStatusList'); if(!statusList) return;
+  const today=todayISO(); const oversold=S.rsiOversold||30;
+  const fetchedToday=S.etfs.filter(e=>(S.prices[e.sym]||[]).some(h=>h.date===today)).length;
+  const etfsSorted=[...S.etfs].sort((a,b)=>{
+    const da=getETFData(a.sym),db=getETFData(b.sym); const ra=da.rsi,rb=db.rsi;
+    const aOs=ra!==null&&ra<oversold,bOs=rb!==null&&rb<oversold;
+    if(aOs&&!bOs) return -1; if(!aOs&&bOs) return 1;
+    if(ra===null&&rb===null) return 0; if(ra===null) return 1; if(rb===null) return -1; return ra-rb;
   });
-
-  const osEtfs = etfsSorted.filter(e => { const d = getETFData(e.sym); return d.rsi !== null && d.rsi < oversold; });
-  const normalEtfs = etfsSorted.filter(e => { const d = getETFData(e.sym); return d.rsi === null || d.rsi >= oversold; });
-
-  let html = `<div style="padding:5px 10px 8px;font-size:.58rem;background:var(--bg3);border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+  const osEtfs=etfsSorted.filter(e=>{const d=getETFData(e.sym);return d.rsi!==null&&d.rsi<oversold;});
+  const normalEtfs=etfsSorted.filter(e=>{const d=getETFData(e.sym);return d.rsi===null||d.rsi>=oversold;});
+  let html=`<div style="padding:5px 10px 8px;font-size:.58rem;background:var(--bg3);border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
     <span>Aaj fetched: <strong style="color:var(--green)">${fetchedToday}</strong> / ${S.etfs.length}</span>
-    <span style="color:var(--muted)">${S.etfs.length - fetchedToday} baaki</span>
+    <span style="color:var(--muted)">${S.etfs.length-fetchedToday} baaki</span>
   </div>`;
-
-  if (osEtfs.length > 0) {
-    html += `<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
-    html += `<div class="etf-cards-grid" style="margin-bottom:10px;">`;
-    osEtfs.forEach((e, i) => { html += buildEtfCard(e, i+1); });
-    html += `</div>`;
+  if(osEtfs.length>0) {
+    html+=`<div class="cards-sec-hdr csh-os">📉 RSI &lt; ${oversold} — Oversold (${osEtfs.length})</div>`;
+    html+=`<div class="etf-cards-grid" style="margin-bottom:10px;">`;
+    osEtfs.forEach((e,i)=>{html+=buildEtfCard(e,i+1);});
+    html+=`</div>`;
   }
-
-  if (normalEtfs.length > 0) {
-    html += `<div class="cards-sec-hdr csh-normal">📊 Baaki ETFs — RSI Sorted (${normalEtfs.length})</div>`;
-    html += `<div class="etf-cards-grid">`;
-    normalEtfs.forEach((e, i) => { html += buildEtfCard(e, 0); });
-    html += `</div>`;
+  if(normalEtfs.length>0) {
+    html+=`<div class="cards-sec-hdr csh-normal">📊 Baaki ETFs — RSI Sorted (${normalEtfs.length})</div>`;
+    html+=`<div class="etf-cards-grid">`;
+    normalEtfs.forEach((e,i)=>{html+=buildEtfCard(e,0);});
+    html+=`</div>`;
   }
-
-  statusList.innerHTML = html;
+  statusList.innerHTML=html;
 }
-async function fetchAllPrices(force = false) {
-  if (loopRunning) { showToast('⚠️ Loop chal rahi hai — pehle band karo'); return; }
-  if (!S.etfs.length) { showToast('⚠️ Settings mein ETF list daalo pehle'); return; }
-  if (!force && !isGoodFetchTime()) {
-    if (!confirm('Market abhi khula hai.\nAbhi bhi ek baar fetch karna hai?')) return;
+async function fetchAllPrices(force=false) {
+  if(loopRunning){showToast('⚠️ Loop chal rahi hai — pehle band karo');return;}
+  if(!S.etfs.length){showToast('⚠️ Settings mein ETF list daalo pehle');return;}
+  if(!force&&!isGoodFetchTime()){if(!confirm('Market abhi khula hai.\nAbhi bhi ek baar fetch karna hai?')) return;}
+  fetchAbort=false; setApiStatus('api-loading','⬇️ Fetching all…');
+  const btnFetchEl=document.getElementById('btnFetch'); if(btnFetchEl) btnFetchEl.disabled=true;
+  initStatusRows(); let ok=0,fail=0;
+  for(let i=0;i<S.etfs.length;i++) {
+    if(fetchAbort) break; const e=S.etfs[i];
+    const stEl=document.getElementById('fst-'+e.sym); if(stEl) stEl.innerHTML=`<span class="spinner"></span> Fetching…`;
+    setBar(Math.round((i/S.etfs.length)*100));
+    try { const result=await fetchYahooPrice(e.sym); savePrice(e.sym,result); ok++; if(stEl) stEl.innerHTML=`<span class="fe-ok">✅ ₹${result.price.toFixed(2)}</span>`; }
+    catch(err) { fail++; if(stEl) stEl.innerHTML=`<span class="fe-err">❌ ${(err.message||'?').slice(0,25)}</span>`; }
+    if(i<S.etfs.length-1) await sleep(400);
   }
-  fetchAbort = false;
-  setApiStatus('api-loading', '⬇️ Fetching all…');
-  const btnFetchEl = document.getElementById('btnFetch');
-  if (btnFetchEl) btnFetchEl.disabled = true;
-  initStatusRows();
-  let ok = 0, fail = 0;
-  for (let i = 0; i < S.etfs.length; i++) {
-    if (fetchAbort) break;
-    const e = S.etfs[i];
-    const stEl = document.getElementById('fst-' + e.sym);
-    if (stEl) stEl.innerHTML = `<span class="spinner"></span> Fetching…`;
-    setBar(Math.round((i / S.etfs.length) * 100));
-    try {
-      const result = await fetchYahooPrice(e.sym);
-      const price = result.price;
-      savePrice(e.sym, result);
-      ok++;
-      if (stEl) stEl.innerHTML = `<span class="fe-ok">✅ ₹${price.toFixed(2)}</span>`;
-    } catch(err) {
-      fail++;
-      if (stEl) stEl.innerHTML = `<span class="fe-err">❌ ${(err.message||'?').slice(0,25)}</span>`;
-    }
-    if (i < S.etfs.length - 1) await sleep(400);
-  }
-  setBar(100); setTimeout(() => setBar(0), 1500);
-  S.lastFetchDate = todayISO();
-  S.lastFetchTime = nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-  S.fetchedToday = ok;
-  save();
-  setApiStatus('api-done', `✅ ${ok} fetched`);
-  const btnFetchEl2 = document.getElementById('btnFetch');
-  if (btnFetchEl2) btnFetchEl2.disabled = false;
-  showToast(`✅ ${ok} fetched, ${fail} failed`);
-  renderFetchTab(); renderDashboard();
+  setBar(100); setTimeout(()=>setBar(0),1500);
+  S.lastFetchDate=todayISO(); S.lastFetchTime=nowIST().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); S.fetchedToday=ok; save();
+  setApiStatus('api-done',`✅ ${ok} fetched`);
+  const btnFetchEl2=document.getElementById('btnFetch'); if(btnFetchEl2) btnFetchEl2.disabled=false;
+  showToast(`✅ ${ok} fetched, ${fail} failed`); renderFetchTab(); renderDashboard();
 }
 function renderFetchTab() {
-  const today = todayISO();
-  const lfEl = document.getElementById('lastFetchTime');
-  if (lfEl) {
-    if (S.lastFetchDate === today && S.lastFetchTime) {
-      lfEl.textContent = `Aaj ${S.lastFetchTime}`;
-      lfEl.style.color = 'var(--green)';
-    } else if (S.lastFetchDate) {
-      lfEl.textContent = `${fmtDate(S.lastFetchDate)} ${S.lastFetchTime||''}`;
-      lfEl.style.color = 'var(--amber)';
-    } else {
-      lfEl.textContent = 'Kabhi nahi';
-    }
-  }
-  const fcEl = document.getElementById('fetchedCount');
-  if (fcEl) {
-    const today2 = todayISO();
-    const cnt = S.etfs.filter(e => (S.prices[e.sym]||[]).some(h => h.date === today2)).length;
-    fcEl.textContent = `${cnt} / ${S.etfs.length} ETFs`;
-    fcEl.style.color = cnt > 0 ? 'var(--green)' : 'var(--muted)';
-  }
+  const today=todayISO(); const lfEl=document.getElementById('lastFetchTime');
+  if(lfEl) { if(S.lastFetchDate===today&&S.lastFetchTime){lfEl.textContent=`Aaj ${S.lastFetchTime}`;lfEl.style.color='var(--green)';}else if(S.lastFetchDate){lfEl.textContent=`${fmtDate(S.lastFetchDate)} ${S.lastFetchTime||''}`;lfEl.style.color='var(--amber)';}else{lfEl.textContent='Kabhi nahi';} }
+  const fcEl=document.getElementById('fetchedCount');
+  if(fcEl) { const cnt=S.etfs.filter(e=>(S.prices[e.sym]||[]).some(h=>h.date===todayISO())).length; fcEl.textContent=`${cnt} / ${S.etfs.length} ETFs`; fcEl.style.color=cnt>0?'var(--green)':'var(--muted)'; }
   updateCountdown();
 }
 
-/* Dashboard, Pick Card, WL Row, Price Grid, Holdings, Settings, Modal, Log (exactly same as original) */
+/* ══ DASHBOARD ══ */
 function renderDashboard() {
-  const cont = document.getElementById('tab-dashboard-content');
-  if (!S.etfs.length) {
-    cont.innerHTML = `<div class="no-pick"><span class="no-pick-icon">⚙️</span>
-      <div class="no-pick-msg"><strong>Koi ETF nahi hai!</strong><br>Settings mein ETF list add karo.</div></div>`;
-    return;
-  }
-  const today = todayISO();
-  const oversold = S.rsiOversold || 30;
-  const all = getAllRSI();
-  const heldSyms = new Set(S.holdings.map(h => h.sym));
-  const under = all.filter(r => r.price !== null && r.rsi !== null && r.rsi < oversold && !r.held);
-  const underAll = all.filter(r => r.price !== null && r.rsi !== null && r.rsi < oversold);
-  const noPrice = S.etfs.filter(e => !S.prices[e.sym] || !S.prices[e.sym].length);
-  let pickETF = null;
-  if (S.dailyPick && S.dailyPick.date === today) pickETF = all.find(r => r.sym === S.dailyPick.sym);
-  if (!pickETF && under.length > 0) {
-    pickETF = under[0];
-    S.dailyPick = { sym: pickETF.sym, date: today };
-    save();
-  }
-  let html = '';
-  const fetchedToday = S.lastFetchDate === today;
-  if (!fetchedToday) {
-    const good = isGoodFetchTime();
-    html += `<div style="background:${good?'rgba(245,200,66,.08)':'rgba(91,155,213,.08)'};border:2px solid ${good?'rgba(245,200,66,.3)':'rgba(91,155,213,.25)'};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div style="font-size:.65rem;color:${good?'var(--yellow)':'var(--blue)'};">
-        ${good ? '⚡ Aaj ke prices abhi tak fetch nahi hue!' : '⏰ Market band hone ke baad (4 PM) prices auto-fetch honge.'}
-      </div>
-      ${good ? `<button class="btn btn-y" style="font-size:.6rem;padding:5px 12px;" onclick="switchTab('fetch');fetchAllPrices(false)">⬇️ Fetch Now</button>` : ''}
+  const cont=document.getElementById('tab-dashboard-content');
+  if(!S.etfs.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg"><strong>Koi ETF nahi hai!</strong><br>Settings mein ETF list add karo.</div></div>`; return; }
+  const today=todayISO(); const oversold=S.rsiOversold||30;
+  const all=getAllRSI(); const heldSyms=new Set(S.holdings.map(h=>h.sym));
+  const under=all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold&&!r.held);
+  const noPrice=S.etfs.filter(e=>!S.prices[e.sym]||!S.prices[e.sym].length);
+  let pickETF=null;
+  if(S.dailyPick&&S.dailyPick.date===today) pickETF=all.find(r=>r.sym===S.dailyPick.sym);
+  if(!pickETF&&under.length>0) { pickETF=under[0]; S.dailyPick={sym:pickETF.sym,date:today}; save(); }
+  let html='';
+  const fetchedToday=S.lastFetchDate===today;
+  if(!fetchedToday) {
+    const good=isGoodFetchTime();
+    html+=`<div style="background:${good?'rgba(245,200,66,.08)':'rgba(91,155,213,.08)'};border:2px solid ${good?'rgba(245,200,66,.3)':'rgba(91,155,213,.25)'};border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:.65rem;color:${good?'var(--yellow)':'var(--blue)'};">${good?'⚡ Aaj ke prices abhi tak fetch nahi hue!':'⏰ Market band hone ke baad (4 PM) prices auto-fetch honge.'}</div>
+      ${good?`<button class="btn btn-y" style="font-size:.6rem;padding:5px 12px;" onclick="switchTab('fetch');fetchAllPrices(false)">⬇️ Fetch Now</button>`:''}
     </div>`;
   } else {
-    html += `<div style="background:rgba(76,175,130,.07);border:1px solid rgba(76,175,130,.2);border-radius:10px;padding:8px 14px;font-size:.6rem;color:var(--green);">
-      ✅ Aaj ke prices fetch ho gaye — ${S.lastFetchTime} pe · ${S.fetchedToday} ETFs updated
-    </div>`;
+    html+=`<div style="background:rgba(76,175,130,.07);border:1px solid rgba(76,175,130,.2);border-radius:10px;padding:8px 14px;font-size:.6rem;color:var(--green);">✅ Aaj ke prices fetch ho gaye — ${S.lastFetchTime} pe · ${S.fetchedToday} ETFs updated</div>`;
   }
-  html += `<div class="sec" style="margin-top:2px;">🎯 Aaj Ka Pick</div>`;
-  if (!all.filter(r => r.price !== null).length) {
-    html += `<div class="no-pick"><span class="no-pick-icon">💰</span>
-      <div class="no-pick-msg">Pehle <strong>"Auto Fetch"</strong> tab se prices fetch karo.<br>
-      <span style="font-size:.58rem;opacity:.7;">RSI ke liye ${S.rsiPeriod+1} din ke prices chahiye.</span></div></div>`;
-  } else if (!pickETF) {
-    html += `<div class="no-pick"><span class="no-pick-icon">😴</span>
-      <div class="no-pick-msg"><strong>Aaj koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi ETF nahi mila.<br>Kal phir dekho!</div></div>`;
+  html+=`<div class="sec" style="margin-top:2px;">🎯 Aaj Ka Pick</div>`;
+  if(!all.filter(r=>r.price!==null).length) {
+    html+=`<div class="no-pick"><span class="no-pick-icon">💰</span><div class="no-pick-msg">Pehle <strong>"Auto Fetch"</strong> tab se prices fetch karo.<br><span style="font-size:.58rem;opacity:.7;">RSI ke liye ${S.rsiPeriod+1} din ke prices chahiye.</span></div></div>`;
+  } else if(!pickETF) {
+    html+=`<div class="no-pick"><span class="no-pick-icon">😴</span><div class="no-pick-msg"><strong>Aaj koi ETF oversold nahi.</strong><br>RSI &lt; ${oversold} wala koi ETF nahi mila.<br>Kal phir dekho!</div></div>`;
   } else {
-    const boughtTd = S.holdings.some(h => h.sym === pickETF.sym && h.buyDate === today);
-    html += buildPickCard(pickETF, heldSyms.has(pickETF.sym), boughtTd);
+    const boughtTd=S.holdings.some(h=>h.sym===pickETF.sym&&h.buyDate===today);
+    html+=buildPickCard(pickETF,heldSyms.has(pickETF.sym),boughtTd);
   }
-  if (underAll.length > 0) {
-    html += `<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
-    underAll.forEach((r, i) => { html += buildWLRow(r, i+1); });
-    html += `</div>`;
+  const underAll=all.filter(r=>r.price!==null&&r.rsi!==null&&r.rsi<oversold);
+  if(underAll.length>0) {
+    html+=`<div class="sec">📉 RSI &lt; ${oversold} — Oversold <span class="badge">${underAll.length}</span></div><div class="wl">`;
+    underAll.forEach((r,i)=>{html+=buildWLRow(r,i+1);}); html+=`</div>`;
   }
-
-  // Holdings section in dashboard
-  if (S.holdings.length > 0) {
-    const tgtPct = S.sellTarget || 4.51;
-    html += `<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
-    S.holdings.forEach(h => {
-      const d = getETFData(h.sym);
-      const curPx = d.price || h.buyPrice;
-      const pnl = (curPx - h.buyPrice) * h.units;
-      const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
-      const tgt = h.buyPrice * (1 + tgtPct/100);
-      const sellHit = curPx >= tgt;
-      const isP = pnl >= 0;
-      const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
-      html += `<div class="hc ${sellHit?'sell-active':''}">
+  if(S.holdings.length>0) {
+    const tgtPct=S.sellTarget||4.51;
+    html+=`<div class="sec" style="margin-top:4px;">💼 Holdings <span class="badge">${S.holdings.length}</span></div>`;
+    S.holdings.forEach(h=>{
+      const d=getETFData(h.sym); const curPx=d.price||h.buyPrice;
+      const pnl=(curPx-h.buyPrice)*h.units; const pct=((curPx-h.buyPrice)/h.buyPrice)*100;
+      const tgt=h.buyPrice*(1+tgtPct/100); const sellHit=curPx>=tgt; const isP=pnl>=0;
+      const rem=tgt>curPx?((tgt-curPx)/curPx*100).toFixed(2):'0';
+      html+=`<div class="hc ${sellHit?'sell-active':''}">
         <div class="hc-top">
           <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
-          <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
-            <div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
+          <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div><div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
         </div>
         <div class="hc-body">
           <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
           <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
-          <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
+          <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice*h.units).toLocaleString('en-IN')}</div></div>
         </div>
         <div style="padding:4px 13px 10px;">
-          <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
-            ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
-          </div>
-          ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
+          <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">${sellHit?`🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)`:`Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div>
+          ${d.rsi!==null?`<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>`:''}
         </div>
-        ${sellHit ? `<div class="sell-row">
-          <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
-          <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
-        </div>` : ''}
+        ${sellHit?`<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div><button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button></div>`:''}
       </div>`;
     });
   }
-
-  cont.innerHTML = html;
+  cont.innerHTML=html;
 }
 
+/* ══ PICK CARD ══ */
 function buildPickCard(r, held, boughtToday) {
-  const today = todayISO();
-  const canBuy = !held && !boughtToday;
-  const buyTxt = held ? '✅ Already Held' : boughtToday ? '✅ Aaj Liya' : '🛒 BUY';
-  const rsiPct = r.rsi !== null ? Math.min(r.rsi, 100) : 0;
-  const up = r.changePct !== null && r.changePct >= 0;
-  const tgt = r.price * (1 + (S.sellTarget||4.51)/100);
+  const canBuy=!held&&!boughtToday;
+  const buyTxt=held?'✅ Already Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
+  const rsiPct=r.rsi!==null?Math.min(r.rsi,100):0;
+  const up=r.changePct!==null&&r.changePct>=0;
+  const tgt=r.price*(1+(S.sellTarget||4.51)/100);
+  const maskPct=rsiMaskPct(r.rsi);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
     <div class="pick-top">
@@ -1536,18 +1110,18 @@ function buildPickCard(r, held, boughtToday) {
       <div class="pick-sub">${r.days} din ka data · Target: ₹${tgt.toFixed(2)} (+${S.sellTarget}%)</div>
     </div>
     <div class="pick-stats">
-      <div class="ps"><div class="ps-l">RSI (${r.isPartialRSI ? '~'+r.effPeriod+'D ⚠️' : S.rsiPeriod+'D'})</div>
-        <div class="ps-v ${rsiClass(r.rsi)}">${r.rsi !== null ? r.rsi.toFixed(1) : 'N/A'}</div></div>
+      <div class="ps"><div class="ps-l">RSI (${r.isPartialRSI?'~'+r.effPeriod+'D ⚠️':S.rsiPeriod+'D'})</div>
+        <div class="ps-v ${rsiClass(r.rsi)}">${r.rsi!==null?r.rsi.toFixed(1):'N/A'}</div></div>
       <div class="ps"><div class="ps-l">Price</div>
         <div class="ps-v" style="color:var(--yellow)">₹ ${r.price.toFixed(2)}</div></div>
       <div class="ps"><div class="ps-l">Change</div>
         <div class="ps-v" style="color:${r.changePct!==null?(up?'var(--green)':'var(--red)'):'var(--muted)'}">
-          ${r.changePct !== null ? (up?'+':'')+r.changePct.toFixed(2)+'%' : '—'}</div></div>
+          ${r.changePct!==null?(up?'+':'')+r.changePct.toFixed(2)+'%':'—'}</div></div>
     </div>
-    ${r.rsi !== null ? `<div class="rsi-bar-wrap">
-      <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${100 - rsiPct}%;background:${rsiBg(r.rsi)};"></div></div>
+    ${r.rsi!==null?`<div class="rsi-bar-wrap">
+      <div class="rsi-bar-out"><div class="rsi-bar-in" style="width:${maskPct}%;"></div></div>
       <div class="rsi-lbl"><span>0 Oversold</span><span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span><span>100 Overbought</span></div>
-    </div>` : `<div style="padding:4px 16px 6px;font-size:.6rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
+    </div>`:`<div style="padding:4px 16px 6px;font-size:.6rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
     <div class="pick-btns">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
       <button class="btn-sell-sm" disabled>SELL — Not Held</button>
@@ -1555,299 +1129,211 @@ function buildPickCard(r, held, boughtToday) {
   </div>`;
 }
 
+/* ══ WL ROW ══ */
 function buildWLRow(r, rank) {
-  const up = r.changePct !== null && r.changePct >= 0;
-  const heldBadge = r.held ? `<span class="tag tag-held">✅ Held</span>` : '';
-  const oversold = S.rsiOversold || 30;
-  const hist = (S.prices[r.sym] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
-  const lastEntry = hist[0];
-  const today = todayISO();
-  const isToday = lastEntry?.date === today;
-  const ago = lastEntry?.ts ? timeAgo(lastEntry.ts) : null;
-  const updateLabel = isToday
-    ? lastEntry?.ts
-      ? `<span style="color:var(--green);font-size:.52rem;">🟢 ${new Date(lastEntry.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`
-      : `<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`
-    : lastEntry
-      ? `<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`
-      : '';
-  const rsiPillBg = r.rsi === null ? 'var(--bg4)' :
-    r.rsi < oversold ? 'rgba(224,82,82,.18)' :
-    r.rsi > 70 ? 'rgba(232,164,64,.18)' : 'rgba(76,175,130,.12)';
-  const rsiPillBorder = r.rsi === null ? 'var(--border)' :
-    r.rsi < oversold ? 'rgba(224,82,82,.4)' :
-    r.rsi > 70 ? 'rgba(232,164,64,.4)' : 'rgba(76,175,130,.3)';
-  const rsiLabel = r.rsi === null ? 'No data' :
-    r.rsi < oversold ? '📉 Oversold' : r.rsi > 70 ? '📈 Overbought' : 'Neutral';
+  const up=r.changePct!==null&&r.changePct>=0;
+  const heldBadge=r.held?`<span class="tag tag-held">✅ Held</span>`:'';
+  const oversold=S.rsiOversold||30;
+  const hist=(S.prices[r.sym]||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const lastEntry=hist[0]; const today=todayISO(); const isToday=lastEntry?.date===today;
+  const updateLabel=isToday?(lastEntry?.ts?`<span style="color:var(--green);font-size:.52rem;">🟢 ${new Date(lastEntry.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`:`<span style="color:var(--green);font-size:.52rem;">🟢 Aaj updated</span>`):lastEntry?`<span style="color:var(--amber);font-size:.52rem;">🕐 ${fmtDate(lastEntry.date)}</span>`:'';
+  const rsiPillBg=r.rsi===null?'var(--bg4)':r.rsi<oversold?'rgba(224,82,82,.18)':r.rsi>70?'rgba(232,164,64,.18)':'rgba(76,175,130,.12)';
+  const rsiPillBorder=r.rsi===null?'var(--border)':r.rsi<oversold?'rgba(224,82,82,.4)':r.rsi>70?'rgba(232,164,64,.4)':'rgba(76,175,130,.3)';
+  const rsiLabel=r.rsi===null?'No data':r.rsi<oversold?'📉 Oversold':r.rsi>70?'📈 Overbought':'Neutral';
   return `<div class="wl-row ${r.held?'held':''}">
-    <div class="wl-rank" style="font-size:.58rem;color:var(--muted);">${rank}</div>
+    <div class="wl-rank">${rank}</div>
     <div class="wl-info">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-        <div class="wl-name">${r.sym}</div>
-        ${heldBadge}
-        ${r.rsi !== null && r.rsi < oversold ? `<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">🔥 Oversold</span>` : ''}
+        <div class="wl-name">${r.sym}</div>${heldBadge}
+        ${r.rsi!==null&&r.rsi<oversold?`<span class="tag" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,82,82,.25);">🔥 Oversold</span>`:''}
       </div>
-      <div class="wl-meta" style="margin-top:3px;gap:6px;">
-        ${updateLabel}
-        <span style="font-size:.52rem;color:var(--muted);">${r.days}d history</span>
-      </div>
+      <div class="wl-meta" style="margin-top:3px;gap:6px;">${updateLabel}<span style="font-size:.52rem;color:var(--muted);">${r.days}d history</span></div>
     </div>
     <div style="text-align:center;flex-shrink:0;min-width:68px;">
-      <div style="font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">RSI ${r.isPartialRSI ? '~'+r.effPeriod+'D' : S.rsiPeriod+'D'}</div>
+      <div style="font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">RSI ${r.isPartialRSI?'~'+r.effPeriod+'D':S.rsiPeriod+'D'}</div>
       <div style="background:${rsiPillBg};border:1px solid ${rsiPillBorder};border-radius:8px;padding:3px 8px;display:inline-block;">
-        <span class="${rsiClass(r.rsi)}" style="font-size:.82rem;font-weight:700;">${r.rsi !== null ? r.rsi.toFixed(1) : '—'}</span>
+        <span class="${rsiClass(r.rsi)}" style="font-size:.82rem;font-weight:700;">${r.rsi!==null?r.rsi.toFixed(1):'—'}</span>
       </div>
       <div style="font-size:.48rem;color:var(--muted);margin-top:2px;">${rsiLabel}</div>
     </div>
     <div class="wl-px" style="min-width:80px;">
-      <div style="font-size:.82rem;font-weight:700;color:var(--yellow);">${r.price !== null ? '₹'+r.price.toFixed(2) : '—'}</div>
-      <div class="wl-chg ${up?'up':'dn'}" style="font-size:.6rem;margin-top:1px;">
-        ${r.changePct !== null ? (up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%' : '—'}
-      </div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--yellow);">${r.price!==null?'₹'+r.price.toFixed(2):'—'}</div>
+      <div class="wl-chg ${up?'up':'dn'}" style="font-size:.6rem;margin-top:1px;">${r.changePct!==null?(up?'▲':'▼')+' '+Math.abs(r.changePct).toFixed(2)+'%':'—'}</div>
     </div>
   </div>`;
 }
 
+/* ══ PRICE GRID ══ */
 function renderPriceGrid() {
-  const today = todayISO();
-  const grid = document.getElementById('priceGrid');
-  if (!S.etfs.length) {
-    grid.innerHTML = `<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list daalo.</div></div>`;
-    return;
-  }
-  let html = '';
-  S.etfs.forEach((e, idx) => {
-    const hist = S.prices[e.sym] || [];
-    const todayEntry = hist.find(h => h.date === today);
-    const lastEntry = hist.filter(h => h.date !== today).sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const curTxt = todayEntry ? `✅ ₹${todayEntry.price.toFixed(2)}` : (lastEntry ? `Last: ₹${lastEntry.price.toFixed(2)} (${fmtDate(lastEntry.date)})` : 'No price yet');
-    html += `<div class="pe-row" id="per-${e.sym}">
+  const today=todayISO(); const grid=document.getElementById('priceGrid');
+  if(!S.etfs.length) { grid.innerHTML=`<div class="no-pick"><span class="no-pick-icon">⚙️</span><div class="no-pick-msg">Settings mein ETF list daalo.</div></div>`; return; }
+  let html='';
+  S.etfs.forEach((e,idx)=>{
+    const hist=S.prices[e.sym]||[]; const todayEntry=hist.find(h=>h.date===today);
+    const lastEntry=hist.filter(h=>h.date!==today).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const curTxt=todayEntry?`✅ ₹${todayEntry.price.toFixed(2)}`:(lastEntry?`Last: ₹${lastEntry.price.toFixed(2)} (${fmtDate(lastEntry.date)})`:'No price yet');
+    html+=`<div class="pe-row" id="per-${e.sym}">
       <div class="pe-sym">${e.sym}</div>
       <div class="pe-cur" style="${todayEntry?'color:var(--green)':''}">${curTxt}</div>
       <input class="pe-inp" type="number" id="pi-${e.sym}" step="0.01" min="0.01"
-        placeholder="${todayEntry ? todayEntry.price.toFixed(2) : '0.00'}"
-        value="${todayEntry ? todayEntry.price.toFixed(2) : ''}"
-        onkeydown="priceKeyNav(event,'${e.sym}',${idx})"
-        onchange="quickSavePrice('${e.sym}', this.value)">
-      <div class="pe-status" id="ps-${e.sym}">${todayEntry ? '✅' : '⬜'}</div>
+        placeholder="${todayEntry?todayEntry.price.toFixed(2):'0.00'}" value="${todayEntry?todayEntry.price.toFixed(2):''}"
+        onkeydown="priceKeyNav(event,'${e.sym}',${idx})" onchange="quickSavePrice('${e.sym}',this.value)">
+      <div class="pe-status" id="ps-${e.sym}">${todayEntry?'✅':'⬜'}</div>
     </div>`;
   });
-  grid.innerHTML = html;
+  grid.innerHTML=html;
 }
-function priceKeyNav(e, sym, idx) {
-  if (e.key === 'Enter' || e.key === 'Tab') {
-    e.preventDefault();
-    const val = e.target.value;
-    if (val) quickSavePrice(sym, val);
-    const next = S.etfs[idx+1];
-    if (next) { const ni = document.getElementById('pi-'+next.sym); if (ni) { ni.focus(); ni.select(); } }
-  }
+function priceKeyNav(e,sym,idx) {
+  if(e.key==='Enter'||e.key==='Tab') { e.preventDefault(); const val=e.target.value; if(val) quickSavePrice(sym,val); const next=S.etfs[idx+1]; if(next){const ni=document.getElementById('pi-'+next.sym);if(ni){ni.focus();ni.select();}} }
 }
-function quickSavePrice(sym, val) {
-  const price = parseFloat(val);
-  if (!price || price <= 0) return;
-  savePrice(sym, price);
-  save();
-  const s = document.getElementById('ps-'+sym);
-  if (s) s.textContent = '✅';
-  const c = document.getElementById('per-'+sym)?.querySelector('.pe-cur');
-  if (c) { c.textContent = `✅ ₹${price.toFixed(2)}`; c.style.color = 'var(--green)'; }
+function quickSavePrice(sym,val) {
+  const price=parseFloat(val); if(!price||price<=0) return;
+  savePrice(sym,price); save();
+  const s=document.getElementById('ps-'+sym); if(s) s.textContent='✅';
+  const c=document.getElementById('per-'+sym)?.querySelector('.pe-cur'); if(c){c.textContent=`✅ ₹${price.toFixed(2)}`;c.style.color='var(--green)';}
 }
 function saveAllPrices() {
-  let count = 0;
-  S.etfs.forEach(e => {
-    const inp = document.getElementById('pi-'+e.sym);
-    if (inp && inp.value) { const price = parseFloat(inp.value); if (price > 0) { savePrice(e.sym, price); count++; } }
-  });
+  let count=0;
+  S.etfs.forEach(e=>{const inp=document.getElementById('pi-'+e.sym);if(inp&&inp.value){const price=parseFloat(inp.value);if(price>0){savePrice(e.sym,price);count++;}}});
   save(); showToast(`✅ ${count} prices save ho gaye!`); renderPriceGrid();
 }
 function clearTodayPrices() {
-  if (!confirm('Aaj ke saare prices delete karein?')) return;
-  const today = todayISO();
-  S.etfs.forEach(e => { if (S.prices[e.sym]) S.prices[e.sym] = S.prices[e.sym].filter(h => h.date !== today); });
+  if(!confirm('Aaj ke saare prices delete karein?')) return;
+  const today=todayISO();
+  S.etfs.forEach(e=>{if(S.prices[e.sym]) S.prices[e.sym]=S.prices[e.sym].filter(h=>h.date!==today);});
   save(); renderPriceGrid(); showToast('🗑 Aaj ke prices clear ho gaye');
 }
 
+/* ══ HOLDINGS ══ */
 function renderHoldings() {
-  const cont = document.getElementById('holdingsContent');
-  if (!S.holdings.length) {
-    cont.innerHTML = `<div class="no-pick"><span class="no-pick-icon">💼</span>
-      <div class="no-pick-msg"><strong>Koi holding nahi hai.</strong><br>Dashboard pe BUY button se kharidao.</div></div>`;
-    return;
-  }
-  const tgtPct = S.sellTarget || 4.51;
-  let html = `<div class="sec">💼 Active Holdings <span class="badge">${S.holdings.length}</span></div>`;
-  S.holdings.forEach(h => {
-    const d = getETFData(h.sym);
-    const curPx = d.price || h.buyPrice;
-    const pnl = (curPx - h.buyPrice) * h.units;
-    const pct = ((curPx - h.buyPrice) / h.buyPrice) * 100;
-    const tgt = h.buyPrice * (1 + tgtPct/100);
-    const sellHit = curPx >= tgt;
-    const isP = pnl >= 0;
-    const rem = tgt > curPx ? ((tgt - curPx)/curPx*100).toFixed(2) : '0';
-    html += `<div class="hc ${sellHit?'sell-active':''}">
+  const cont=document.getElementById('holdingsContent');
+  if(!S.holdings.length) { cont.innerHTML=`<div class="no-pick"><span class="no-pick-icon">💼</span><div class="no-pick-msg"><strong>Koi holding nahi hai.</strong><br>Dashboard pe BUY button se kharidao.</div></div>`; return; }
+  const tgtPct=S.sellTarget||4.51;
+  let html=`<div class="sec">💼 Active Holdings <span class="badge">${S.holdings.length}</span></div>`;
+  S.holdings.forEach(h=>{
+    const d=getETFData(h.sym); const curPx=d.price||h.buyPrice;
+    const pnl=(curPx-h.buyPrice)*h.units; const pct=((curPx-h.buyPrice)/h.buyPrice)*100;
+    const tgt=h.buyPrice*(1+tgtPct/100); const sellHit=curPx>=tgt; const isP=pnl>=0;
+    const rem=tgt>curPx?((tgt-curPx)/curPx*100).toFixed(2):'0';
+    html+=`<div class="hc ${sellHit?'sell-active':''}">
       <div class="hc-top">
         <div><div class="hc-nm">${h.sym}</div><div class="hc-sm">${h.units} Share · Buy ₹${h.buyPrice.toFixed(2)} · ${fmtDate(h.buyDate)}</div></div>
-        <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div>
-          <div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
+        <div><div class="hc-pnl-v ${isP?'pp':'ll'}">${isP?'+':'-'}₹${Math.abs(pnl).toFixed(2)}</div><div class="hc-pnl-p ${isP?'pp':'ll'}">${isP?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>
       </div>
       <div class="hc-body">
         <div class="hc-c"><div class="hc-cl">Buy Price</div><div class="hc-cv">₹ ${h.buyPrice.toFixed(2)}</div></div>
         <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹ ${curPx.toFixed(2)}</div></div>
-        <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
+        <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹ ${Math.round(h.buyPrice*h.units).toLocaleString('en-IN')}</div></div>
       </div>
       <div style="padding:4px 13px 10px;">
-        <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">
-          ${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}
-        </div>
-        ${d.rsi !== null ? `<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>` : ''}
+        <div style="font-size:.6rem;color:${sellHit?'var(--red)':'var(--muted)'};">${sellHit?`🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)} (+${tgtPct}%)`:`Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div>
+        ${d.rsi!==null?`<div style="font-size:.6rem;color:${rsiClass(d.rsi)==='rsi-os'?'var(--red)':rsiClass(d.rsi)==='rsi-ob'?'var(--amber)':'var(--muted)'};margin-top:3px;">RSI: ${d.rsi.toFixed(1)}</div>`:''}
       </div>
-      ${sellHit ? `<div class="sell-row">
-        <div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div>
-        <button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button>
-      </div>` : ''}
+      ${sellHit?`<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div><button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button></div>`:''}
     </div>`;
   });
-  cont.innerHTML = html;
+  cont.innerHTML=html;
 }
 
+/* ══ SETTINGS ══ */
 function renderSettings() {
-  document.getElementById('etfListInput').value = S.etfs.map(e => e.sym).join('\n');
-  document.getElementById('rsiPeriod').value = S.rsiPeriod || 14;
-  document.getElementById('rsiOversold').value = S.rsiOversold|| 30;
-  document.getElementById('sellTarget').value = S.sellTarget || 4.51;
-  const chk = document.getElementById('autoFetchEnabled');
-  chk.checked = S.autoFetchEnabled !== false;
-  document.getElementById('autoFetchLbl').textContent = chk.checked ? 'On' : 'Off';
-  chk.onchange = () => { document.getElementById('autoFetchLbl').textContent = chk.checked ? 'On' : 'Off'; };
-  const today = todayISO();
-  const withPx = S.etfs.filter(e => S.prices[e.sym]?.some(h => h.date === today)).length;
-  let maxDays = 0;
-  S.etfs.forEach(e => { const l = (S.prices[e.sym]||[]).length; if (l > maxDays) maxDays = l; });
-  document.getElementById('dataInfo').innerHTML =
-    `Total ETFs: <strong style="color:var(--text)">${S.etfs.length}</strong><br>` +
-    `Aaj prices hain: <strong style="color:var(--green)">${withPx} / ${S.etfs.length}</strong><br>` +
-    `Max price history: <strong style="color:var(--text)">${maxDays} din</strong><br>` +
-    `Last fetch: <strong style="color:var(--text)">${S.lastFetchDate === today ? 'Aaj '+S.lastFetchTime : S.lastFetchDate||'Kabhi nahi'}</strong><br>` +
+  document.getElementById('etfListInput').value=S.etfs.map(e=>e.sym).join('\n');
+  document.getElementById('rsiPeriod').value=S.rsiPeriod||14;
+  document.getElementById('rsiOversold').value=S.rsiOversold||30;
+  document.getElementById('sellTarget').value=S.sellTarget||4.51;
+  const chk=document.getElementById('autoFetchEnabled'); chk.checked=S.autoFetchEnabled!==false;
+  document.getElementById('autoFetchLbl').textContent=chk.checked?'On':'Off';
+  chk.onchange=()=>{document.getElementById('autoFetchLbl').textContent=chk.checked?'On':'Off';};
+  const today=todayISO();
+  const withPx=S.etfs.filter(e=>S.prices[e.sym]?.some(h=>h.date===today)).length;
+  let maxDays=0; S.etfs.forEach(e=>{const l=(S.prices[e.sym]||[]).length;if(l>maxDays)maxDays=l;});
+  document.getElementById('dataInfo').innerHTML=
+    `Total ETFs: <strong style="color:var(--text)">${S.etfs.length}</strong><br>`+
+    `Aaj prices hain: <strong style="color:var(--green)">${withPx} / ${S.etfs.length}</strong><br>`+
+    `Max price history: <strong style="color:var(--text)">${maxDays} din</strong><br>`+
+    `Last fetch: <strong style="color:var(--text)">${S.lastFetchDate===today?'Aaj '+S.lastFetchTime:S.lastFetchDate||'Kabhi nahi'}</strong><br>`+
     `Holdings: <strong style="color:var(--text)">${S.holdings.length}</strong>`;
 }
 function saveSettings() {
-  const raw = document.getElementById('etfListInput').value;
-  const syms = raw.split('\n').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
-  S.etfs = [...new Set(syms)].map(sym => ({ sym }));
-  save(); showToast(`✅ ${S.etfs.length} ETFs save ho gaye!`); renderSettings();
+  const raw=document.getElementById('etfListInput').value;
+  const syms=raw.split('\n').map(s=>s.trim().toUpperCase()).filter(s=>s.length>0);
+  S.etfs=[...new Set(syms)].map(sym=>({sym})); save(); showToast(`✅ ${S.etfs.length} ETFs save ho gaye!`); renderSettings();
 }
-function loadDefaultETFs() {
-  document.getElementById('etfListInput').value = DEFAULT_ETFS;
-  showToast('Default list load ho gayi — Save karo!');
-}
+function loadDefaultETFs() { document.getElementById('etfListInput').value=DEFAULT_ETFS; showToast('Default list load ho gayi — Save karo!'); }
 function saveRSISettings() {
-  S.rsiPeriod = parseInt(document.getElementById('rsiPeriod').value) || 14;
-  S.rsiOversold = parseInt(document.getElementById('rsiOversold').value) || 30;
-  S.sellTarget = parseFloat(document.getElementById('sellTarget').value) || 4.51;
-  S.autoFetchEnabled = document.getElementById('autoFetchEnabled').checked;
+  S.rsiPeriod=parseInt(document.getElementById('rsiPeriod').value)||14;
+  S.rsiOversold=parseInt(document.getElementById('rsiOversold').value)||30;
+  S.sellTarget=parseFloat(document.getElementById('sellTarget').value)||4.51;
+  S.autoFetchEnabled=document.getElementById('autoFetchEnabled').checked;
   save(); showToast('✅ Settings save ho gayi!');
 }
 function resetAll() {
-  if (!confirm('Sab kuch delete karein — prices, holdings, log?')) return;
-  localStorage.removeItem(LS);
-  if (dbRef) dbRef.set(null);
-  location.reload();
+  if(!confirm('Sab kuch delete karein — prices, holdings, log?')) return;
+  localStorage.removeItem(LS); if(dbRef) dbRef.set(null); location.reload();
 }
 
-function openModal(sym, price, type) {
-  pending = { sym, price, type };
-  const isBuy = type === 'buy';
-  const h = S.holdings.find(x => x.sym === sym);
-  const d = getETFData(sym);
-  document.getElementById('mTitle').textContent = isBuy ? `🛒 BUY — ${sym}` : `💰 SELL — ${sym}`;
-  document.getElementById('priceLbl').textContent = isBuy ? 'Buy Price (₹)' : 'Sell Price (₹)';
-  const pi = document.getElementById('tradePrice');
-  pi.value = price.toFixed(2); pi.readOnly = !isBuy;
-  const ui = document.getElementById('tradeUnits');
-  if (!isBuy && h) { ui.value = h.units; ui.readOnly = true; } else { ui.readOnly = false; ui.value = 10; }
-  const tgt = h ? (h.buyPrice * (1 + (S.sellTarget||4.51)/100)).toFixed(2) : '—';
-  document.getElementById('mInfo').innerHTML = `
+/* ══ MODAL ══ */
+function openModal(sym,price,type) {
+  pending={sym,price,type}; const isBuy=type==='buy';
+  const h=S.holdings.find(x=>x.sym===sym); const d=getETFData(sym);
+  document.getElementById('mTitle').textContent=isBuy?`🛒 BUY — ${sym}`:`💰 SELL — ${sym}`;
+  document.getElementById('priceLbl').textContent=isBuy?'Buy Price (₹)':'Sell Price (₹)';
+  const pi=document.getElementById('tradePrice'); pi.value=price.toFixed(2); pi.readOnly=!isBuy;
+  const ui=document.getElementById('tradeUnits');
+  if(!isBuy&&h){ui.value=h.units;ui.readOnly=true;}else{ui.readOnly=false;ui.value=10;}
+  const tgt=h?(h.buyPrice*(1+(S.sellTarget||4.51)/100)).toFixed(2):'—';
+  document.getElementById('mInfo').innerHTML=`
     <div class="mi-row"><span class="mi-k">ETF</span><span class="mi-v">${sym}</span></div>
     <div class="mi-row"><span class="mi-k">Price</span><span class="mi-v">₹ ${price.toFixed(2)}</span></div>
-    ${d.rsi !== null ? `<div class="mi-row"><span class="mi-k">RSI</span><span class="mi-v ${rsiClass(d.rsi)}">RSI ${d.rsi.toFixed(1)}</span></div>` : ''}
-    ${h ? `<div class="mi-row"><span class="mi-k">Buy Price</span><span class="mi-v">₹ ${h.buyPrice.toFixed(2)}</span></div>` : ''}
-    ${!isBuy && h ? `<div class="mi-row"><span class="mi-k">Sell Target (+${S.sellTarget}%)</span><span class="mi-v" style="color:var(--amber)">₹ ${tgt}</span></div>` : ''}`;
-  const btn = document.getElementById('mConfirm');
-  btn.textContent = isBuy ? '✅ Confirm BUY' : '✅ Confirm SELL';
-  btn.className = isBuy ? 'm-confirm-b' : 'm-confirm-s';
+    ${d.rsi!==null?`<div class="mi-row"><span class="mi-k">RSI</span><span class="mi-v ${rsiClass(d.rsi)}">RSI ${d.rsi.toFixed(1)}</span></div>`:''}
+    ${h?`<div class="mi-row"><span class="mi-k">Buy Price</span><span class="mi-v">₹ ${h.buyPrice.toFixed(2)}</span></div>`:''}
+    ${!isBuy&&h?`<div class="mi-row"><span class="mi-k">Sell Target (+${S.sellTarget}%)</span><span class="mi-v" style="color:var(--amber)">₹ ${tgt}</span></div>`:''}`;
+  const btn=document.getElementById('mConfirm'); btn.textContent=isBuy?'✅ Confirm BUY':'✅ Confirm SELL';
+  btn.className=isBuy?'m-confirm-b':'m-confirm-s';
   document.getElementById('tradeModal').classList.add('show');
 }
-function closeModal() { document.getElementById('tradeModal').classList.remove('show'); pending = null; }
+function closeModal() { document.getElementById('tradeModal').classList.remove('show'); pending=null; }
 function confirmTrade() {
-  if (!pending) return;
-  const { sym, type } = pending;
-  const price = parseFloat(document.getElementById('tradePrice').value);
-  const units = parseInt(document.getElementById('tradeUnits').value);
-  if (!price || price <= 0 || !units || units < 1) { showToast('⚠️ Valid price aur units daalo!'); return; }
-  const today = todayISO();
-  const time = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-  if (type === 'buy') {
-    S.holdings = S.holdings.filter(h => h.sym !== sym);
-    S.holdings.push({ sym, buyPrice: price, units, buyDate: today, buyTime: time });
-    S.dailyPick = { sym, date: today };
-    addLog({ type:'buy', sym, price, units, time });
+  if(!pending) return; const {sym,type}=pending;
+  const price=parseFloat(document.getElementById('tradePrice').value);
+  const units=parseInt(document.getElementById('tradeUnits').value);
+  if(!price||price<=0||!units||units<1){showToast('⚠️ Valid price aur units daalo!');return;}
+  const today=todayISO(); const time=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  if(type==='buy') {
+    S.holdings=S.holdings.filter(h=>h.sym!==sym);
+    S.holdings.push({sym,buyPrice:price,units,buyDate:today,buyTime:time});
+    S.dailyPick={sym,date:today}; addLog({type:'buy',sym,price,units,time});
     showToast(`✅ BOUGHT ${units} × ${sym} @ ₹${price.toFixed(2)}`);
   } else {
-    const h = S.holdings.find(x => x.sym === sym);
-    if (!h) { showToast('⚠️ Holding nahi mili!'); closeModal(); return; }
-    const pnl = (price - h.buyPrice) * h.units;
-    addLog({ type:'sell', sym, price, units: h.units, pnl, time });
-    S.holdings = S.holdings.filter(x => x.sym !== sym);
-    if (S.dailyPick?.sym === sym) S.dailyPick = null;
+    const h=S.holdings.find(x=>x.sym===sym); if(!h){showToast('⚠️ Holding nahi mili!');closeModal();return;}
+    const pnl=(price-h.buyPrice)*h.units; addLog({type:'sell',sym,price,units:h.units,pnl,time});
+    S.holdings=S.holdings.filter(x=>x.sym!==sym); if(S.dailyPick?.sym===sym) S.dailyPick=null;
     showToast(`✅ SOLD ${h.units} × ${sym} @ ₹${price.toFixed(2)} | P&L: ${pnl>=0?'+':''}₹${pnl.toFixed(2)}`);
   }
   closeModal(); save(); renderDashboard();
 }
-function addLog(e) { S.log.unshift(e); if (S.log.length > 50) S.log.pop(); renderLog(); }
+function addLog(e) { S.log.unshift(e); if(S.log.length>50) S.log.pop(); renderLog(); }
 function renderLog() {
-  const el = document.getElementById('logBar');
-  if (!S.log.length) { el.innerHTML = '<span class="le">Trades yahaan dikhenge…</span>'; return; }
-  el.innerHTML = S.log.slice(0,25).map(l =>
-    `<div class="lchip ${l.type}">${l.type.toUpperCase()} ${l.units}× ${l.sym} @₹${l.price.toFixed(2)}${l.pnl!==undefined?(l.pnl>=0?' +₹':' -₹')+Math.abs(l.pnl).toFixed(2):''} · ${l.time}</div>`
-  ).join('');
+  const el=document.getElementById('logBar');
+  if(!S.log.length){el.innerHTML='<span class="le">Trades yahaan dikhenge…</span>';return;}
+  el.innerHTML=S.log.slice(0,25).map(l=>`<div class="lchip ${l.type}">${l.type.toUpperCase()} ${l.units}× ${l.sym} @₹${l.price.toFixed(2)}${l.pnl!==undefined?(l.pnl>=0?' +₹':' -₹')+Math.abs(l.pnl).toFixed(2):''} · ${l.time}</div>`).join('');
 }
 
-/* INIT */
+/* ══ INIT ══ */
 window.onload = async () => {
-  load(); // local first
-  if (!S.etfs || !S.etfs.length) {
-    S.etfs = DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym}));
-    saveLocal();
-  }
-  document.getElementById('hdrDate').textContent = fmtDate(todayISO());
-  renderLog();
-  renderDashboard();
-
-  // Firebase init (handles redirect result + auth state internally)
+  load();
+  if(!S.etfs||!S.etfs.length) { S.etfs=DEFAULT_ETFS.split('\n').map(s=>s.trim()).filter(Boolean).map(sym=>({sym})); saveLocal(); }
+  document.getElementById('hdrDate').textContent=fmtDate(todayISO());
+  renderLog(); renderDashboard();
   await initFirebaseAuth();
-
-  document.getElementById('tradeModal').addEventListener('click', e => {
-    if (e.target.id === 'tradeModal') closeModal();
-  });
-
-
-
-  // Listen for real-time changes from other devices
-  if (dbRef) {
-    dbRef.on('value', (snapshot) => {
-      const fbData = snapshot.val();
-      if (fbData) {
-        // Simple merge (you can make it smarter if needed)
-        const newS = {...S, ...fbData};
-        if (JSON.stringify(newS) !== JSON.stringify(S)) {
-          S = newS;
-          saveLocal();
-          renderDashboard();
-          renderHoldings();
-          renderPriceGrid();
-          renderSettings();
+  document.getElementById('tradeModal').addEventListener('click',e=>{if(e.target.id==='tradeModal') closeModal();});
+  if(dbRef) {
+    dbRef.on('value',(snapshot)=>{
+      const fbData=snapshot.val();
+      if(fbData) {
+        const newS={...S,...fbData};
+        if(JSON.stringify(newS)!==JSON.stringify(S)) {
+          S=newS; saveLocal(); renderDashboard(); renderHoldings(); renderPriceGrid(); renderSettings();
           showToast('🔄 Dusre device se data update ho gaya');
         }
       }
