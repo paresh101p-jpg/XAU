@@ -294,15 +294,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 <div id="tab-dashboard-content" class="main"></div>
 <div id="tab-fetch-content" class="main" style="display:none;">
   <div class="auto-panel">
-    <div class="ap-title">🔄 Rolling Loop — Har ETF 10 Min Baad Update</div>
-    <div style="font-size:.72rem;color:var(--muted);line-height:1.8;">
-      Loop ON karo — ek ek karke har ETF fetch hoga, <strong style="color:var(--yellow)">~1.5 min ka gap</strong> aur jab sab ho jaaye to <strong style="color:var(--yellow)">phir se pehle se shuru</strong>.
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-g" onclick="startLoop()" id="btnLoopStart">▶️ Loop Shuru</button>
-      <button class="btn btn-r" onclick="stopLoop()" id="btnLoopStop" disabled>⏹ Band Karo</button>
-      <button class="btn btn-b" onclick="fetchAllPrices(true)" id="btnFetch">⚡ Ek Baar Sab Fetch</button>
-    </div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;">
       <div style="font-size:.72rem;" id="loopStatus"><span style="color:var(--muted)">⚫ Loop band hai</span></div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;">
