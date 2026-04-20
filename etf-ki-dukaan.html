@@ -111,29 +111,35 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-rsi-val{font-size:1.55rem;font-weight:800;line-height:1;}
 .ec-rsi-zone{font-size:.66rem;font-weight:700;margin-top:3px;}
 
-/* ══ RSI BAR — Fixed: left=0/green, right=100/red ══
-   Bar shows filled portion = RSI value %
-   RSI 30 → 30% filled (green zone)
-   RSI 70 → 70% filled (orange zone)
-   RSI 10 → 10% filled (deep green)
+/* ══ RSI BAR — FIXED ══
+   Left = 100 = RED (Overbought)
+   Right = 0 = GREEN (Oversold)
+
+   Gradient goes: left(red) → right(green)
+   Dark overlay sits on RIGHT side: width = (100 - rsi)%
+   
+   RSI 86.5 → overlay = 13.5% from right → 86.5% red visible from left ✅
+   RSI 30   → overlay = 70% from right → 30% visible (green zone) ✅
+   RSI 10   → overlay = 90% from right → 10% visible (deep green) ✅
+   RSI 0    → overlay = 100% → fully dark ✅
 */
 .ec-bar-wrap{margin-top:4px;}
 .ec-bar-out{
-  background: linear-gradient(to left,
-    #1a8a3a 0%,
-    #4ddb7a 22%,
-    #c8e000 40%,
-    #f5c842 55%,
-    #f5a623 70%,
-    #E05252 100%
+  background: linear-gradient(to right,
+    #E05252 0%,
+    #f5a623 30%,
+    #f5c842 45%,
+    #c8e000 60%,
+    #4ddb7a 78%,
+    #1a8a3a 100%
   );
   border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);
   position:relative;
 }
-/* Dark overlay from LEFT — covers rsi% so right side green stays visible */
+/* Dark overlay from RIGHT — covers (100-rsi)% so left side red is visible for high RSI */
 .ec-bar-in{
   height:100%;
-  position:absolute;top:0;left:0;
+  position:absolute;top:0;right:0;
   background:var(--bg3);
   transition:width .6s ease;
 }
@@ -165,15 +171,15 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps-l{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:1.05rem;font-weight:700;margin-top:3px;}
 
-/* Pick card RSI bar — same fix */
+/* Pick card RSI bar — FIXED same as above */
 .rsi-bar-wrap{padding:8px 18px 6px;}
 .rsi-bar-out{
-  background:linear-gradient(to left,#1a8a3a 0%,#4ddb7a 22%,#c8e000 40%,#f5c842 55%,#f5a623 70%,#E05252 100%);
+  background:linear-gradient(to right,#E05252 0%,#f5a623 30%,#f5c842 45%,#c8e000 60%,#4ddb7a 78%,#1a8a3a 100%);
   border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);position:relative;
 }
 .rsi-bar-in{
   height:100%;
-  position:absolute;top:0;left:0;
+  position:absolute;top:0;right:0;
   background:var(--bg3);
   transition:width .5s;
 }
@@ -686,20 +692,19 @@ function rsiClass(rsi) {
   return 'rsi-n';
 }
 
-/* ══ RSI BAR HELPERS (FIXED) ══
-   Bar fills RIGHT to LEFT.
-   Right = 0 = green (oversold/buy zone) — always visible base
-   Left  = 100 = red (overbought) — covered by dark overlay
+/* ══ RSI BAR OVERLAY — FIXED ══
+   Bar gradient: Left=RED(100) → Right=GREEN(0)
+   Dark overlay from RIGHT side, width = (100 - rsi)%
 
-   Overlay sits on LEFT, width = rsi%
-   So: RSI 10 → overlay 10% → 90% green visible ✅
-       RSI 30 → overlay 30% → 70% green visible ✅
-       RSI 70 → overlay 70% → 30% visible (amber/red) ✅
-       RSI 100 → overlay 100% → 0% visible (fully dark) ✅
+   RSI 86.5 → overlay = 13.5% from right → bar shows 86.5% red from left ✅
+   RSI 70   → overlay = 30% from right → bar shows 70% (orange zone) ✅
+   RSI 30   → overlay = 70% from right → bar shows 30% (green zone) ✅
+   RSI 10   → overlay = 90% from right → bar shows 10% (deep green) ✅
 */
 function rsiOverlayPct(rsi) {
   if (rsi === null) return 100;
-  return Math.max(0, Math.min(100, rsi));
+  // overlay from RIGHT = (100 - rsi)% — hides the green portion on right
+  return Math.max(0, Math.min(100, 100 - rsi));
 }
 
 function rsiZoneText(rsi) {
@@ -865,7 +870,6 @@ async function runLoopTick() {
       const pxEl2=document.getElementById('ec-px-'+e.sym); if(pxEl2) pxEl2.innerHTML=`<div class="ec-price">₹${price.toFixed(2)}</div>`;
       const timeEl=document.getElementById('ec-time-'+e.sym); if(timeEl) timeEl.textContent=`⏱ ${fetchTime} (abhi abhi)`;
       const rsiEl=document.getElementById('ec-rsi-val-'+e.sym); if(rsiEl){rsiEl.textContent=rsi!==null?rsi.toFixed(1):'—';rsiEl.style.color=rsiColor;}
-      /* ── FIXED: overlay width = (100 - rsi)% from right ── */
       const barEl=document.getElementById('ec-bar-'+e.sym); if(barEl){barEl.style.width=rsiOverlayPct(rsi)+'%';}
     }
     if(stEl) stEl.innerHTML=`<span class="fe-ok">₹${price.toFixed(2)}</span> <span style="font-size:.6rem;color:var(--muted);margin-left:4px;">${fetchTime}</span>`;
@@ -903,7 +907,6 @@ function buildEtfCard(e, rank) {
   const td=hist.find(h=>h.date===today); const lastEntry=hist[0];
   const d=getETFData(e.sym); const oversold=S.rsiOversold||30;
 
-  // Badge
   let badgeClass='ec-st-pending',badgeTxt='⏳ Pending';
   if(td) {
     const diffMin=td.ts?Math.floor((Date.now()-td.ts)/60000):9999;
@@ -911,7 +914,6 @@ function buildEtfCard(e, rank) {
     else{badgeClass='ec-st-stale';badgeTxt='🕐 Purana';}
   } else if(lastEntry){badgeClass='ec-st-stale';badgeTxt='🕐 Stale';}
 
-  // Time label
   const lastP=td||lastEntry; let timeStr='—';
   if(lastP){
     if(lastP.ts){
@@ -931,12 +933,11 @@ function buildEtfCard(e, rank) {
   let cardClass='etf-card';
   if(isOs) cardClass+=rank===1?' os os-1':' os';
 
-  /* overlay width = (100 - rsi)% covers right portion, revealing rsi% from left */
+  // overlay from RIGHT = (100-rsi)% — shows rsi% of gradient from left (red side)
   const overlayPct=rsiOverlayPct(rsi);
   const up=d.changePct!==null&&d.changePct>=0;
 
   return `<div class="${cardClass}" id="etf-card-${e.sym}">
-    <!-- Top: Symbol + Badge -->
     <div class="ec-top">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <div class="ec-sym">${e.sym}</div>
@@ -945,7 +946,6 @@ function buildEtfCard(e, rank) {
       <span class="ec-st-badge ${badgeClass}" id="ec-st-${e.sym}">${badgeTxt}</span>
     </div>
 
-    <!-- Mid: Price left, RSI right -->
     <div class="ec-mid">
       <div class="ec-price-block">
         <div id="ec-px-${e.sym}">
@@ -961,7 +961,7 @@ function buildEtfCard(e, rank) {
       </div>
     </div>
 
-    <!-- RSI Bar: left=0/green → right=100/red, filled = rsi% from left -->
+    <!-- RSI Bar: LEFT=100/RED → RIGHT=0/GREEN | overlay from RIGHT hides (100-rsi)% -->
     <div class="ec-bar-wrap">
       <div class="ec-bar-out">
         <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${overlayPct}%;"></div>
@@ -974,7 +974,6 @@ function buildEtfCard(e, rank) {
       </div>
     </div>
 
-    <!-- Days info -->
     <div style="margin-top:6px;font-size:.66rem;color:var(--muted);">${d.days} din ka data · ${d.days>=(S.rsiPeriod||14)?'RSI accurate ✓':'Aur data chahiye ⚠️'}</div>
   </div>`;
 }
@@ -1108,7 +1107,7 @@ function buildPickCard(r, held, boughtToday) {
   const buyTxt=held?'✅ Already Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
   const up=r.changePct!==null&&r.changePct>=0;
   const tgt=r.price*(1+(S.sellTarget||4.51)/100);
-  /* overlay = (100 - rsi)% from right */
+  // overlay from RIGHT = (100-rsi)%
   const overlayPct=rsiOverlayPct(r.rsi);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
