@@ -1670,15 +1670,103 @@ function updateColSignal(k, signalType) { const tradeBtnsEl = document.getElemen
 const PROX = [ u => `https://corsproxy.io/?${encodeURIComponent(u)}`, u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, u => `https://corsproxy.org/?${encodeURIComponent(u)}`, u => `https://thingproxy.freeboard.io/fetch/${u}`, u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` ];
 function yahooUrls(sym) { const ts = Date.now(); return [ `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`, `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`, `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=2m&range=1d&_=${ts}`, `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`, `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}` ]; }
 function parseYahoo(j) { const res = j?.chart?.result?.[0]; if (res) { const price = res.meta?.regularMarketPrice||res.meta?.previousClose; const prev = res.meta?.chartPreviousClose||res.meta?.previousClose||price; if (price && price > 0) return {price, prev}; } const q = j?.quoteResponse?.result?.[0]; if (q?.regularMarketPrice) return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose||q.regularMarketPrice }; return null; }
-async function tryFetch(k) { const urls = yahooUrls(ETF[k].sym); if (st.workingProxy !== null) { const px = PROX[st.workingProxy]; for (const yu of urls) { try { const r = await fetch(px(yu),{signal:AbortSignal.timeout(8000),cache:'no-store'}); if (!r.ok) continue; const raw = await r.json(); const j = typeof raw==='string'?JSON.parse(raw):raw; const d = parseYahoo(j); if (d) return d; } catch(_) {} } st.workingProxy = null; } for (let pi=0; pi<PROX.length; pi++) { for (const yu of urls) { try { const r = await fetch(PROX[pi](yu),{signal:AbortSignal.timeout(9000)}); if (!r.ok) continue; const raw = await r.json(); const j = typeof raw==='string'?JSON.parse(raw):raw; const d = parseYahoo(j); if (d) { st.workingProxy=pi; return d; } } catch(_) {} } } return null; }
+async function tryFetch(k) {
+  const urls = yahooUrls(ETF[k].sym);
+  if (st.workingProxy !== null) {
+    const px = PROX[st.workingProxy];
+    for (const yu of urls) {
+      try {
+        const r = await fetch(px(yu), { signal: AbortSignal.timeout(8000), cache: 'no-store' });
+        if (!r.ok) continue;
+        const raw = await r.json();
+        const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const d = parseYahoo(j);
+        if (d) {
+          st.fetchFailCount = 0;  // success, reset failure count
+          return d;
+        }
+      } catch (_) {}
+    }
+    st.workingProxy = null;
+  }
+  for (let pi = 0; pi < PROX.length; pi++) {
+    for (const yu of urls) {
+      try {
+        const r = await fetch(PROX[pi](yu), { signal: AbortSignal.timeout(9000) });
+        if (!r.ok) continue;
+        const raw = await r.json();
+        const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        const d = parseYahoo(j);
+        if (d) {
+          st.workingProxy = pi;
+          st.fetchFailCount = 0;  // success, reset failure count
+          return d;
+        }
+      } catch (_) {}
+    }
+  }
+  // 🔁 Sab proxy fail ho gaye — exponential backoff
+  st.fetchFailCount = (st.fetchFailCount || 0) + 1;
+  const delay = Math.min(30000, 1000 * Math.pow(2, st.fetchFailCount));
+  console.warn(`All proxies failed for ${k}, retrying in ${delay}ms`);
+  await new Promise(r => setTimeout(r, delay));
+  // Retry recursively (maximum 3 attempts already handled by delay, but safe)
+  return tryFetch(k);
+}
 function getPriceDir(k) { const cur=st.price[k],pv=st.prev[k]; if (!cur||!pv) return 'flat'; const chg=cur-pv; if(chg>0.001) return 'up'; if(chg<-0.001) return 'down'; return 'flat'; }
 function updatePriceColor(k) { const dir=getPriceDir(k); document.getElementById('pr-'+k).className = 'price-big price-'+dir; document.getElementById('pb-'+k).className = 'price-block price-'+dir; const sbEl = document.getElementById(k==='G'?'fsb-gPrice':'fsb-sPrice'); if (sbEl) sbEl.className = 'fsb-val price-'+dir; }
 function updateTabTitle() { let bestSignal=null, bestDist=Infinity; for (const k of ['G','S']) { const p=st.price[k]; if (!p) continue; const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100); const tu=st.hold[k].reduce((s,h)=>s+h.units,0); const buyDist=((p-bt)/p*100), sellDist=tu>0?((sv-p)/p*100):Infinity; if (buyDist<=0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; } if (sellDist<=0&&tu>0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`; return; } if (buyDist<bestDist) { bestDist=buyDist; bestSignal={k,type:'BUY',dist:buyDist.toFixed(2)}; } if (tu>0&&sellDist<bestDist) { bestDist=sellDist; bestSignal={k,type:'SELL',dist:sellDist.toFixed(2)}; } } if (bestSignal) { const name=bestSignal.k==='G'?'GOLD':'SILVER', dir=bestSignal.type==='BUY'?'↓':'↑'; document.title=`${ETF[bestSignal.k].icon} ${name} ${bestSignal.type} ${dir}${bestSignal.dist}% · BeES`; } else document.title='⚜️ Gold & Silver BeES'; }
 let lastFetchTs=null, agoTimer=null;
-function updateAgo() { if (!lastFetchTs) return; const sec=Math.floor((Date.now()-lastFetchTs)/1000), nextSec=Math.max(0,cfg.ref-sec); const el=document.getElementById('fsb-ago'); if (!el) return; let agoTxt = sec<60 ? sec+'s ago' : sec<3600 ? Math.floor(sec/60)+'m '+(sec%60)+'s ago' : Math.floor(sec/3600)+'h ago'; el.textContent = agoTxt+'  ·  '+nextSec+'s mein refresh'; }
+  let lastTickTs = null;
+let tickFailCount = { G: 0, S: 0 };
+function updateAgo() {
+  if (!lastFetchTs && !lastTickTs) return;
+  const now = Date.now();
+  const lastGood = lastTickTs || lastFetchTs;
+  if (!lastGood) return;
+  const sec = Math.floor((now - lastGood) / 1000);
+  const nextSec = Math.max(0, cfg.ref - sec);
+  const el = document.getElementById('fsb-ago');
+  let agoTxt = sec < 60 ? sec + 's ago' : sec < 3600 ? Math.floor(sec / 60) + 'm ' + (sec % 60) + 's ago' : Math.floor(sec / 3600) + 'h ago';
+  if (lastTickTs && (!lastFetchTs || lastTickTs > lastFetchTs)) {
+    agoTxt += ' ⚡tick';
+  }
+  el.textContent = agoTxt + '  ·  ' + nextSec + 's mein refresh';
+}
 function setFetchStatus(state, statusTxt) { const bar=document.getElementById('fetchStatusBar'); bar.className='fetch-status-bar '+state; document.getElementById('fetchStatusText').textContent=statusTxt; if (st.price.G&&st.prev.G) { const gChg=st.price.G-st.prev.G, gEl=document.getElementById('fsb-gChg'); gEl.textContent=(gChg>=0?'▲':'▼')+Math.abs((gChg/st.prev.G*100)).toFixed(2)+'%'; gEl.className='fsb-chg '+(gChg>=0?'up':'down'); document.getElementById('fsb-gPrice').textContent='₹'+st.price.G.toFixed(2); } if (st.price.S&&st.prev.S) { const sChg=st.price.S-st.prev.S, sEl=document.getElementById('fsb-sChg'); sEl.textContent=(sChg>=0?'▲':'▼')+Math.abs((sChg/st.prev.S*100)).toFixed(2)+'%'; sEl.className='fsb-chg '+(sChg>=0?'up':'down'); document.getElementById('fsb-sPrice').textContent='₹'+st.price.S.toFixed(2); } if (state==='') { lastFetchTs=Date.now(); if (!agoTimer) agoTimer=setInterval(updateAgo,1000); updateAgo(); } }
 async function fetchOne(k) { if (!apiEnabled) return; const d=await tryFetch(k); if (!d) { st.fetchFailCount++; if (st.fetchFailCount>=2) setFetchStatus('fail','Price fetch failed — retrying in '+cfg.ref+'s'); return; } st.fetchFailCount=0; const old=st.price[k]; st.price[k]=d.price; st.prev[k]=d.prev; showTick(k,old,d.price); updatePriceColor(k); updateCard(k); alertCheck(k); saveSt(); const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); document.getElementById('lastUpd').textContent='Updated '+t; setFetchStatus('','✓ Live · '+t); updateTabTitle(); }
-async function tickOne(k) { if (!apiEnabled) return; const d=await tryFetch(k); if (!d) return; const old=st.price[k]; st.price[k]=d.price; st.prev[k]=d.prev; if (d.price!==old) showTick(k,old,d.price); updatePriceColor(k); updateCard(k); alertCheck(k); saveSt(); const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); document.getElementById('lastUpd').textContent='🔄 '+t; setFetchStatus('','✓ Live · '+t); updateTabTitle(); }
+async function tickOne(k) {
+  if (!apiEnabled) return;
+  const d = await tryFetch(k);
+  if (!d) {
+    tickFailCount[k] = (tickFailCount[k] || 0) + 1;
+    if (tickFailCount[k] >= 3) {
+      console.warn(`${k} tick fails, forcing full fetch`);
+      fetchOne(k);
+      tickFailCount[k] = 0;
+    }
+    return;
+  }
+  tickFailCount[k] = 0;
+  const old = st.price[k];
+  st.price[k] = d.price;
+  st.prev[k] = d.prev;
+  if (d.price !== old) showTick(k, old, d.price);
+  updatePriceColor(k);
+  updateCard(k);
+  alertCheck(k);
+  saveSt();
+  // 🔁 Tick fetch bhi lastFetchTs update karega
+  if (!lastFetchTs || Date.now() - lastFetchTs > 5000) {
+    lastFetchTs = Date.now();
+    updateAgo();
+  }
+  lastTickTs = Date.now();
+  const t = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('lastUpd').textContent = '🔄 ' + t;
+  setFetchStatus('', '✓ Live · ' + t);
+  updateTabTitle();
+}
 function showTick(k, oldP, newP) { if (!oldP||oldP===newP) return; const pb=document.getElementById('pb-'+k), badge=document.getElementById('tick-'+k); if (newP>oldP) { pb.classList.add('price-flash-up'); badge.className='tick-badge up'; badge.textContent='▲ LIVE'; } else { pb.classList.add('price-flash-down'); badge.className='tick-badge down'; badge.textContent='▼ LIVE'; } setTimeout(()=>{ pb.classList.remove('price-flash-up','price-flash-down'); },600); }
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
 function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
