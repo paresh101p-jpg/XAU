@@ -76,23 +76,24 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 /* ══════════════════════════════════════════
    ETF CARD
 ══════════════════════════════════════════ */
-.etf-cards-grid{display:flex;flex-direction:column;gap:10px;}
+.etf-cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
 
 .etf-card{
   background:var(--bg2);
   border:2px solid var(--border);
-  border-radius:14px;
-  padding:14px 16px;
+  border-radius:12px;
+  padding:10px 12px;
   position:relative;
   transition:border-color .2s,box-shadow .2s;
+  min-width:0;
 }
 .etf-card.os{border-color:rgba(224,82,82,.55);background:rgba(224,82,82,.04);}
 .etf-card.os-1{border-color:rgba(224,82,82,.9);animation:sellGlow 1.4s infinite alternate;}
 .etf-card.ec-fetching{border-color:rgba(245,200,66,.6);}
 
 /* Top row */
-.ec-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
-.ec-sym{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:.5px;}
+.ec-top{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:7px;}
+.ec-sym{font-size:.88rem;font-weight:800;color:var(--text);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ec-st-badge{font-size:.68rem;padding:4px 10px;border-radius:8px;white-space:nowrap;flex-shrink:0;font-weight:700;}
 .ec-st-fetch{background:rgba(245,200,66,.18);color:var(--yellow);border:1px solid rgba(245,200,66,.4);}
 .ec-st-live{background:rgba(76,175,130,.14);color:var(--green);border:1px solid rgba(76,175,130,.3);}
@@ -100,16 +101,16 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ec-st-stale{background:rgba(232,164,64,.12);color:var(--amber);border:1px solid rgba(232,164,64,.3);}
 
 /* Mid row: price + RSI */
-.ec-mid{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px;}
-.ec-price-block{flex:1;}
-.ec-price{font-size:1.45rem;font-weight:800;color:var(--yellow);line-height:1.1;}
-.ec-no-price{font-size:.9rem;color:var(--muted);}
-.ec-chg{font-size:.78rem;font-weight:700;margin-top:3px;}
-.ec-time{font-size:.68rem;color:var(--muted);margin-top:4px;}
+.ec-mid{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px;}
+.ec-price-block{flex:1;min-width:0;}
+.ec-price{font-size:1.1rem;font-weight:800;color:var(--yellow);line-height:1.1;}
+.ec-no-price{font-size:.78rem;color:var(--muted);}
+.ec-chg{font-size:.68rem;font-weight:700;margin-top:2px;}
+.ec-time{font-size:.58rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ec-rsi-block{text-align:right;flex-shrink:0;}
-.ec-rsi-lbl-txt{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
-.ec-rsi-val{font-size:1.55rem;font-weight:800;line-height:1;}
-.ec-rsi-zone{font-size:.66rem;font-weight:700;margin-top:3px;}
+.ec-rsi-lbl-txt{font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.ec-rsi-val{font-size:1.3rem;font-weight:800;line-height:1;}
+.ec-rsi-zone{font-size:.58rem;font-weight:700;margin-top:2px;}
 
 /* ══ RSI BAR — FIXED ══
    Left = 100 = RED (Overbought)
@@ -123,27 +124,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
    RSI 10   → overlay = 90% from right → 10% visible (deep green) ✅
    RSI 0    → overlay = 100% → fully dark ✅
 */
-.ec-bar-wrap{margin-top:4px;}
-.ec-bar-out{
-  background: linear-gradient(to right,
-    #E05252 0%,
-    #f5a623 30%,
-    #f5c842 45%,
-    #c8e000 60%,
-    #4ddb7a 78%,
-    #1a8a3a 100%
-  );
-  border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);
-  position:relative;
-}
-/* Dark overlay from RIGHT — covers (100-rsi)% so left side red is visible for high RSI */
-.ec-bar-in{
-  height:100%;
-  position:absolute;top:0;right:0;
-  background:var(--bg3);
-  transition:width .6s ease;
-}
-.ec-bar-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:5px;font-weight:600;}
+/* bar removed */
 
 .ec-os-tag{
   font-size:.66rem;background:var(--red-dim);color:var(--red);
@@ -171,19 +152,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .ps-l{font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .ps-v{font-size:1.05rem;font-weight:700;margin-top:3px;}
 
-/* Pick card RSI bar — FIXED same as above */
-.rsi-bar-wrap{padding:8px 18px 6px;}
-.rsi-bar-out{
-  background:linear-gradient(to right,#E05252 0%,#f5a623 30%,#f5c842 45%,#c8e000 60%,#4ddb7a 78%,#1a8a3a 100%);
-  border-radius:8px;height:12px;overflow:hidden;border:1px solid var(--border);position:relative;
-}
-.rsi-bar-in{
-  height:100%;
-  position:absolute;top:0;right:0;
-  background:var(--bg3);
-  transition:width .5s;
-}
-.rsi-lbl{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);margin-top:5px;font-weight:600;}
+/* pick bar removed */
 
 /* ── WATCHLIST ROW ── */
 .no-pick{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:26px;text-align:center;}
@@ -961,20 +930,7 @@ function buildEtfCard(e, rank) {
       </div>
     </div>
 
-    <!-- RSI Bar: LEFT=100/RED → RIGHT=0/GREEN | overlay from RIGHT hides (100-rsi)% -->
-    <div class="ec-bar-wrap">
-      <div class="ec-bar-out">
-        <div class="ec-bar-in" id="ec-bar-${e.sym}" style="width:${overlayPct}%;"></div>
-      </div>
-      <div class="ec-bar-labels">
-        <span style="color:var(--red)">100</span>
-        <span style="color:var(--amber)">70</span>
-        <span style="color:var(--green)">30</span>
-        <span style="color:var(--green)">0</span>
-      </div>
-    </div>
-
-    <div style="margin-top:6px;font-size:.66rem;color:var(--muted);">${d.days} din ka data · ${d.days>=(S.rsiPeriod||14)?'RSI accurate ✓':'Aur data chahiye ⚠️'}</div>
+    <div style="margin-top:6px;font-size:.62rem;color:var(--muted);">${d.days}d · ${d.days>=(S.rsiPeriod||14)?'✓':'⚠️'}</div>
   </div>`;
 }
 
@@ -1124,16 +1080,7 @@ function buildPickCard(r, held, boughtToday) {
         <div class="ps-v" style="color:${r.changePct!==null?(up?'var(--green)':'var(--red)'):'var(--muted)'}">
           ${r.changePct!==null?(up?'+':'')+r.changePct.toFixed(2)+'%':'—'}</div></div>
     </div>
-    ${r.rsi!==null?`<div class="rsi-bar-wrap">
-      <div class="rsi-bar-out">
-        <div class="rsi-bar-in" style="width:${overlayPct}%;"></div>
-      </div>
-      <div class="rsi-lbl">
-        <span style="color:var(--red)">100 Overbought</span>
-        <span class="${rsiClass(r.rsi)}">RSI ${r.rsi.toFixed(1)}</span>
-        <span style="color:var(--green)">0 Oversold</span>
-      </div>
-    </div>`:`<div style="padding:6px 18px;font-size:.68rem;color:var(--amber);">⚠️ Aur data chahiye RSI ke liye</div>`}
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 14px;">
       <button class="btn-buy-sm" onclick="openModal('${r.sym}',${r.price},'buy')" ${canBuy?'':'disabled'}>${buyTxt}</button>
       <button class="btn-sell-sm" disabled>SELL — Not Held</button>
