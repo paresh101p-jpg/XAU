@@ -920,15 +920,26 @@ function buildEtfCard(e, rank) {
   let cardClass = 'etf-card';
   if(isOs) cardClass += rank===1?' os os-1':' os';
   
-  // ✅ FIX: change percent with red/green
+  // Determine price colour based on changePct
+  let priceColor = 'var(--yellow)'; // default
   let changeHtml = '';
   if(e.changePct !== null && !isNaN(e.changePct)) {
     let chgClass = '';
     let arrow = '';
     let absVal = Math.abs(e.changePct).toFixed(2);
-    if(e.changePct > 0) { chgClass = 'up'; arrow = '▲'; }
-    else if(e.changePct < 0) { chgClass = 'dn'; arrow = '▼'; }
-    else { chgClass = 'zero'; arrow = '◆'; }
+    if(e.changePct > 0) {
+      chgClass = 'up';
+      arrow = '▲';
+      priceColor = 'var(--green)';
+    } else if(e.changePct < 0) {
+      chgClass = 'dn';
+      arrow = '▼';
+      priceColor = 'var(--red)';
+    } else {
+      chgClass = 'zero';
+      arrow = '◆';
+      priceColor = 'var(--yellow)';
+    }
     changeHtml = `<div class="ec-chg ${chgClass}" style="color: ${e.changePct>0 ? 'var(--green)' : (e.changePct<0 ? 'var(--red)' : 'var(--muted)')};">${arrow} ${absVal}%</div>`;
   }
   
@@ -948,7 +959,7 @@ function buildEtfCard(e, rank) {
     </div>
     <div class="ec-mid">
       <div class="ec-price-block">
-        ${e.price?`<div class="ec-price">₹${e.price.toFixed(2)}</div>`:`<div class="ec-no-price">—</div>`}
+        ${e.price ? `<div class="ec-price" style="color:${priceColor};">₹${e.price.toFixed(2)}</div>` : `<div class="ec-no-price">—</div>`}
         ${changeHtml}
         <div style="font-size:.56rem;color:var(--muted);margin-top:2px;">${timeStr}</div>
       </div>
@@ -966,13 +977,19 @@ function buildEtfCard(e, rank) {
 function buildPickCard(r, held, boughtToday) {
   const canBuy = !held && !boughtToday;
   const buyTxt = held?'✅ Held':boughtToday?'✅ Aaj Liya':'🛒 BUY';
+  
+  let priceColor = 'var(--yellow)';
   let changeHtml = '';
   if(r.changePct !== null && !isNaN(r.changePct)) {
     let arrow = r.changePct>0 ? '▲' : (r.changePct<0 ? '▼' : '◆');
     let absVal = Math.abs(r.changePct).toFixed(2);
     let color = r.changePct>0 ? 'var(--green)' : (r.changePct<0 ? 'var(--red)' : 'var(--muted)');
     changeHtml = `<span style="color:${color}; font-weight:700;">${arrow} ${absVal}%</span>`;
+    if(r.changePct > 0) priceColor = 'var(--green)';
+    else if(r.changePct < 0) priceColor = 'var(--red)';
+    else priceColor = 'var(--yellow)';
   } else { changeHtml = '—'; }
+  
   const tgt = r.price*(1+(S.sellTarget||4.51)/100);
   return `<div class="pick-card">
     <span class="pick-star">⭐ Aaj Ka Pick</span>
@@ -984,7 +1001,7 @@ function buildPickCard(r, held, boughtToday) {
       <div class="ps"><div class="ps-l">RSI 14</div>
         <div class="ps-v ${rsiClass(r.rsi)}">${r.rsi!==null?r.rsi.toFixed(1):'N/A'}</div></div>
       <div class="ps"><div class="ps-l">Price</div>
-        <div class="ps-v" style="color:var(--yellow)">₹${r.price.toFixed(2)}</div></div>
+        <div class="ps-v" style="color:${priceColor};">₹${r.price.toFixed(2)}</div></div>
       <div class="ps"><div class="ps-l">Change</div>
         <div class="ps-v">${changeHtml}</div></div>
     </div>
@@ -997,12 +1014,16 @@ function buildPickCard(r, held, boughtToday) {
 
 // ══ WL ROW with colored change ══
 function buildWLRow(r, rank) {
+  let priceColor = 'var(--yellow)';
   let changeHtml = '';
   if(r.changePct !== null && !isNaN(r.changePct)) {
     let arrow = r.changePct>0 ? '▲' : (r.changePct<0 ? '▼' : '◆');
     let absVal = Math.abs(r.changePct).toFixed(2);
     let color = r.changePct>0 ? 'var(--green)' : (r.changePct<0 ? 'var(--red)' : 'var(--muted)');
     changeHtml = `<div style="color:${color}; font-size:.66rem; margin-top:2px;">${arrow} ${absVal}%</div>`;
+    if(r.changePct > 0) priceColor = 'var(--green)';
+    else if(r.changePct < 0) priceColor = 'var(--red)';
+    else priceColor = 'var(--yellow)';
   } else { changeHtml = '<div style="font-size:.66rem; color:var(--muted);">—</div>'; }
   
   const oversold = S.rsiOversold || 30;
@@ -1032,7 +1053,7 @@ function buildWLRow(r, rank) {
       <div style="font-size:.58rem;color:var(--red);margin-top:3px;">${rsiZoneText(r.rsi)}</div>
     </div>
     <div class="wl-px">
-      <div style="font-size:.9rem;font-weight:800;color:var(--yellow);">${r.price!==null?'₹'+r.price.toFixed(2):'—'}</div>
+      <div style="font-size:.9rem;font-weight:800;color:${priceColor};">${r.price!==null?'₹'+r.price.toFixed(2):'—'}</div>
       ${changeHtml}
     </div>
   </div>`;
