@@ -1148,6 +1148,14 @@ body {
             </div>
             <button class="ps-save-btn" onclick="saveLiveAmount()">💾 Save Value</button>
           </div>
+          <div class="ps-input-group">
+            <div class="ps-input-group-title">⚙️ Settings</div>
+            <div class="ps-field" style="margin-top:8px;">
+              <label>Google Apps Script URL (Stable Price API)</label>
+              <input type="text" id="gsheet-url-input" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveGSheetUrl()">
+              <div class="bp-hint">Stable price update ke liye Google Sheet (Apps Script) use karo.</div>
+            </div>
+          </div>
         </div>
         <div class="ps-hist-badge">
           🗂 Last 30d ref: <span id="last30dInfo">—</span> &nbsp;·&nbsp; Last 1y ref: <span id="last1yInfo">—</span> &nbsp;·&nbsp; <span id="totalSnapshotsInfo">0 snapshots saved</span>
@@ -1312,6 +1320,13 @@ function togglePsSection() {
 let manualStart = { amount: null, date: null };
 let manualSnapshots = [];
 
+function saveGSheetUrl() {
+  const url = document.getElementById('gsheet-url-input').value.trim();
+  st.gSheetUrl = url;
+  localStorage.setItem('gsheet_url', url);
+  saveSt();
+}
+
 function loadManualData() {
   try {
     const raw = localStorage.getItem('manual_portfolio_v1');
@@ -1322,6 +1337,14 @@ function loadManualData() {
       manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
     }
   } catch(e) { console.warn(e); }
+  
+  // Load GSheet URL
+  const gsUrl = localStorage.getItem('gsheet_url') || '';
+  st.gSheetUrl = gsUrl;
+  if (document.getElementById('gsheet-url-input')) {
+    document.getElementById('gsheet-url-input').value = gsUrl;
+  }
+
   if (manualStart.amount) document.getElementById('manualStartAmount').value = manualStart.amount;
   if (manualStart.date) document.getElementById('manualStartDate').value = manualStart.date;
   updateCapStartDisplay();
@@ -1543,7 +1566,7 @@ function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getE
 const ETF = { G:{sym:'GOLDBEES.NS', nseSym:'GOLDBEES', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', nseSym:'SILVERBEES', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
 let cfg = { buy: 2, sell: 3, ref: 60 };
-let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0 };
+let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0, gSheetUrl: localStorage.getItem('gsheet_url') || '' };
 let editState = { k: null, idx: null };
 
 function getSortedHoldings(k) { return [...st.hold[k]].sort((a,b) => (a.buyPrice||a.price) - (b.buyPrice||b.price)); }
@@ -1642,6 +1665,22 @@ async function fetchOnce(url, parseFunc, proxyIdx, timeout = 8000) {
 
 async function tryFetch(k) {
   if (!apiEnabled) return null;
+
+  // --- Google Sheet API (Highest Priority if set) ---
+  if (st.gSheetUrl) {
+    try {
+      const r = await fetch(st.gSheetUrl, { signal: AbortSignal.timeout(8000), cache: 'no-store' });
+      if (r.ok) {
+        const j = await r.json();
+        const d = j[k]; // Format: {G: {price, prev}, S: {price, prev}}
+        if (d && d.price > 0) {
+          st.fetchFailCount = 0;
+          updateApiSourceBadge('G-Sheet', -1);
+          return { price: d.price, prev: d.prev || d.price, src: 'G-Sheet' };
+        }
+      }
+    } catch (e) { console.warn('G-Sheet fetch fail:', e); }
+  }
 
   const nseSym = ETF[k].nseSym;
   const yahooSym = ETF[k].sym;
@@ -1993,6 +2032,7 @@ function buildDataObj() {
       gord: document.getElementById('cp-gord').value,
       sord: document.getElementById('cp-sord').value
     },
+    gsheet_url: st.gSheetUrl,
     manual: { start: manualStart, snapshots: manualSnapshots }
   };
 }
@@ -2091,6 +2131,13 @@ function applyData(data) {
   if (data.alerted) st.alerted = data.alerted;
   if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
   if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
+  if (data.gsheet_url !== undefined) {
+    st.gSheetUrl = data.gsheet_url;
+    localStorage.setItem('gsheet_url', data.gsheet_url);
+    if (document.getElementById('gsheet-url-input')) {
+      document.getElementById('gsheet-url-input').value = data.gsheet_url;
+    }
+  }
   if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
   localStorage.setItem(LS_KEY, JSON.stringify(data)); renderLog(); updateAll();
 }
