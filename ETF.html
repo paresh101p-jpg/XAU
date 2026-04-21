@@ -1152,7 +1152,10 @@ body {
             <div class="ps-input-group-title">⚙️ Settings</div>
             <div class="ps-field" style="margin-top:8px;">
               <label>Google Apps Script URL (Stable Price API)</label>
-              <input type="text" id="gsheet-url-input" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveGSheetUrl()">
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="gsheet-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1;">
+                <button class="ps-save-btn" onclick="saveGSheetUrl()">💾 Save</button>
+              </div>
               <div class="bp-hint">Stable price update ke liye Google Sheet (Apps Script) use karo.</div>
             </div>
           </div>
@@ -1322,9 +1325,16 @@ let manualSnapshots = [];
 
 function saveGSheetUrl() {
   const url = document.getElementById('gsheet-url-input').value.trim();
+  if (!url) { showToast('⚠️ URL empty hai'); return; }
+  if (!url.startsWith('https://script.google.com')) { 
+    showToast('⚠️ Invalid Google Script URL'); 
+    return; 
+  }
   st.gSheetUrl = url;
   localStorage.setItem('gsheet_url', url);
   saveSt();
+  showToast('✅ Google Sheet URL saved! Fetching prices...');
+  fetchAll();
 }
 
 function loadManualData() {
