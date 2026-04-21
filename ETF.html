@@ -1015,6 +1015,7 @@ body {
 
 /* API Source Badge */
 .api-source-badge {
+  display: none;
   font-size: 0.55rem; padding: 1px 7px; border-radius: 6px;
   background: rgba(212,168,67,0.15); color: var(--gold);
   border: 1px solid rgba(212,168,67,0.3);
@@ -2026,7 +2027,35 @@ function closeEditModal() { document.getElementById('editOverlay').classList.rem
 function saveEditHolding() { const { k, idx } = editState; if (k === null || idx === null) return; const newPrice = parseFloat(document.getElementById('editPrice').value); const newUnits = parseInt(document.getElementById('editUnits').value); let newDate = document.getElementById('editDate').value.trim(); let newTime = document.getElementById('editTime').value.trim(); if (!newPrice || newPrice <= 0 || !newUnits || newUnits < 1) { showToast('⚠️ Valid price aur units daalo'); return; } if (!newDate) newDate = todayDateStr(); if (!newTime) newTime = currentTimeStr(); st.hold[k][idx].buyPrice = newPrice; st.hold[k][idx].price = newPrice; st.hold[k][idx].units = newUnits; st.hold[k][idx].date = newDate; st.hold[k][idx].time = newTime; closeEditModal(); saveSt(); updateCard(k); showToast('✅ Holding updated!'); }
 function deleteHolding(k, idx) { const h = st.hold[k][idx]; if (!h) return; if (!confirm(`Lot delete karna chahte ho? Qty: ${h.units} Share @ ₹${(h.buyPrice || h.price).toFixed(2)}`)) return; st.hold[k].splice(idx, 1); saveSt(); updateCard(k); showToast('🗑 Holding deleted'); }
 function updateAll() { ['G', 'S'].forEach(k => updateCard(k)); }
-function alertCheck(k) { const p = st.price[k]; if (!p) return; const ref = getLot1Price(k) || p; const bt = ref * (1 - cfg.buy / 100); const sv = ref * (1 + cfg.sell / 100); const tu = st.hold[k].reduce((s, h) => s + h.units, 0); if (p <= bt && !st.alerted[k].buy) { st.alerted[k].buy = true; st.alerted[k].sell = false; playBeep('buy'); showAlertPopup(k, 'buy', bt, sv, tu); } else if (p >= sv && tu > 0 && !st.alerted[k].sell) { st.alerted[k].sell = true; st.alerted[k].buy = false; playBeep('sell'); showAlertPopup(k, 'sell', bt, sv, tu); } else if (p > bt && p < sv) { st.alerted[k].buy = false; st.alerted[k].sell = false; } }
+function alertCheck(k) {
+  const p = st.price[k]; if (!p) return;
+  const ref = getLot1Price(k) || p;
+  const bt = ref * (1 - cfg.buy / 100);
+  const sv = ref * (1 + cfg.sell / 100);
+  const tu = st.hold[k].reduce((s, h) => s + h.units, 0);
+
+  // Debug: console.log(`Checking ${k}: Price=${p}, BuyTarget=${bt}, SellTarget=${sv}`);
+
+  if (p <= bt && !st.alerted[k].buy) {
+    st.alerted[k].buy = true;
+    st.alerted[k].sell = false;
+    playBeep('buy');
+    showAlertPopup(k, 'buy', bt, sv, tu);
+    saveSt();
+  } else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
+    st.alerted[k].sell = true;
+    st.alerted[k].buy = false;
+    playBeep('sell');
+    showAlertPopup(k, 'sell', bt, sv, tu);
+    saveSt();
+  } else if (p > bt && p < sv) {
+    if (st.alerted[k].buy || st.alerted[k].sell) {
+      st.alerted[k].buy = false;
+      st.alerted[k].sell = false;
+      saveSt();
+    }
+  }
+}
 function showAlertPopup(k, type, bt, sv, tu) { const isBuy = type === 'buy'; const p = st.price[k]; const avg = tu > 0 ? st.hold[k].reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0) / tu : 0; const lot1P = getLot1Price(k); const buyU = calcBuyUnits(k); const sellU = getLot1Units(k); const nextLot = getSortedHoldings(k).length + 1; const amt = isBuy ? (buyU * p).toFixed(2) : null; const profit = !isBuy && avg > 0 ? ((sv - avg) * tu).toFixed(2) : null; if (Notification && Notification.permission === 'granted') { const title = `${ETF[k].icon} ${ETF[k].name} — ${isBuy ? 'BUY' : 'SELL'} Signal!`; const body = isBuy ? `Lot ${nextLot} · Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${buyU} Share · ₹${Number(amt).toLocaleString('en-IN')}` : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · Lot 1 · ${sellU} Share · Profit: +₹${profit}`; new Notification(title, { body }); } st.alertPend = { k, type }; const box = document.getElementById('alertBox'); box.className = 'alert-box ' + (isBuy ? 'ab' : 'as'); document.getElementById('apIcon').textContent = ETF[k].icon; document.getElementById('apType').textContent = isBuy ? '🟢 BUY SIGNAL' : '🔴 SELL SIGNAL'; document.getElementById('apTitle').textContent = isBuy ? 'Buy Target Hit! 🎯' : 'Sell Target Hit! 💰'; let rows = `<div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div><div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div><div class="alert-row"><span class="ark">${isBuy ? 'Buy' : 'Sell'} Target</span><span class="arv">₹ ${isBuy ? bt.toFixed(2) : sv.toFixed(2)}</span></div>`; if (lot1P) rows += `<div class="alert-row"><span class="ark">Lot 1 Ref Price</span><span class="arv">₹ ${lot1P.toFixed(2)}</span></div>`; if (isBuy) rows += `<div class="alert-row"><span class="ark">New Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`; rows += `<div class="alert-divider"></div><div class="alert-row"><span class="ark">Share to ${isBuy ? 'Buy' : 'Sell'}</span><span class="arv big">${isBuy ? buyU : sellU} Share</span></div>`; if (isBuy) rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`; else { if (avg > 0) rows += `<div class="alert-row"><span class="ark">Overall Avg Buy</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`; if (profit) rows += `<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`; } document.getElementById('alertRows').innerHTML = rows; document.getElementById('alertTradeBtn').textContent = isBuy ? '🛒 BUY Now' : '💰 SELL Now'; document.getElementById('alertOverlay').classList.add('show'); }
 function alertDoTrade() { const { k, type } = st.alertPend; dismissAlert(); openModal(k, type, true); }
 function dismissAlert() { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend = null; }
