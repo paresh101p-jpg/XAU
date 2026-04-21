@@ -1575,7 +1575,7 @@ function playTone(ctx, freq, startDelay, dur, wave, vol) { const osc = ctx.creat
 function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getElementById('soundToggle'), icon = document.getElementById('soundIcon'), txt = document.getElementById('soundTxt'); if (soundEnabled) { btn.className='sound-toggle on'; icon.textContent='🔔'; txt.textContent='Sound ON'; playBeep('buy'); } else { btn.className='sound-toggle off'; icon.textContent='🔕'; txt.textContent='Sound OFF'; } showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF'); }
 const ETF = { G:{sym:'GOLDBEES.NS', nseSym:'GOLDBEES', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', nseSym:'SILVERBEES', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
-let cfg = { buy: 2, sell: 3, ref: 60 };
+let cfg = { buy: 2, sell: 3, ref: 300 };
 let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0, gSheetUrl: localStorage.getItem('gsheet_url') || '' };
 let editState = { k: null, idx: null };
 
@@ -1796,13 +1796,17 @@ function updateAgo() {
   const lastGood = lastTickTs || lastFetchTs;
   if (!lastGood) return;
   const sec = Math.floor((now - lastGood) / 1000);
-  const nextSec = Math.max(0, cfg.ref - sec);
+  const nextSecTotal = Math.max(0, cfg.ref - sec);
+  const mm = Math.floor(nextSecTotal / 60);
+  const ss = nextSecTotal % 60;
+  const countdownTxt = `${mm}:${ss.toString().padStart(2, '0')}`;
+  
   const el = document.getElementById('fsb-ago');
   let agoTxt = sec < 60 ? sec + 's ago' : sec < 3600 ? Math.floor(sec / 60) + 'm ' + (sec % 60) + 's ago' : Math.floor(sec / 3600) + 'h ago';
   if (lastTickTs && (!lastFetchTs || lastTickTs > lastFetchTs)) {
     agoTxt += ' ⚡';
   }
-  el.textContent = agoTxt + '  ·  ' + nextSec + 's mein refresh';
+  el.innerHTML = `<span style="color:var(--muted)">${agoTxt}</span> · <span style="color:var(--amber); font-weight:bold;">Next: ${countdownTxt}</span>`;
 }
 
 function setFetchStatus(state, statusTxt) {
@@ -1890,7 +1894,7 @@ async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','F
 window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000); applyApiState(); if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); } loadManualData(); };
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
-function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 60; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
+function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 300; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
 function updateCard(k) {
   const p=st.price[k], pv=st.prev[k]; if (!p) return;
   const dir=getPriceDir(k), icon=ETF[k].icon, arrow=dir==='up'?'▲':dir==='down'?'▼':'';
