@@ -1851,7 +1851,7 @@ async function fetchOne(k) {
   saveSt();
   const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = 'Updated ' + t;
-  setFetchStatus('', '✓ Live · ' + t);
+  document.getElementById('fetchStatusText').textContent = '✓ Live · ' + t;
   updateTabTitle();
 }
 
