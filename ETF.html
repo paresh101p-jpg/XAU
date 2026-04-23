@@ -1039,6 +1039,31 @@ body {
   .cap-cards { grid-template-columns: 1fr; }
   .mhist-summary-row { grid-template-columns: 1fr 1fr; }
 }
+  .popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(10px); z-index: 180;
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 20px; overflow-y: auto;
+}
+.popup-overlay.show { display: flex; }
+.popup-inner-wrap {
+  background: var(--bg2); border: 2px solid rgba(245,200,66,0.4);
+  border-radius: 24px; width: 95vw; max-width: 760px;
+  margin: auto; animation: pop 0.22s ease; overflow: hidden;
+}
+.popup-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 2px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+.popup-title { font-size: 1.1rem; color: var(--yellow); }
+.popup-close {
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--muted); border-radius: 40px; padding: 6px 18px;
+  font-size: 0.8rem; cursor: pointer; transition: 0.15s;
+}
+.popup-close:hover { border-color: var(--red); color: var(--red); }
+.popup-body { overflow-y: auto; max-height: 80vh; }
 </style>
 </head>
 <body>
@@ -1118,14 +1143,15 @@ body {
 
   <!-- Portfolio Summary -->
   <div class="portfolio-summary" id="portfolioSummary">
-    <div class="ps-header" id="psHeader" onclick="togglePsSection()">
+    <div class="ps-header" id="psHeader">
       <div class="ps-header-left">
         <span style="font-size:1rem;">📊</span>
         <span class="ps-header-title">Portfolio Summary &nbsp;<span>₹</span></span>
       </div>
       <div class="ps-header-right" onclick="event.stopPropagation()">
         <button class="btn-monthly-hist" onclick="showMonthlyHistory()">📅 Monthly History</button>
-        <span class="ps-toggle-arrow" id="psArrow" style="transform:rotate(-90deg);">▼</span>
+        <button class="btn-monthly-hist" onclick="openPsPopup()" style="background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
+        <button class="btn-monthly-hist" onclick="openCapPopup()" style="background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
       </div>
     </div>
     <div class="ps-body" id="psBody">
@@ -1179,9 +1205,30 @@ body {
     </div>
   </div>
 
+  <!-- Portfolio Summary Popup -->
+  <div class="popup-overlay" id="psPopupOverlay" onclick="if(event.target.id==='psPopupOverlay')closePsPopup()">
+    <div class="popup-inner-wrap">
+      <div class="popup-header">
+        <div class="popup-title">📊 Portfolio Summary</div>
+        <button class="popup-close" onclick="closePsPopup()">✕ Close</button>
+      </div>
+      <div class="popup-body" id="psPopupBody"></div>
+    </div>
+  </div>
+  <!-- Capital Planner Popup -->
+  <div class="popup-overlay" id="capPopupOverlay" onclick="if(event.target.id==='capPopupOverlay')closeCapPopup()">
+    <div class="popup-inner-wrap" style="border-color:rgba(76,175,130,0.35);">
+      <div class="popup-header" style="border-color:rgba(76,175,130,0.2);">
+        <div class="popup-title" style="color:var(--green);">💰 Capital Planner</div>
+        <button class="popup-close" onclick="closeCapPopup()">✕ Close</button>
+      </div>
+      <div class="popup-body" id="capPopupBody"></div>
+    </div>
+  </div>
+
   <!-- Capital Planner -->
-  <button class="cap-toggle" id="capToggle" onclick="toggleCap()">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
-  <div class="cap-panel" id="capPanel">
+  <button class="cap-toggle" id="capToggle" onclick="toggleCap()" style="display:none;">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
+  <div class="cap-panel" id="capPanel" style="display:none;">
     <div class="cap-inner">
       <div class="cap-start-section">
         <div class="cap-start-title">📌 Start Capital</div>
@@ -2060,6 +2107,22 @@ document.getElementById('overlay').addEventListener('click', e => { if (e.target
 document.getElementById('alertOverlay').addEventListener('click', e => { if (e.target.id === 'alertOverlay') dismissAlert(); });
 document.getElementById('editOverlay').addEventListener('click', e => { if (e.target.id === 'editOverlay') closeEditModal(); });
 document.getElementById('mhistOverlay').addEventListener('click', e => { if (e.target.id === 'mhistOverlay') closeMonthlyHistory(); });
+function openPsPopup() {
+  const inner = document.querySelector('.ps-inner');
+  const body = document.getElementById('psPopupBody');
+  if (inner && !body.contains(inner)) body.appendChild(inner);
+  document.getElementById('psPopupOverlay').classList.add('show');
+  updateSummaryDisplay(); calcCapital();
+}
+function closePsPopup() { document.getElementById('psPopupOverlay').classList.remove('show'); }
+function openCapPopup() {
+  const inner = document.querySelector('#capPanel .cap-inner');
+  const body = document.getElementById('capPopupBody');
+  if (inner && !body.contains(inner)) body.appendChild(inner);
+  document.getElementById('capPopupOverlay').classList.add('show');
+  calcCapital();
+}
+function closeCapPopup() { document.getElementById('capPopupOverlay').classList.remove('show'); }
 </script>
 
 <script type="module">
