@@ -117,18 +117,6 @@ body {
 }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-.api-toggle {
-  display: flex; align-items: center; gap: 6px; cursor: pointer;
-  border-radius: 20px; padding: 5px 13px; font-size: 0.68rem; transition: all 0.2s; user-select: none;
-  border: 2px solid; white-space: nowrap;
-}
-.api-toggle.on  { background: rgba(76,175,130,0.1); border-color: rgba(76,175,130,0.6); color: var(--green); }
-.api-toggle.off { background: rgba(224,82,82,0.1);  border-color: rgba(224,82,82,0.5);  color: var(--red); }
-.api-toggle:hover { transform: translateY(-1px); }
-.api-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.api-toggle.on  .api-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 1.6s infinite; }
-.api-toggle.off .api-dot { background: var(--red); }
-
 .top-header {
   background: var(--bg2); border-bottom: 2px solid var(--border);
   padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
@@ -1091,10 +1079,6 @@ body {
     </div>
   </div>
 
-  <div class="api-paused-bar" id="apiPausedBar">
-    ⏸ API Paused — Live price fetch band hai · Toggle kaaro enable karne ke liye
-  </div>
-
   <div class="fetch-status-bar loading" id="fetchStatusBar">
     <div id="fetchStatusDot"></div>
     <div class="fsb-prices">
@@ -1572,27 +1556,9 @@ function toggleMonthEntries(monthKey) { const rowEl = document.getElementById('m
 function closeMonthlyHistory() { document.getElementById('mhistOverlay').classList.remove('show'); }
 
 // ======================== MAIN APP CODE ========================
-let apiEnabled = localStorage.getItem('apiEnabled') !== 'false';
-
-function toggleApi() {
-  apiEnabled = !apiEnabled;
-  localStorage.setItem('apiEnabled', String(apiEnabled));
-  applyApiState();
-  saveSt();
-  if (apiEnabled) {
-    if (window._appStarted) { fetchAll(); startLoop(); startTickLoop(); }
-    showToast('✅ API ON — Live price fetch shuru');
-  } else {
-    if (st.timer) clearInterval(st.timer);
-    if (st.tickTimer) clearInterval(st.tickTimer);
-    document.getElementById('fetchStatusText').textContent = '⏸ API Paused';
-    showToast('⏸ API OFF — Price fetch band');
-  }
-}
+let apiEnabled = true;
 
 function applyApiState() {
-  const pausedBar = document.getElementById('apiPausedBar');
-  if (pausedBar) pausedBar.classList.toggle('show', !apiEnabled);
 }
 
 let audioCtx = null, soundEnabled = true;
@@ -1851,21 +1817,26 @@ function renderHold(k, p, buyTarget, overallAvg) {
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
     const buyTargetLot = bp * (1 - cfg.buy / 100);
     const sellTargetLot = bp * (1 + cfg.sell / 100);
-    const buyHit = p !== null && p <= buyTargetLot;
-    const sellHit = p !== null && p >= sellTargetLot;
+    
+    // Strict "Hit!" logic for UI: only show if price is VERY close to target
+    const tolerance = bp * 0.0015; // 0.15% tolerance
+    const buyHit = p !== null && Math.abs(p - buyTargetLot) <= tolerance;
+    const sellHit = p !== null && Math.abs(p - sellTargetLot) <= tolerance;
 
     let buyLabel = '';
     if (buyHit) {
       buyLabel = '🎯 Hit!';
     } else {
-      buyLabel = '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '% baki';
+      const dist = (p - buyTargetLot) / p * 100;
+      buyLabel = (dist > 0 ? '−' : '+') + Math.abs(dist).toFixed(2) + '% baki';
     }
 
     let sellLabel = '';
     if (sellHit) {
       sellLabel = '🎯 Hit!';
     } else {
-      sellLabel = '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '% baki';
+      const dist = (sellTargetLot - p) / p * 100;
+      sellLabel = (dist > 0 ? '+' : '−') + Math.abs(dist).toFixed(2) + '% baki';
     }
 
     let fillWidth = 0;
@@ -1875,18 +1846,19 @@ function renderHold(k, p, buyTarget, overallAvg) {
         const range = bp - buyTargetLot;
         if (range > 0) { 
           const progress = (bp - p) / range; 
-          fillWidth = Math.min(50, progress * 50); 
+          fillWidth = progress * 50; 
           direction = 'left'; 
         } else { fillWidth = 50; direction = 'left'; }
       } else {
         const range = sellTargetLot - bp;
         if (range > 0) { 
           const progress = (p - bp) / range; 
-          fillWidth = Math.min(50, progress * 50); 
+          fillWidth = progress * 50; 
           direction = 'right'; 
         } else { fillWidth = 50; direction = 'right'; }
       }
     }
+    if (fillWidth > 100) fillWidth = 100;
     const cardHtml = `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
       <div class="h-card-top">
         <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share ${badgeHtml}</span>
@@ -1905,14 +1877,14 @@ function renderHold(k, p, buyTarget, overallAvg) {
         <div class="h-cell" style="text-align:right;"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-bar-container">
+        <div class="progress-bar-container" style="overflow:hidden;">
           <div class="progress-fill ${direction === 'left' ? 'left-expand' : direction === 'right' ? 'right-expand' : ''}" style="width:${fillWidth}%;"></div>
           <div class="progress-center-line"></div>
           <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
         </div>
         <div class="progress-labels">
-          <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${direction === 'right' ? 'opacity:0;pointer-events:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${buyLabel})</span></span>
-          <span class="progress-label-sell ${sellHit ? 'hit' : ''}" style="${direction === 'left' ? 'opacity:0;pointer-events:none;' : ''}">▲ Sell ₹${sellTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${sellLabel})</span></span>
+          <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${direction === 'right' ? 'opacity:0.4;pointer-events:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.85;font-size:0.65rem;font-weight:bold;">(${buyLabel})</span></span>
+          <span class="progress-label-sell ${sellHit ? 'hit' : ''}" style="${direction === 'left' ? 'opacity:0.4;pointer-events:none;' : ''}">▲ Sell ₹${sellTargetLot.toFixed(2)} <span style="opacity:0.85;font-size:0.65rem;font-weight:bold;">(${sellLabel})</span></span>
         </div>
       </div>
       <div class="h-date-row">
@@ -2208,6 +2180,32 @@ function applyData(data) {
   calcCapital();
 }
 function setSyncStatus(state, txt) { const dot = document.getElementById('syncDot'), stxt = document.getElementById('syncTxt'); if (!dot) return; dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'offline' ? ' offline' : ''); stxt.textContent = txt; }
+
+// Attach functions to window for HTML onclick handlers
+window.toggleHoldings = toggleHoldings;
+window.toggleShowAllLots = toggleShowAllLots;
+window.togglePsSection = togglePsSection;
+window.saveGSheetUrl = saveGSheetUrl;
+window.saveStartAmount = saveStartAmount;
+window.saveLiveAmount = saveLiveAmount;
+window.showMonthlyHistory = showMonthlyHistory;
+window.closeMonthlyHistory = closeMonthlyHistory;
+window.toggleMonthEntries = toggleMonthEntries;
+window.toggleCap = toggleCap;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.confirmTrade = confirmTrade;
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.saveEditHolding = saveEditHolding;
+window.deleteHolding = deleteHolding;
+window.setCurrentDateTimeInEdit = setCurrentDateTimeInEdit;
+window.toggleSound = toggleSound;
+window.alertDoTrade = alertDoTrade;
+window.dismissAlert = dismissAlert;
+window.calcCapital = calcCapital;
+window.onStartCapitalChange = onStartCapitalChange;
+window.applySettings = applySettings;
 
 // Start Firebase initialization when module loads
 initFirebase();
