@@ -1577,7 +1577,7 @@ function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getE
 const ETF = { G:{sym:'GOLDBEES.NS', nseSym:'GOLDBEES', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', nseSym:'SILVERBEES', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
 let cfg = { buy: 2, sell: 3, ref: 300 };
-let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0, gSheetUrl: localStorage.getItem('gsheet_url') || '' };
+let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0, gSheetUrl: localStorage.getItem('gsheet_url') || '', lastSrc: '' };
 let editState = { k: null, idx: null };
 
 function getSortedHoldings(k) { return [...st.hold[k]].sort((a,b) => (a.buyPrice||a.price) - (b.buyPrice||b.price)); }
@@ -1604,184 +1604,39 @@ function calcBuyUnits(k) {
 function updateBtnHints(k) { const p = st.price[k]; const buyU = calcBuyUnits(k), sellU = getLot1Units(k); const buyHint = document.getElementById('buyHint-' + k), sellHint = document.getElementById('sellHint-' + k); const actualAmt = p ? (buyU * p) : 0; if (buyHint) buyHint.textContent = buyU + ' Share · ₹' + Math.round(actualAmt).toLocaleString('en-IN'); if (sellHint) sellHint.textContent = sellU > 0 ? sellU + ' Share (Lot 1)' : '— no holdings'; }
 function updateColSignal(k, signalType) { const tradeBtnsEl = document.getElementById('tradeBtns-' + k); tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active'); if (signalType === 'buy') tradeBtnsEl.classList.add('signal-buy-active'); if (signalType === 'sell') tradeBtnsEl.classList.add('signal-sell-active'); }
 
-// ======================== NEW MULTI-API PRICE FETCH ========================
-// Priority: NSE India > Yahoo v8 > Yahoo v7 > Groww > AllOrigins fallback
-// Each with multiple CORS proxies
-
-const PROX = [
-  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u => `https://corsproxy.org/?${encodeURIComponent(u)}`,
-  u => `https://thingproxy.freeboard.io/fetch/${u}`,
-  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
-];
-
-// --- NSE India ---
-function getNseUrl(nseSym) {
-  return `https://www.nseindia.com/api/quote-equity?symbol=${encodeURIComponent(nseSym)}`;
-}
-function parseNse(j) {
-  const p = j?.priceInfo?.lastPrice || j?.priceInfo?.close;
-  const pv = j?.priceInfo?.previousClose || p;
-  if (p && p > 0) return { price: p, prev: pv, src: 'NSE' };
-  return null;
-}
-
-// --- Yahoo Finance ---
-function getYahooUrls(sym) {
-  const ts = Date.now();
-  return [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d&_=${ts}`,
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`,
-    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&_=${ts}`
-  ];
-}
-function parseYahoo(j) {
-  const res = j?.chart?.result?.[0];
-  if (res) {
-    const price = res.meta?.regularMarketPrice || res.meta?.previousClose;
-    const prev = res.meta?.chartPreviousClose || res.meta?.previousClose || price;
-    if (price && price > 0) return { price, prev, src: 'Yahoo' };
-  }
-  const q = j?.quoteResponse?.result?.[0];
-  if (q?.regularMarketPrice) return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose || q.regularMarketPrice, src: 'Yahoo' };
-  return null;
-}
-
-// --- Groww ---
-function getGrowwUrl(nseSym) {
-  return `https://groww.in/v1/api/stocks_data/v1/accord_points/exchange/NSE/segment/EQUITY/latest_prices_ohlc/search?q=${encodeURIComponent(nseSym)}`;
-}
-function parseGroww(j) {
-  const arr = Array.isArray(j) ? j : (j?.data || []);
-  const d = arr[0];
-  if (d?.ltp && d.ltp > 0) return { price: d.ltp, prev: d.close || d.ltp, src: 'Groww' };
-  return null;
-}
-
-// Fast fetch with single proxy+url combo
-async function fetchOnce(url, parseFunc, proxyIdx, timeout = 8000) {
-  try {
-    const r = await fetch(PROX[proxyIdx](url), {
-      signal: AbortSignal.timeout(timeout),
-      cache: 'no-store'
-    });
-    if (!r.ok) return null;
-    const raw = await r.json();
-    const j = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return parseFunc(j);
-  } catch (_) { return null; }
-}
-
+// ======================== GOOGLE SHEET PRICE FETCH ========================
 async function tryFetch(k) {
   if (!apiEnabled) return null;
 
-  // --- Google Sheet API (Highest Priority if set) ---
-  if (st.gSheetUrl) {
-    try {
-      const r = await fetch(st.gSheetUrl, { signal: AbortSignal.timeout(8000), cache: 'no-store' });
-      if (r.ok) {
-        const j = await r.json();
-        const d = j[k]; // Format: {G: {price, prev}, S: {price, prev}}
-        if (d && d.price > 0) {
-          st.fetchFailCount = 0;
-          updateApiSourceBadge('G-Sheet', -1);
-          return { price: d.price, prev: d.prev || d.price, src: 'G-Sheet' };
-        }
-      }
-    } catch (e) { console.warn('G-Sheet fetch fail:', e); }
+  if (!st.gSheetUrl) {
+    setFetchStatus('fail', '⚠️ Google Sheet URL set karein (Settings mein)');
+    return null;
   }
 
-  const nseSym = ETF[k].nseSym;
-  const yahooSym = ETF[k].sym;
-
-  // Fast path: use last known working proxy+api
-  if (st.workingProxy !== null && st.workingApi) {
-    let d = null;
-    if (st.workingApi === 'nse') {
-      d = await fetchOnce(getNseUrl(nseSym), parseNse, st.workingProxy, 6000);
-    } else if (st.workingApi === 'yahoo') {
-      for (const yu of getYahooUrls(yahooSym)) {
-        d = await fetchOnce(yu, parseYahoo, st.workingProxy, 6000);
-        if (d) break;
-      }
-    } else if (st.workingApi === 'groww') {
-      d = await fetchOnce(getGrowwUrl(nseSym), parseGroww, st.workingProxy, 6000);
-    }
-    if (d) {
-      st.fetchFailCount = 0;
-      updateApiSourceBadge(d.src, st.workingProxy);
-      return d;
-    }
-    // Fast path failed, reset and try full scan
-    st.workingProxy = null;
-    st.workingApi = null;
-  }
-
-  // Full scan: try all APIs x all proxies
-  // API 1: NSE India (most reliable for Indian ETFs)
-  for (let pi = 0; pi < PROX.length; pi++) {
-    const d = await fetchOnce(getNseUrl(nseSym), parseNse, pi, 8000);
-    if (d) {
-      st.workingProxy = pi; st.workingApi = 'nse';
-      st.fetchFailCount = 0;
-      updateApiSourceBadge('NSE', pi);
-      return d;
-    }
-  }
-
-  // API 2: Yahoo Finance (v8 + v7)
-  for (const yu of getYahooUrls(yahooSym)) {
-    for (let pi = 0; pi < PROX.length; pi++) {
-      const d = await fetchOnce(yu, parseYahoo, pi, 8000);
-      if (d) {
-        st.workingProxy = pi; st.workingApi = 'yahoo';
+  try {
+    const r = await fetch(st.gSheetUrl, { signal: AbortSignal.timeout(10000), cache: 'no-store' });
+    if (r.ok) {
+      const j = await r.json();
+      const d = j[k]; // Format: {G: {price, prev}, S: {price, prev}}
+      if (d && d.price > 0) {
         st.fetchFailCount = 0;
-        updateApiSourceBadge('Yahoo', pi);
-        return d;
+        return { price: d.price, prev: d.prev || d.price, src: 'G-Sheet' };
       }
     }
+  } catch (e) { 
+    console.warn('G-Sheet fetch fail:', e); 
   }
 
-  // API 3: Groww
-  for (let pi = 0; pi < PROX.length; pi++) {
-    const d = await fetchOnce(getGrowwUrl(nseSym), parseGroww, pi, 7000);
-    if (d) {
-      st.workingProxy = pi; st.workingApi = 'groww';
-      st.fetchFailCount = 0;
-      updateApiSourceBadge('Groww', pi);
-      return d;
-    }
-  }
-
-  // All failed
   st.fetchFailCount = (st.fetchFailCount || 0) + 1;
-  const delay = Math.min(60000, 3000 * Math.pow(2, Math.min(st.fetchFailCount - 1, 4)));
-  setFetchStatus('fail', `❌ Sab APIs fail (attempt ${st.fetchFailCount}) · ${Math.round(delay/1000)}s mein retry`);
-  updateApiSourceBadge('offline', -1);
-  await new Promise(r => setTimeout(r, delay));
-  return tryFetch(k);
+  const delay = Math.min(60000, 5000 * Math.pow(2, Math.min(st.fetchFailCount - 1, 3)));
+  setFetchStatus('fail', `❌ Fetch fail (Check Script URL) · Retrying in ${Math.round(delay/1000)}s`);
+  return null;
 }
 
-const PROXY_NAMES = ['corsproxy.io', 'allorigins', 'corsproxy.org', 'thingproxy', 'codetabs'];
 function updateApiSourceBadge(src, proxyIdx) {
-  const el = document.getElementById('apiSourceBadge');
-  if (!el) return;
-  const pName = proxyIdx >= 0 ? PROXY_NAMES[proxyIdx] : '';
-  if (src === 'offline') {
-    el.textContent = '❌ offline';
-    el.style.background = 'rgba(224,82,82,0.15)';
-    el.style.color = 'var(--red)';
-    el.style.borderColor = 'rgba(224,82,82,0.4)';
-  } else {
-    el.textContent = `✓ ${src} · ${pName}`;
-    el.style.background = 'rgba(76,175,130,0.12)';
-    el.style.color = 'var(--green)';
-    el.style.borderColor = 'rgba(76,175,130,0.3)';
-  }
+  // Function kept for compatibility but badge is hidden in CSS
 }
-// ======================== END NEW FETCH ========================
+// ======================== END FETCH ========================
 
 function getPriceDir(k) { const cur=st.price[k],pv=st.prev[k]; if (!cur||!pv) return 'flat'; const chg=cur-pv; if(chg>0.001) return 'up'; if(chg<-0.001) return 'down'; return 'flat'; }
 function updatePriceColor(k) { const dir=getPriceDir(k); document.getElementById('pr-'+k).className = 'price-big price-'+dir; document.getElementById('pb-'+k).className = 'price-block price-'+dir; const sbEl = document.getElementById(k==='G'?'fsb-gPrice':'fsb-sPrice'); if (sbEl) sbEl.className = 'fsb-val price-'+dir; }
@@ -1801,13 +1656,14 @@ function updateAgo() {
   const mm = Math.floor(nextSecTotal / 60);
   const ss = nextSecTotal % 60;
   const countdownTxt = `${mm}:${ss.toString().padStart(2, '0')}`;
+  const srcTxt = st.lastSrc ? ` via ${st.lastSrc}` : '';
   
   const el = document.getElementById('fsb-ago');
   let agoTxt = sec < 60 ? sec + 's ago' : sec < 3600 ? Math.floor(sec / 60) + 'm ' + (sec % 60) + 's ago' : Math.floor(sec / 3600) + 'h ago';
   if (lastTickTs && (!lastFetchTs || lastTickTs > lastFetchTs)) {
     agoTxt += ' ⚡';
   }
-  el.innerHTML = `<span style="color:var(--muted)">${agoTxt}</span> · <span style="color:var(--amber); font-weight:bold;">Next: ${countdownTxt}</span>`;
+  el.innerHTML = `<span style="color:var(--muted)">${agoTxt}${srcTxt}</span> · <span style="color:var(--amber); font-weight:bold;">Next: ${countdownTxt}</span>`;
 }
 
 function setFetchStatus(state, statusTxt) {
@@ -1840,6 +1696,7 @@ async function fetchOne(k) {
     st.fetchFailCount++;
     return;
   }
+  st.lastSrc = d.src;
   st.fetchFailCount = 0;
   const old = st.price[k];
   st.price[k] = d.price;
@@ -1867,6 +1724,7 @@ async function tickOne(k) {
     }
     return;
   }
+  st.lastSrc = d.src;
   tickFailCount[k] = 0;
   const old = st.price[k];
   st.price[k] = d.price;
