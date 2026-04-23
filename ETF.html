@@ -1955,10 +1955,12 @@ function renderHold(k, p, buyTarget, overallAvg) {
         <div class="h-cell" style="text-align:right;"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-bar-container">
-          <div class="progress-fill ${direction === 'left' ? 'left-expand' : direction === 'right' ? 'right-expand' : ''}" style="width:${fillWidth}%;"></div>
-          <div class="progress-center-line"></div>
+        <div style="position:relative;">
           <div class="progress-center-label">₹ ${p ? p.toFixed(2) : '—'}</div>
+          <div class="progress-bar-container" style="overflow:hidden;">
+            <div class="progress-fill ${direction === 'left' ? 'left-expand' : direction === 'right' ? 'right-expand' : ''}" style="width:${fillWidth}%;"></div>
+            <div class="progress-center-line"></div>
+          </div>
         </div>
         <div class="progress-labels">
           <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${(direction === 'right' || direction === '') ? 'display:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.85;font-size:0.65rem;font-weight:bold;">(${buyLabel})</span></span>
