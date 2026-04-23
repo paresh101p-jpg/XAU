@@ -1853,6 +1853,24 @@ function renderHold(k, p, buyTarget, overallAvg) {
     const sellTargetLot = bp * (1 + cfg.sell / 100);
     const buyHit = p !== null && p <= buyTargetLot;
     const sellHit = p !== null && p >= sellTargetLot;
+
+    // Smart labels: Show "Hit!" only if very close to target, otherwise show "Below/Above"
+    let buyLabel = '';
+    if (buyHit) {
+      const distPct = ((buyTargetLot - p) / buyTargetLot) * 100;
+      buyLabel = distPct < 0.2 ? '🎯 Hit!' : '✅ Below Target';
+    } else {
+      buyLabel = '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '% baki';
+    }
+
+    let sellLabel = '';
+    if (sellHit) {
+      const distPct = ((p - sellTargetLot) / sellTargetLot) * 100;
+      sellLabel = distPct < 0.2 ? '🎯 Hit!' : '✅ Above Target';
+    } else {
+      sellLabel = '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '% baki';
+    }
+
     let fillWidth = 0;
     let direction = '';
     if (p !== null && p !== undefined) {
@@ -1888,8 +1906,8 @@ function renderHold(k, p, buyTarget, overallAvg) {
           <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
         </div>
         <div class="progress-labels">
-          <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${direction === 'right' ? 'opacity:0;pointer-events:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${buyHit ? '🎯 Hit!' : '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '% baki'})</span></span>
-          <span class="progress-label-sell ${sellHit ? 'hit' : ''}" style="${direction === 'left' ? 'opacity:0;pointer-events:none;' : ''}">▲ Sell ₹${sellTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${sellHit ? '🎯 Hit!' : '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '% baki'})</span></span>
+          <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${direction === 'right' ? 'opacity:0;pointer-events:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${buyLabel})</span></span>
+          <span class="progress-label-sell ${sellHit ? 'hit' : ''}" style="${direction === 'left' ? 'opacity:0;pointer-events:none;' : ''}">▲ Sell ₹${sellTargetLot.toFixed(2)} <span style="opacity:0.75;font-size:0.6rem;">(${sellLabel})</span></span>
         </div>
       </div>
       <div class="h-date-row">
