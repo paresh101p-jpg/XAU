@@ -1854,19 +1854,16 @@ function renderHold(k, p, buyTarget, overallAvg) {
     const buyHit = p !== null && p <= buyTargetLot;
     const sellHit = p !== null && p >= sellTargetLot;
 
-    // Smart labels: Show "Hit!" only if very close to target, otherwise show "Below/Above"
     let buyLabel = '';
     if (buyHit) {
-      const distPct = ((buyTargetLot - p) / buyTargetLot) * 100;
-      buyLabel = distPct < 0.2 ? '🎯 Hit!' : '✅ Below Target';
+      buyLabel = '🎯 Hit!';
     } else {
       buyLabel = '−' + (p ? ((p - buyTargetLot) / p * 100).toFixed(2) : cfg.buy) + '% baki';
     }
 
     let sellLabel = '';
     if (sellHit) {
-      const distPct = ((p - sellTargetLot) / sellTargetLot) * 100;
-      sellLabel = distPct < 0.2 ? '🎯 Hit!' : '✅ Above Target';
+      sellLabel = '🎯 Hit!';
     } else {
       sellLabel = '+' + (p ? ((sellTargetLot - p) / p * 100).toFixed(2) : cfg.sell) + '% baki';
     }
@@ -1876,10 +1873,18 @@ function renderHold(k, p, buyTarget, overallAvg) {
     if (p !== null && p !== undefined) {
       if (p <= bp) {
         const range = bp - buyTargetLot;
-        if (range > 0) { const progress = (bp - p) / range; fillWidth = Math.min(50, progress * 50); direction = 'left'; } else { fillWidth = 50; direction = 'left'; }
+        if (range > 0) { 
+          const progress = (bp - p) / range; 
+          fillWidth = Math.min(50, progress * 50); 
+          direction = 'left'; 
+        } else { fillWidth = 50; direction = 'left'; }
       } else {
         const range = sellTargetLot - bp;
-        if (range > 0) { const progress = (p - bp) / range; fillWidth = Math.min(50, progress * 50); direction = 'right'; } else { fillWidth = 50; direction = 'right'; }
+        if (range > 0) { 
+          const progress = (p - bp) / range; 
+          fillWidth = Math.min(50, progress * 50); 
+          direction = 'right'; 
+        } else { fillWidth = 50; direction = 'right'; }
       }
     }
     const cardHtml = `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
