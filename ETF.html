@@ -1500,16 +1500,20 @@ function fmtMonthLabel(monthKey) { const [y, m] = monthKey.split('-'); return `$
 function buildMonthlyData() { if (!manualSnapshots.length) return []; const monthMap = {}; for (const snap of manualSnapshots) { const mk = getMonthKey(snap.date); if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap; } const sortedMonths = Object.keys(monthMap).sort(); const rows = []; for (let i = 0; i < sortedMonths.length; i++) { const mk = sortedMonths[i]; const current = monthMap[mk]; const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null; let prevAmount = prev ? prev.amount : null; if (!prevAmount && manualStart.amount && manualStart.date && manualStart.date < mk + '-01') prevAmount = manualStart.amount; const diff = prevAmount !== null ? current.amount - prevAmount : null; const pct = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null; const entries = manualSnapshots.filter(s => getMonthKey(s.date) === mk).sort((a,b) => b.date.localeCompare(a.date)); rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries }); } return rows.reverse(); }
 function showMonthlyHistory() {
   const rows = buildMonthlyData();
-  const noData = document.getElementById('mhistNoData');
   const scroll = document.getElementById('mhistScroll');
+  if (!scroll) return; // Modal element missing?
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
   document.getElementById('mhsStart').textContent = manualStart.amount ? `₹ ${manualStart.amount.toLocaleString('en-IN')}` : '—';
   document.getElementById('mhsStartDate').textContent = manualStart.date ? `since ${fmtDateNice(manualStart.date)}` : '—';
   document.getElementById('mhsLive').textContent = latest ? `₹ ${latest.amount.toLocaleString('en-IN')}` : '—';
   document.getElementById('mhsLiveDate').textContent = latest ? `as on ${fmtDateNice(latest.date)}` : '—';
   if (manualStart.amount && latest) { const d = latest.amount - manualStart.amount, p = (d / manualStart.amount * 100); const el = document.getElementById('mhsPnl'); el.className = 'mhs-value ' + (d >= 0 ? 'positive' : 'negative'); el.textContent = (d >= 0 ? '+' : '-') + '₹ ' + Math.abs(d).toLocaleString('en-IN'); document.getElementById('mhsPnlPct').textContent = (p >= 0 ? '+' : '') + p.toFixed(2) + '% overall'; } else { document.getElementById('mhsPnl').className = 'mhs-value'; document.getElementById('mhsPnl').textContent = '—'; document.getElementById('mhsPnlPct').textContent = '—'; }
-  if (!rows.length) { noData.style.display = 'block'; scroll.innerHTML = ''; scroll.appendChild(noData); document.getElementById('mhistSubtitle').textContent = 'Koi data nahi'; document.getElementById('mhistOverlay').classList.add('show'); return; }
-  noData.style.display = 'none';
+  if (!rows.length) { 
+    scroll.innerHTML = `<div class="mhist-no-data" id="mhistNoData"><span>📊</span>Abhi koi data nahi hai.<br>Pehle "Add Today's Value" se<br>kuch snapshots save karo.</div>`;
+    document.getElementById('mhistSubtitle').textContent = 'Koi data nahi'; 
+    document.getElementById('mhistOverlay').classList.add('show'); 
+    return; 
+  }
   const years = [...new Set(rows.map(r => r.monthKey.slice(0,4)))];
   const yearMap = {}; for (const r of rows) { const yr = r.monthKey.slice(0,4); if (!yearMap[yr]) yearMap[yr] = []; yearMap[yr].push(r); }
   document.getElementById('mhistSubtitle').textContent = `${manualSnapshots.length} snapshot${manualSnapshots.length !== 1 ? 's' : ''} · ${years.length} year${years.length !== 1 ? 's' : ''}`;
@@ -2127,6 +2131,10 @@ window.emergencyRecovery = () => {
       updateCapStartDisplay();
       saveSt();
       showToast(`✅ ${recoveredCount} history entries recovered!`);
+      // Update Monthly History if modal is open
+      if (document.getElementById('mhistOverlay').classList.contains('show')) {
+        showMonthlyHistory();
+      }
     } else {
       showToast('ℹ️ No hidden history found.');
     }
