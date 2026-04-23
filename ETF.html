@@ -1958,7 +1958,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
         <div class="progress-bar-container" style="overflow:hidden;">
           <div class="progress-fill ${direction === 'left' ? 'left-expand' : direction === 'right' ? 'right-expand' : ''}" style="width:${fillWidth}%;"></div>
           <div class="progress-center-line"></div>
-          <div class="progress-center-label">₹ ${bp.toFixed(2)}</div>
+          <div class="progress-center-label">₹ ${p ? p.toFixed(2) : '—'}</div>
         </div>
         <div class="progress-labels">
           <span class="progress-label-buy ${buyHit ? 'hit' : ''}" style="${direction === 'right' ? 'opacity:0.4;pointer-events:none;' : ''}">▼ Buy ₹${buyTargetLot.toFixed(2)} <span style="opacity:0.85;font-size:0.65rem;font-weight:bold;">(${buyLabel})</span></span>
