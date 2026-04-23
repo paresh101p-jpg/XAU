@@ -1591,16 +1591,8 @@ function toggleApi() {
 }
 
 function applyApiState() {
-  const btn = document.getElementById('apiToggle');
-  const txt = document.getElementById('apiTxt');
   const pausedBar = document.getElementById('apiPausedBar');
-  if (apiEnabled) {
-    btn.className = 'api-toggle on'; txt.textContent = 'API ON';
-    pausedBar.classList.remove('show');
-  } else {
-    btn.className = 'api-toggle off'; txt.textContent = 'API OFF';
-    pausedBar.classList.add('show');
-  }
+  if (pausedBar) pausedBar.classList.toggle('show', !apiEnabled);
 }
 
 let audioCtx = null, soundEnabled = true;
@@ -1667,9 +1659,6 @@ async function tryFetch(k) {
 }
 
 function updateApiSourceBadge(src, proxyIdx) {}
-function toggleApi() {}
-function applyApiState() {}
-let apiEnabled = true;
 // ======================== END FETCH ========================
 
 function getPriceDir(k) { const cur=st.price[k],pv=st.prev[k]; if (!cur||!pv) return 'flat'; const chg=cur-pv; if(chg>0.001) return 'up'; if(chg<-0.001) return 'down'; return 'flat'; }
@@ -1784,7 +1773,19 @@ function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterv
 function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
 async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
 
-window.onload = () => { initFirebase(); mktCheck(); setInterval(mktCheck, 30000); applyApiState(); if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); } loadManualData(); };
+window.onload = () => {
+  try {
+    mktCheck();
+    setInterval(mktCheck, 30000);
+    applyApiState();
+    if (!apiEnabled) {
+      setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye');
+    }
+    loadManualData();
+  } catch (e) {
+    console.error('App init crash:', e);
+  }
+};
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
 function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 300; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
@@ -2047,9 +2048,52 @@ let currentUser = null, dbRef = null, listenActive = false, saveTimer = null;
 window.signInWithGoogle = async () => { try { await signInWithPopup(auth, gProv); } catch (e) { showToast('❌ Login failed: ' + e.message); } };
 window.signOutUser = async () => { if (!confirm('Logout karna chahte ho?')) return; if (dbRef) off(dbRef); listenActive = false; await signOut(auth); currentUser = null; dbRef = null; document.getElementById('appShell').classList.remove('visible'); document.getElementById('userBar').classList.add('hide'); document.getElementById('fbLoginScreen').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('visible'); showToast('👋 Logged out!'); };
 window.saveToFirebase = (data) => { if (!currentUser || !dbRef) return; setSyncStatus('syncing', 'Saving…'); clearTimeout(saveTimer); saveTimer = setTimeout(() => { set(dbRef, JSON.stringify(data)).then(() => setSyncStatus('ok', 'Synced ✓')).catch(e => { setSyncStatus('offline', 'Sync failed'); console.warn(e); }); }, 1500); };
-window.initFirebase = () => { onAuthStateChanged(auth, user => { if (user) { currentUser = user; document.getElementById('userAvatar').src = user.photoURL || ''; document.getElementById('userName').textContent = user.displayName || user.email; document.getElementById('userBar').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('hide'); document.getElementById('appShell').classList.add('visible'); dbRef = ref(db, 'users/' + user.uid + '/data'); if (!listenActive) { listenActive = true; setSyncStatus('syncing', 'Loading data…'); onValue(dbRef, snap => { const raw = snap.val(); if (raw) { try { const data = typeof raw === 'string' ? JSON.parse(raw) : raw; applyData(data); setSyncStatus('ok', 'Synced ✓'); showToast('☁️ Cloud data loaded!'); } catch (e) { console.warn('Firebase parse error:', e); setSyncStatus('ok', 'Synced ✓'); } } else { setSyncStatus('ok', 'New account'); const local = localStorage.getItem(LS_KEY); if (local) set(dbRef, local).then(() => setSyncStatus('ok', 'Synced ✓')); } if (!window._appStarted) { window._appStarted = true; startApp(); } }, { onlyOnce: true }); } } else { document.getElementById('fbLoginScreen').classList.remove('hide'); setTimeout(() => document.getElementById('fbLoginScreen').classList.add('visible'), 30); document.getElementById('appShell').classList.remove('visible'); } }); };
+const initFirebase = () => {
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      currentUser = user;
+      document.getElementById('userAvatar').src = user.photoURL || '';
+      document.getElementById('userName').textContent = user.displayName || user.email;
+      document.getElementById('userBar').classList.remove('hide');
+      document.getElementById('fbLoginScreen').classList.add('hide');
+      document.getElementById('appShell').classList.add('visible');
+      dbRef = ref(db, 'users/' + user.uid + '/data');
+      if (!listenActive) {
+        listenActive = true;
+        setSyncStatus('syncing', 'Loading data…');
+        onValue(dbRef, snap => {
+          const raw = snap.val();
+          if (raw) {
+            try {
+              const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+              applyData(data);
+              setSyncStatus('ok', 'Synced ✓');
+              showToast('☁️ Cloud data loaded!');
+            } catch (e) {
+              console.warn('Firebase parse error:', e);
+              setSyncStatus('ok', 'Synced ✓');
+            }
+          } else {
+            setSyncStatus('ok', 'New account');
+            const local = localStorage.getItem(LS_KEY);
+            if (local) set(dbRef, local).then(() => setSyncStatus('ok', 'Synced ✓'));
+          }
+          if (!window._appStarted) {
+            window._appStarted = true;
+            startApp();
+          }
+        });
+      }
+    } else {
+      document.getElementById('fbLoginScreen').classList.remove('hide');
+      setTimeout(() => document.getElementById('fbLoginScreen').classList.add('visible'), 30);
+      document.getElementById('appShell').classList.remove('visible');
+    }
+  });
+};
+window.initFirebase = initFirebase;
 
-function emergencyRecovery() {
+window.emergencyRecovery = () => {
   let recoveredCount = 0;
   try {
     // 1. Check old dedicated key
@@ -2093,7 +2137,7 @@ function emergencyRecovery() {
     console.error(e);
     showToast('❌ Recovery error'); 
   }
-}
+};
 
 function applyData(data) {
   // Update global manualSnapshots properly
@@ -2139,6 +2183,9 @@ function applyData(data) {
   calcCapital();
 }
 function setSyncStatus(state, txt) { const dot = document.getElementById('syncDot'), stxt = document.getElementById('syncTxt'); if (!dot) return; dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'offline' ? ' offline' : ''); stxt.textContent = txt; }
+
+// Start Firebase initialization when module loads
+initFirebase();
 </script>
 </body>
 </html>
