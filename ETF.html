@@ -1955,7 +1955,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
         <div class="h-cell" style="text-align:right;"><div class="hcl">Invested</div><div class="hcv">₹ ${Number(invested).toLocaleString('en-IN')}</div></div>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-bar-container" style="overflow:hidden;">
+        <div class="progress-bar-container">
           <div class="progress-fill ${direction === 'left' ? 'left-expand' : direction === 'right' ? 'right-expand' : ''}" style="width:${fillWidth}%;"></div>
           <div class="progress-center-line"></div>
           <div class="progress-center-label">₹ ${p ? p.toFixed(2) : '—'}</div>
