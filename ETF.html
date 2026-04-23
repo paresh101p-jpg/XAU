@@ -2028,6 +2028,19 @@ window.saveToFirebase = (data) => { if (!currentUser || !dbRef) return; setSyncS
 window.initFirebase = () => { onAuthStateChanged(auth, user => { if (user) { currentUser = user; document.getElementById('userAvatar').src = user.photoURL || ''; document.getElementById('userName').textContent = user.displayName || user.email; document.getElementById('userBar').classList.remove('hide'); document.getElementById('fbLoginScreen').classList.add('hide'); document.getElementById('appShell').classList.add('visible'); dbRef = ref(db, 'users/' + user.uid + '/data'); if (!listenActive) { listenActive = true; setSyncStatus('syncing', 'Loading data…'); onValue(dbRef, snap => { const raw = snap.val(); if (raw) { try { const data = typeof raw === 'string' ? JSON.parse(raw) : raw; applyData(data); setSyncStatus('ok', 'Synced ✓'); showToast('☁️ Cloud data loaded!'); } catch (e) { console.warn('Firebase parse error:', e); setSyncStatus('ok', 'Synced ✓'); } } else { setSyncStatus('ok', 'New account'); const local = localStorage.getItem(LS_KEY); if (local) set(dbRef, local).then(() => setSyncStatus('ok', 'Synced ✓')); } if (!window._appStarted) { window._appStarted = true; startApp(); } }, { onlyOnce: true }); } } else { document.getElementById('fbLoginScreen').classList.remove('hide'); setTimeout(() => document.getElementById('fbLoginScreen').classList.add('visible'), 30); document.getElementById('appShell').classList.remove('visible'); } }); };
 
 function applyData(data) {
+  // Merge snapshots to prevent data loss
+  if (data.manual && data.manual.snapshots) {
+    const cloudSnaps = data.manual.snapshots;
+    const localSnaps = manualSnapshots;
+    const merged = [...cloudSnaps];
+    localSnaps.forEach(ls => {
+      if (!merged.find(cs => cs.date === ls.date)) {
+        merged.push(ls);
+      }
+    });
+    data.manual.snapshots = merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
   if (data.apiEnabled !== undefined) {
     apiEnabled = data.apiEnabled;
     localStorage.setItem('apiEnabled', String(apiEnabled));
