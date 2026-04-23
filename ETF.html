@@ -1138,11 +1138,15 @@ body {
     <div class="fsb-right">
       <span class="fsb-ago" id="fsb-ago">—</span>
       <span class="fsb-status-txt" id="fetchStatusText">Connecting…</span>
+      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;"></div>
+      <button class="btn-monthly-hist" onclick="showMonthlyHistory()" style="padding:3px 10px;font-size:0.6rem;">📅 History</button>
+      <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
+      <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
     </div>
   </div>
 
   <!-- Portfolio Summary -->
-  <div class="portfolio-summary" id="portfolioSummary">
+  <div class="portfolio-summary" id="portfolioSummary" style="display:none;">
     <div class="ps-header" id="psHeader">
       <div class="ps-header-left">
         <span style="font-size:1rem;">📊</span>
