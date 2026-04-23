@@ -1945,6 +1945,7 @@ function alertCheck(k) {
     if (st.alerted[k].buy || st.alerted[k].sell) {
       st.alerted[k].buy = false;
       st.alerted[k].sell = false;
+      dismissAlert(); // Hide popup if price is back in range
       saveSt();
     }
   }
