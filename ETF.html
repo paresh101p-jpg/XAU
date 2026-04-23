@@ -1927,25 +1927,26 @@ function alertCheck(k) {
   const sv = ref * (1 + cfg.sell / 100);
   const tu = st.hold[k].reduce((s, h) => s + h.units, 0);
 
-  // Debug: console.log(`Checking ${k}: Price=${p}, BuyTarget=${bt}, SellTarget=${sv}`);
+  const isBuyHit = p <= bt;
+  const isSellHit = p >= sv && tu > 0;
 
-  if (p <= bt && !st.alerted[k].buy) {
+  if (isBuyHit && !st.alerted[k].buy) {
     st.alerted[k].buy = true;
     st.alerted[k].sell = false;
     playBeep('buy');
     showAlertPopup(k, 'buy', bt, sv, tu);
     saveSt();
-  } else if (p >= sv && tu > 0 && !st.alerted[k].sell) {
+  } else if (isSellHit && !st.alerted[k].sell) {
     st.alerted[k].sell = true;
     st.alerted[k].buy = false;
     playBeep('sell');
     showAlertPopup(k, 'sell', bt, sv, tu);
     saveSt();
-  } else if (p > bt && p < sv) {
+  } else if (!isBuyHit && !isSellHit) {
     if (st.alerted[k].buy || st.alerted[k].sell) {
       st.alerted[k].buy = false;
       st.alerted[k].sell = false;
-      dismissAlert(); // Hide popup if price is back in range
+      dismissAlert(); // Hide popup
       saveSt();
     }
   }
