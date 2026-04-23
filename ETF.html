@@ -389,8 +389,11 @@ body {
   font-size: 0.68rem;
 }
 .mhist-entry-row:last-child { border-bottom: none; }
-.mhist-entry-date { color: var(--muted); }
-.mhist-entry-amount { color: var(--text); font-size: 0.75rem; }
+.mhist-entry-date { color: var(--muted); flex: 1; }
+.mhist-entry-pnl { font-size: 0.62rem; margin-right: 12px; }
+.mhist-entry-pnl.pos { color: var(--green); }
+.mhist-entry-pnl.neg { color: var(--red); }
+.mhist-entry-amount { color: var(--text); font-size: 0.75rem; text-align: right; min-width: 80px; }
 .mhist-no-data {
   text-align: center; padding: 40px 20px;
   color: var(--muted); font-size: 0.78rem; line-height: 2;
@@ -1079,10 +1082,6 @@ body {
         <span id="soundIcon">🔔</span>
         <span id="soundTxt">Sound ON</span>
       </div>
-      <div class="api-toggle on" id="apiToggle" onclick="toggleApi()">
-        <div class="api-dot"></div>
-        <span id="apiTxt">API ON</span>
-      </div>
       <div class="market-status">
         <div class="mkt-dot" id="mktDot"></div>
         <span class="mkt-label" id="mktLabel">Checking...</span>
@@ -1524,7 +1523,20 @@ function showMonthlyHistory() {
       const hasMultiple = r.entries.length > 1;
       const expandArrow = hasMultiple ? `<span class="mhist-expand-arrow">▼</span>` : '';
       let entriesHtml = '';
-      if (hasMultiple) entriesHtml = `<div class="mhist-entries-panel" id="ep-${r.monthKey}">${r.entries.map(e => `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span><span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`).join('')}</div>`;
+      if (hasMultiple) {
+        const entriesItems = r.entries.map((e, idx) => {
+          // Calculate daily P&L compared to previous entry in manualSnapshots
+          const currentIdx = manualSnapshots.findIndex(s => s.date === e.date);
+          const prevEntry = manualSnapshots[currentIdx + 1] || (manualStart.date && e.date > manualStart.date ? { amount: manualStart.amount } : null);
+          let pnlHtml = '';
+          if (prevEntry) {
+            const diff = e.amount - prevEntry.amount;
+            pnlHtml = `<span class="mhist-entry-pnl ${diff >= 0 ? 'pos' : 'neg'}">${diff >= 0 ? '+' : ''}₹${Math.abs(diff).toLocaleString('en-IN')}</span>`;
+          }
+          return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>${pnlHtml}<span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`;
+        }).join('');
+        entriesHtml = `<div class="mhist-entries-panel" id="ep-${r.monthKey}">${entriesItems}</div>`;
+      }
       const onclick = hasMultiple ? `onclick="toggleMonthEntries('${r.monthKey}')"` : '';
       return `<div class="mhist-month-wrap"><div class="mhist-row ${rowCls}" id="mr-${r.monthKey}" ${onclick}><div class="mhist-month">${r.label} ${expandArrow}</div><div class="mhist-amount">₹ ${r.amount.toLocaleString('en-IN')}</div><div class="mhist-change ${diffCls}">${arrow}${diffStr}</div><div class="mhist-pct ${diffCls}">${pctStr}</div></div>${entriesHtml}</div>`;
     }).join('');
