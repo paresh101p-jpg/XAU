@@ -1342,15 +1342,33 @@ function saveGSheetUrl() {
 }
 
 function loadManualData() {
+  // 1. Try to load from the main LS_KEY first (most recent)
   try {
-    const raw = localStorage.getItem('manual_portfolio_v1');
-    if (raw) {
-      const data = JSON.parse(raw);
-      manualStart = data.start || { amount: null, date: null };
-      manualSnapshots = data.snapshots || [];
-      manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
+    const mainRaw = localStorage.getItem(LS_KEY);
+    if (mainRaw) {
+      const mainData = JSON.parse(mainRaw);
+      if (mainData.manual && mainData.manual.snapshots && mainData.manual.snapshots.length > 0) {
+        manualStart = mainData.manual.start || { amount: null, date: null };
+        manualSnapshots = mainData.manual.snapshots;
+        console.log("Loaded history from main storage");
+      }
     }
-  } catch(e) { console.warn(e); }
+  } catch(e) {}
+
+  // 2. If still empty, try the old dedicated key
+  if (manualSnapshots.length === 0) {
+    try {
+      const oldRaw = localStorage.getItem('manual_portfolio_v1');
+      if (oldRaw) {
+        const oldData = JSON.parse(oldRaw);
+        manualStart = oldData.start || manualStart;
+        manualSnapshots = oldData.snapshots || [];
+        console.log("Recovered history from old dedicated storage");
+      }
+    } catch(e) { console.warn("Old storage recovery failed", e); }
+  }
+
+  manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
   
   // Load GSheet URL
   const gsUrl = localStorage.getItem('gsheet_url') || '';
