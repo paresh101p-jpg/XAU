@@ -1617,7 +1617,9 @@ function showMonthlyHistory() {
             const diff = e.amount - prevEntry.amount;
             pnlHtml = `<span class="mhist-entry-pnl ${diff >= 0 ? 'pos' : 'neg'}">${diff >= 0 ? '+' : ''}₹${Math.abs(diff).toLocaleString('en-IN')}</span>`;
           }
-          return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>${pnlHtml}<span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`;
+          const pnlPct = prevEntry ? ((e.amount - prevEntry.amount) / prevEntry.amount * 100).toFixed(2) : null;
+const pctHtml = pnlPct !== null ? `<span class="mhist-entry-pnl ${parseFloat(pnlPct)>=0?'pos':'neg'}">(${parseFloat(pnlPct)>=0?'+':''}${pnlPct}%)</span>` : '';
+return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>${pnlHtml}${pctHtml}<span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`;
         }).join('');
         entriesHtml = `<div class="mhist-entries-panel" id="ep-${r.monthKey}">${entriesItems}</div>`;
       }
@@ -2114,6 +2116,7 @@ document.getElementById('alertOverlay').addEventListener('click', e => { if (e.t
 document.getElementById('editOverlay').addEventListener('click', e => { if (e.target.id === 'editOverlay') closeEditModal(); });
 document.getElementById('mhistOverlay').addEventListener('click', e => { if (e.target.id === 'mhistOverlay') closeMonthlyHistory(); });
 function openPsPopup() {
+  document.getElementById('manualLiveDate').value = new Date().toISOString().slice(0,10);
   const inner = document.querySelector('.ps-inner');
   const body = document.getElementById('psPopupBody');
   if (inner && !body.contains(inner)) body.appendChild(inner);
