@@ -222,6 +222,16 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
 .btn-sell-sm{background:var(--bg3);color:var(--muted);border:2px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.82rem;font-weight:700;cursor:pointer;}
 .btn-sell-now{background:var(--red);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:.76rem;font-weight:700;cursor:pointer;}
 .btn-sell-now:hover{background:#F06868;}
+/* holding action row */
+.hc-actions{display:flex;gap:6px;padding:6px 14px 10px;border-top:1px solid var(--border);}
+.btn-hc-edit{flex:1;background:var(--bg3);color:var(--blue);border:2px solid rgba(91,155,213,.35);border-radius:8px;padding:7px;font-size:.76rem;font-weight:700;cursor:pointer;transition:.18s;text-align:center;}
+.btn-hc-edit:hover{background:var(--blue-dim);border-color:var(--blue);}
+.btn-hc-del{background:var(--bg3);color:var(--red);border:2px solid rgba(224,82,82,.3);border-radius:8px;padding:7px 12px;font-size:.76rem;font-weight:700;cursor:pointer;transition:.18s;}
+.btn-hc-del:hover{background:var(--red-dim);border-color:var(--red);}
+/* edit modal orange accent */
+.m-box.edit-box{border-color:rgba(91,155,213,.5);}
+.m-title.blue{color:var(--blue);}
+.m-fld input.blue-focus:focus{border-color:var(--blue);}
 
 /* price grid */
 .pe-grid{display:flex;flex-direction:column;gap:5px;}
@@ -525,6 +535,31 @@ body{background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px
     <div class="m-btns">
       <button class="m-cancel" onclick="closeBudgetModal()">Cancel</button>
       <button class="m-confirm-p" onclick="saveBudget()">✅ Save Budget</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT HOLDING MODAL -->
+<div class="m-ov" id="editHoldingModal">
+  <div class="m-box edit-box" style="max-width:340px;">
+    <div class="m-title blue" id="editModalTitle">✏️ Edit Holding</div>
+    <div class="m-info" id="editModalInfo"></div>
+    <div class="m-fld">
+      <label>Buy Price (₹)</label>
+      <input type="number" id="editBuyPrice" step="0.01" min="0.01" class="blue-focus" oninput="onEditPriceChange()">
+    </div>
+    <div class="m-fld">
+      <label>Units (Shares)</label>
+      <input type="number" id="editUnits" min="1" class="blue-focus">
+    </div>
+    <div class="m-fld">
+      <label>Buy Date</label>
+      <input type="date" id="editBuyDate" class="blue-focus">
+    </div>
+    <div id="editInvestSummary" style="background:var(--bg3);border:1px solid rgba(91,155,213,.25);border-radius:8px;padding:9px 12px;font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:12px;"></div>
+    <div class="m-btns">
+      <button class="m-cancel" onclick="closeEditModal()">Cancel</button>
+      <button style="background:var(--blue);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.82rem;font-weight:700;cursor:pointer;" onclick="saveEditHolding()">✅ Save Changes</button>
     </div>
   </div>
 </div>
@@ -1066,8 +1101,12 @@ function renderDashboard() {
           <div class="hc-c"><div class="hc-cl">Current</div><div class="hc-cv">₹${curPx.toFixed(2)}</div></div>
           <div class="hc-c"><div class="hc-cl">Invested</div><div class="hc-cv">₹${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</div></div>
         </div>
-        <div style="padding:5px 14px 10px;"><div style="font-size:.68rem;color:${sellHit ? 'var(--red)' : 'var(--muted)'};">${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)}` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div></div>
+        <div style="padding:5px 14px 6px;"><div style="font-size:.68rem;color:${sellHit ? 'var(--red)' : 'var(--muted)'};">${sellHit ? `🎯 SELL TARGET HIT! ₹${tgt.toFixed(2)}` : `Target: ₹${tgt.toFixed(2)} (+${tgtPct}%) · ${rem}% baki`}</div></div>
         ${sellHit ? `<div class="sell-row"><div class="sell-row-txt">🔴 SELL — +${tgtPct}% Target Hit!</div><button class="btn-sell-now" onclick="openModal('${h.sym}',${curPx},'sell')">💰 SELL NOW</button></div>` : ''}
+        <div class="hc-actions">
+          <button class="btn-hc-edit" onclick="openEditHolding('${h.sym}')">✏️ Edit</button>
+          <button class="btn-hc-del" onclick="deleteHolding('${h.sym}')">🗑</button>
+        </div>
       </div>`;
     });
   }
@@ -1313,6 +1352,77 @@ function resetAll() {
   localStorage.removeItem(LS); if (dbRef) dbRef.set(null); location.reload();
 }
 
+// ══ EDIT / DELETE HOLDING ══
+let editingSym = null;
+
+function openEditHolding(sym) {
+  const h = S.holdings.find(x => x.sym === sym);
+  if (!h) return;
+  editingSym = sym;
+  const d = getLatestData(sym);
+  document.getElementById('editModalTitle').textContent = `✏️ Edit — ${sym}`;
+  document.getElementById('editBuyPrice').value = h.buyPrice.toFixed(2);
+  document.getElementById('editUnits').value = h.units;
+  document.getElementById('editBuyDate').value = h.buyDate || todayISO();
+  document.getElementById('editModalInfo').innerHTML = `
+    <div class="mi-row"><span class="mi-k">ETF</span><span class="mi-v">${sym}</span></div>
+    <div class="mi-row"><span class="mi-k">Current Price</span><span class="mi-v">${d.price ? '₹' + d.price.toFixed(2) : '—'}</span></div>
+    <div class="mi-row"><span class="mi-k">Invested</span><span class="mi-v">₹${Math.round(h.buyPrice * h.units).toLocaleString('en-IN')}</span></div>`;
+  updateEditSummary();
+  document.getElementById('editHoldingModal').classList.add('show');
+  setTimeout(() => document.getElementById('editBuyPrice').focus(), 100);
+}
+
+function onEditPriceChange() { updateEditSummary(); }
+
+function updateEditSummary() {
+  const price = parseFloat(document.getElementById('editBuyPrice').value) || 0;
+  const units = parseInt(document.getElementById('editUnits').value) || 0;
+  const total = price * units;
+  const tgtPct = S.sellTarget || 4.51;
+  const tgtPrice = price * (1 + tgtPct / 100);
+  const el = document.getElementById('editInvestSummary');
+  if (price > 0 && units > 0) {
+    el.innerHTML = `Invested: <strong style="color:var(--text);">${fmtINR(total)}</strong> &nbsp;|&nbsp; Target: <strong style="color:var(--amber);">₹${tgtPrice.toFixed(2)}</strong> (+${tgtPct}%)`;
+  } else {
+    el.textContent = 'Price aur units daalo';
+  }
+}
+
+function closeEditModal() {
+  document.getElementById('editHoldingModal').classList.remove('show');
+  editingSym = null;
+}
+
+function saveEditHolding() {
+  if (!editingSym) return;
+  const price = parseFloat(document.getElementById('editBuyPrice').value);
+  const units = parseInt(document.getElementById('editUnits').value);
+  const date = document.getElementById('editBuyDate').value;
+  if (!price || price <= 0) { showToast('⚠️ Valid buy price daalo!'); return; }
+  if (!units || units < 1) { showToast('⚠️ Valid units daalo!'); return; }
+  const idx = S.holdings.findIndex(x => x.sym === editingSym);
+  if (idx === -1) { showToast('⚠️ Holding nahi mili!'); return; }
+  S.holdings[idx].buyPrice = parseFloat(price.toFixed(2));
+  S.holdings[idx].units = units;
+  S.holdings[idx].buyDate = date || todayISO();
+  save();
+  closeEditModal();
+  renderDashboard();
+  showToast(`✅ ${editingSym} updated — ₹${price.toFixed(2)} × ${units} units`);
+}
+
+function deleteHolding(sym) {
+  const h = S.holdings.find(x => x.sym === sym);
+  if (!h) return;
+  if (!confirm(`"${sym}" holding delete karna chahte ho?\n${h.units} units @ ₹${h.buyPrice.toFixed(2)}`)) return;
+  S.holdings = S.holdings.filter(x => x.sym !== sym);
+  if (S.dailyPick?.sym === sym) S.dailyPick = null;
+  save();
+  renderDashboard();
+  showToast(`🗑 ${sym} holding delete ho gaya`);
+}
+
 // ══ MODAL — with budget-based unit calc ══
 function openModal(sym, price, type) {
   pending = { sym, price, type };
@@ -1435,6 +1545,7 @@ window.onload = async () => {
   });
   document.getElementById('tradeModal').addEventListener('click', e => { if (e.target.id === 'tradeModal') closeModal(); });
   document.getElementById('budgetModal').addEventListener('click', e => { if (e.target.id === 'budgetModal') closeBudgetModal(); });
+  document.getElementById('editHoldingModal').addEventListener('click', e => { if (e.target.id === 'editHoldingModal') closeEditModal(); });
   await initFirebaseAuth();
   if (dbRef) {
     dbRef.on('value', snapshot => {
