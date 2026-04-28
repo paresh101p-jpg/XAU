@@ -1900,8 +1900,8 @@ function renderHold(k, p, buyTarget, overallAvg) {
     
     // Strict "Hit!" logic for UI: only show if price is VERY close to target
     const tolerance = bp * 0.0015; // 0.15% tolerance
-    const buyHit = p !== null && Math.abs(p - buyTargetLot) <= tolerance;
-    const sellHit = p !== null && Math.abs(p - sellTargetLot) <= tolerance;
+    const buyHit = p !== null && p <= buyTargetLot;
+    const sellHit = p !== null && p >= sellTargetLot;
 
     let buyLabel = '';
     if (buyHit) {
