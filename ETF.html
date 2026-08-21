@@ -1283,6 +1283,11 @@ body {
           <div class="ps-stat"><div class="ps-stat-label">🗓 30-Day Change</div><div class="ps-stat-value" id="pnl30d">—</div><div class="ps-stat-sub" id="pnl30dPercent">—</div></div>
           <div class="ps-stat"><div class="ps-stat-label">📆 1-Year Change</div><div class="ps-stat-value" id="pnl1y">—</div><div class="ps-stat-sub" id="pnl1yPercent">—</div></div>
         </div>
+        <div class="ps-wallet-row" style="display:flex; gap:12px; margin-top:12px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); padding:12px 16px; border-radius:10px;">
+          <div style="flex:1;"><div style="color:var(--muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">🏦 Demat Total</div><div id="psDematVal" style="font-size:1.1rem; color:var(--text); font-weight:600; margin-top:4px;">—</div></div>
+          <div style="flex:1;"><div style="color:var(--muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">📉 ETF Invested (Live)</div><div id="psEtfVal" style="font-size:1.1rem; color:var(--silver); font-weight:600; margin-top:4px;">—</div></div>
+          <div style="flex:1; border-left:1px solid rgba(255,255,255,0.1); padding-left:12px;"><div style="color:var(--muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">💵 Wallet Cash</div><div id="psWalletVal" style="font-size:1.1rem; color:var(--green); font-weight:600; margin-top:4px;">—</div></div>
+        </div>
         <div class="ps-divider"></div>
         <div class="ps-inputs-row">
           <div class="ps-input-group">
@@ -1292,6 +1297,17 @@ body {
               <div class="ps-field"><label>Date</label><input type="date" id="manualLiveDate"></div>
             </div>
             <button class="ps-save-btn" onclick="saveLiveAmount()">💾 Save Value</button>
+          </div>
+          <div class="ps-input-group">
+            <div class="ps-input-group-title">💸 Capital Adjustments</div>
+            <div class="ps-fields">
+              <div class="ps-field"><label>Amount (₹)</label><input type="number" id="manualAdjAmount" placeholder="e.g. 266000" step="1000"></div>
+              <div class="ps-field"><label>Date</label><input type="date" id="manualAdjDate"></div>
+            </div>
+            <div class="ps-fields" style="margin-top:8px;">
+              <button class="ps-save-btn" style="background:rgba(76,175,130,0.15);color:var(--green);flex:1;" onclick="saveAdjustment('deposit')">⬇️ Deposit</button>
+              <button class="ps-save-btn" style="background:rgba(224,82,82,0.15);color:var(--red);flex:1;" onclick="saveAdjustment('withdraw')">⬆️ Withdraw</button>
+            </div>
           </div>
           <div class="ps-input-group">
             <div class="ps-input-group-title">⚙️ Settings</div>
@@ -1504,6 +1520,20 @@ function togglePsSection() {
 // ======================== MANUAL PORTFOLIO STORAGE ========================
 let manualStart = { amount: null, date: null };
 let manualSnapshots = [];
+let manualAdjustments = [];
+
+function getNetInvested(upToDate = null) {
+  if (!manualStart.amount) return null;
+  let net = manualStart.amount;
+  if (!upToDate) upToDate = '9999-99-99';
+  for (const adj of manualAdjustments) {
+    if (adj.date <= upToDate) {
+      if (adj.type === 'deposit') net += adj.amount;
+      else if (adj.type === 'withdraw') net -= adj.amount;
+    }
+  }
+  return net;
+}
 
 function saveGSheetUrl() {
   const url = document.getElementById('gsheet-url-input').value.trim();
@@ -1528,6 +1558,7 @@ function loadManualData() {
       if (mainData.manual && mainData.manual.snapshots && mainData.manual.snapshots.length > 0) {
         manualStart = mainData.manual.start || { amount: null, date: null };
         manualSnapshots = mainData.manual.snapshots;
+        manualAdjustments = mainData.manual.adjustments || [];
         console.log("Loaded history from main storage");
       }
     }
@@ -1541,6 +1572,7 @@ function loadManualData() {
         const oldData = JSON.parse(oldRaw);
         manualStart = oldData.start || manualStart;
         manualSnapshots = oldData.snapshots || [];
+        manualAdjustments = oldData.adjustments || [];
         console.log("Recovered history from old dedicated storage");
       }
     } catch(e) { console.warn("Old storage recovery failed", e); }
@@ -1570,7 +1602,7 @@ function loadManualData() {
 }
 
 function saveManualToLocal() {
-  const data = { start: manualStart, snapshots: manualSnapshots };
+  const data = { start: manualStart, snapshots: manualSnapshots, adjustments: manualAdjustments };
   localStorage.setItem('manual_portfolio_v1', JSON.stringify(data));
   saveSt();
 }
@@ -1620,6 +1652,22 @@ function saveLiveAmount() {
   updateAll();
   showToast(`✅ Portfolio value saved: ₹${amount.toLocaleString('en-IN')} on ${date}`);
 }
+function saveAdjustment(type) {
+  let amount = parseFloat(document.getElementById('manualAdjAmount').value);
+  let date = document.getElementById('manualAdjDate').value;
+  if (isNaN(amount) || amount <= 0) { showToast('⚠️ Valid amount daalo'); return; }
+  if (!date) date = new Date().toISOString().slice(0,10);
+  
+  manualAdjustments.push({ type, amount, date });
+  // sort adjustments
+  manualAdjustments.sort((a,b) => new Date(a.date) - new Date(b.date));
+  
+  saveManualToLocal();
+  updateSummaryDisplay();
+  updateTopSummary();
+  showToast(`✅ ${type.toUpperCase()} recorded: ₹${amount.toLocaleString('en-IN')} on ${date}`);
+}
+
 function getAmountOnDate(targetDate) {
   if (!targetDate) return null;
   let best = null;
@@ -1632,13 +1680,35 @@ function getAmountOnDate(targetDate) {
 }
 function updateSummaryDisplay() {
   const startAmount = manualStart.amount;
+  const netInvested = getNetInvested();
   const latest      = manualSnapshots.length ? manualSnapshots[0] : null;
   const liveAmount  = latest ? latest.amount : null;
   const liveDate    = latest ? latest.date : null;
   document.getElementById('liveAmountDisplay').textContent = liveAmount ? `₹ ${liveAmount.toLocaleString('en-IN')}` : '₹ —';
   document.getElementById('liveDateDisplay').textContent   = liveDate ? `as on ${fmtDateNice(liveDate)}` : '—';
+  
+  let etfTotal = 0;
+  for (const k of ['G','S']) {
+    if (st.price[k]) {
+      for (const h of st.hold[k]) {
+        etfTotal += st.price[k] * h.units;
+      }
+    }
+  }
+  
+  if (document.getElementById('psDematVal')) {
+    document.getElementById('psDematVal').textContent = liveAmount ? `₹ ${liveAmount.toLocaleString('en-IN', {maximumFractionDigits:0})}` : '—';
+    document.getElementById('psEtfVal').textContent = etfTotal > 0 ? `₹ ${etfTotal.toLocaleString('en-IN', {maximumFractionDigits:0})}` : '—';
+    if (liveAmount) {
+      const freeCash = liveAmount - etfTotal;
+      document.getElementById('psWalletVal').textContent = `₹ ${freeCash.toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+    } else {
+      document.getElementById('psWalletVal').textContent = '—';
+    }
+  }
+
   if (startAmount && liveAmount) {
-    const diff = liveAmount - startAmount, pct = (diff / startAmount) * 100;
+    const diff = liveAmount - netInvested, pct = (diff / netInvested) * 100;
     const cls = diff >= 0 ? 'positive' : 'negative';
     document.getElementById('totalPnL').className = `ps-stat-value ${cls}`;
     document.getElementById('totalPnL').textContent = (diff >= 0 ? '+' : '') + '₹ ' + Math.abs(diff).toLocaleString('en-IN');
@@ -1690,7 +1760,39 @@ function fmtDateNice(isoDate) {
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function getMonthKey(isoDate) { return isoDate.slice(0, 7); }
 function fmtMonthLabel(monthKey) { const [y, m] = monthKey.split('-'); return `${MONTH_NAMES[parseInt(m)-1]} ${y}`; }
-function buildMonthlyData() { if (!manualSnapshots.length) return []; const monthMap = {}; for (const snap of manualSnapshots) { const mk = getMonthKey(snap.date); if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap; } const sortedMonths = Object.keys(monthMap).sort(); const rows = []; for (let i = 0; i < sortedMonths.length; i++) { const mk = sortedMonths[i]; const current = monthMap[mk]; const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null; let prevAmount = prev ? prev.amount : null; if (!prevAmount && manualStart.amount && manualStart.date && manualStart.date <= mk + '-01') prevAmount = manualStart.amount; const diff = prevAmount !== null ? current.amount - prevAmount : null; const pct = (prevAmount !== null && prevAmount > 0) ? (diff / prevAmount * 100) : null; const entries = manualSnapshots.filter(s => getMonthKey(s.date) === mk).sort((a,b) => b.date.localeCompare(a.date)); rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries }); } return rows.reverse(); }
+function buildMonthlyData() { 
+  if (!manualSnapshots.length) return []; 
+  const monthMap = {}; 
+  for (const snap of manualSnapshots) { 
+    const mk = getMonthKey(snap.date); 
+    if (!monthMap[mk] || snap.date > monthMap[mk].date) monthMap[mk] = snap; 
+  } 
+  const sortedMonths = Object.keys(monthMap).sort(); 
+  const rows = []; 
+  for (let i = 0; i < sortedMonths.length; i++) { 
+    const mk = sortedMonths[i]; 
+    const current = monthMap[mk]; 
+    const prev = i > 0 ? monthMap[sortedMonths[i-1]] : null; 
+    let prevAmount = prev ? prev.amount : null; 
+    if (!prevAmount && manualStart.amount && manualStart.date && manualStart.date <= mk + '-01') {
+      prevAmount = getNetInvested(mk + '-01'); 
+    } 
+    
+    let monthAdjs = 0;
+    for (const adj of manualAdjustments) {
+      if (getMonthKey(adj.date) === mk) {
+        if (adj.type === 'deposit') monthAdjs += adj.amount;
+        else if (adj.type === 'withdraw') monthAdjs -= adj.amount;
+      }
+    }
+    
+    const diff = prevAmount !== null ? current.amount - (prevAmount + monthAdjs) : null; 
+    const pct = (prevAmount !== null && (prevAmount + monthAdjs) > 0) ? (diff / (prevAmount + monthAdjs) * 100) : null; 
+    const entries = manualSnapshots.filter(s => getMonthKey(s.date) === mk).sort((a,b) => b.date.localeCompare(a.date)); 
+    rows.push({ monthKey: mk, label: fmtMonthLabel(mk), amount: current.amount, diff, pct, entries, monthAdjs }); 
+  } 
+  return rows.reverse(); 
+}
 function formatInLakhCrore(amt) {
   if (amt === null || isNaN(amt)) return "";
   if (amt >= 10000000) return (amt / 10000000).toFixed(2) + " Cr";
@@ -1700,16 +1802,16 @@ function formatInLakhCrore(amt) {
 function renderHistoryTab() {
   const rows = buildMonthlyData();
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
-  const startAmt = manualStart.amount;
+  const startAmt = getNetInvested();
   const totalPnlVal = (latest && startAmt) ? latest.amount - startAmt : null;
-  const totalPnlPct = (latest && startAmt && startAmt>0) ? ((latest.amount - startAmt)/startAmt*100) : null;
+  const totalPnlPct = (latest && startAmt && startAmt>0) ? (totalPnlVal/startAmt*100) : null;
   const roundedStart = startAmt ? formatInLakhCrore(startAmt) : "";
   const roundedLatest = latest ? formatInLakhCrore(latest.amount) : "";
   const roundedPnl = totalPnlVal !== null ? (totalPnlVal >=0 ? "+" : "-") + formatInLakhCrore(Math.abs(totalPnlVal)) : "";
   
   let out = `
     <div class="mhist-summary-row" style="margin-bottom:20px;">
-      <div class="mhs-card"><div class="mhs-label">📌 Start Capital</div><div class="mhs-value gold">${startAmt ? '₹' + startAmt.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${manualStart.date ? fmtDateNice(manualStart.date) : '—'}</div>${roundedStart ? `<div class="mhs-rounded">${roundedStart}</div>` : ''}</div>
+      <div class="mhs-card"><div class="mhs-label">📌 Net Invested</div><div class="mhs-value gold">${startAmt ? '₹' + startAmt.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">Capital adjustments applied</div>${roundedStart ? `<div class="mhs-rounded">${roundedStart}</div>` : ''}</div>
       <div class="mhs-card"><div class="mhs-label">📈 Latest Value</div><div class="mhs-value">${latest ? '₹' + latest.amount.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${latest ? 'as on ' + fmtDateNice(latest.date) : '—'}</div>${roundedLatest ? `<div class="mhs-rounded">${roundedLatest}</div>` : ''}</div>
       <div class="mhs-card"><div class="mhs-label">💰 Total P&amp;L</div><div class="mhs-value ${totalPnlVal !== null ? (totalPnlVal >=0 ? 'positive' : 'negative') : ''}">${totalPnlVal !== null ? (totalPnlVal >=0 ? '+' : '-') + '₹' + Math.abs(totalPnlVal).toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${totalPnlPct !== null ? (totalPnlPct >=0 ? '+' : '') + totalPnlPct.toFixed(2) + '% overall' : '—'}</div>${roundedPnl ? `<div class="mhs-rounded">${roundedPnl}</div>` : ''}</div>
     </div>
@@ -2008,8 +2110,7 @@ function updateCard(k) {
   if (iel) { if (tu>0) { iel.textContent='₹ '+tc.toLocaleString('en-IN',{maximumFractionDigits:0}); iel.className='holdings-stat-value'; } else { iel.textContent='—'; iel.className='holdings-stat-value'; } }
   const pel=document.getElementById('pnl-'+k);
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='holdings-stat-value '+(pnl>=0?'profit':'loss'); } else { pel.textContent='—'; pel.className='holdings-stat-value'; }
-  const lot1Price=getLot1Price(k), ref=lot1Price||p;
-  const bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
+  const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
   const buyU=calcBuyUnits(k), sellU=getLot1Units(k);
   let signalType = null;
   if (p<=bt) { signalType = 'buy'; } else if (p>=sv&&tu>0) { signalType = 'sell'; } else { signalType = null; }
@@ -2274,7 +2375,7 @@ function buildDataObj() {
       sord: document.getElementById('cp-sord').value
     },
     gsheet_url: st.gSheetUrl,
-    manual: { start: manualStart, snapshots: manualSnapshots }
+    manual: { start: manualStart, snapshots: manualSnapshots, adjustments: manualAdjustments }
   };
 }
 
@@ -2561,8 +2662,9 @@ function renderChartTab() {
   });
   const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
   const fillD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
-  const first = snaps[0].amount, last = snaps[snaps.length-1].amount;
-  const totalPnl = last - first, totalPct = first > 0 ? (totalPnl/first*100) : 0;
+  const netInv = getNetInvested();
+  const last = snaps[snaps.length-1].amount;
+  const totalPnl = last - netInv, totalPct = netInv > 0 ? (totalPnl/netInv*100) : 0;
   const isUp = totalPnl >= 0;
   const color = isUp ? '#4CAF82' : '#E05252';
   const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" stroke="var(--bg3)" stroke-width="2"/>`).join('');
@@ -2572,7 +2674,7 @@ function renderChartTab() {
   const totalRealized = realizedSells.reduce((s, l) => s + (l.pnl || 0), 0);
   return `
     <div class="an-summary-grid">
-      <div class="an-stat"><div class="an-stat-label">📌 Start Value</div><div class="an-stat-val gold">₹${first.toLocaleString('en-IN')}</div></div>
+      <div class="an-stat"><div class="an-stat-label">📌 Net Invested</div><div class="an-stat-val gold">₹${netInv.toLocaleString('en-IN')}</div></div>
       <div class="an-stat"><div class="an-stat-label">📈 Current Value</div><div class="an-stat-val">₹${last.toLocaleString('en-IN')}</div></div>
       <div class="an-stat"><div class="an-stat-label">💰 Total P&L</div><div class="an-stat-val ${isUp?'pos':'neg'}">${isUp?'+':'-'}₹${Math.abs(totalPnl).toLocaleString('en-IN')} (${totalPct.toFixed(2)}%)</div></div>
     </div>
