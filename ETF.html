@@ -1308,6 +1308,7 @@ body {
               <button class="ps-save-btn" style="background:rgba(76,175,130,0.15);color:var(--green);flex:1;" onclick="saveAdjustment('deposit')">⬇️ Deposit</button>
               <button class="ps-save-btn" style="background:rgba(224,82,82,0.15);color:var(--red);flex:1;" onclick="saveAdjustment('withdraw')">⬆️ Withdraw</button>
             </div>
+            <div id="adjHistoryList" style="margin-top:12px; font-size:0.8rem; max-height:100px; overflow-y:auto;"></div>
           </div>
           <div class="ps-input-group">
             <div class="ps-input-group-title">⚙️ Settings</div>
@@ -1662,10 +1663,51 @@ function saveAdjustment(type) {
   // sort adjustments
   manualAdjustments.sort((a,b) => new Date(a.date) - new Date(b.date));
   
+  // Auto-adjust latest portfolio value
+  const latestSnap = manualSnapshots.length ? manualSnapshots[0] : null;
+  let newAmount = 0;
+  if (latestSnap) {
+    newAmount = latestSnap.amount;
+    if (type === 'deposit') newAmount += amount;
+    else if (type === 'withdraw') newAmount -= amount;
+    
+    const existingIdx = manualSnapshots.findIndex(s => s.date === date);
+    if (existingIdx !== -1) {
+      manualSnapshots[existingIdx].amount = newAmount;
+    } else {
+      manualSnapshots.push({ date, amount: newAmount });
+      manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
+    }
+    document.getElementById('manualLiveAmount').value = newAmount;
+    document.getElementById('manualLiveDate').value = date;
+  }
+  
   saveManualToLocal();
+  document.getElementById('manualAdjAmount').value = '';
+  document.getElementById('manualAdjDate').value = '';
   updateSummaryDisplay();
   updateTopSummary();
-  showToast(`✅ ${type.toUpperCase()} recorded: ₹${amount.toLocaleString('en-IN')} on ${date}`);
+  renderAdjustments();
+  calcCapital();
+  updateAll();
+  showToast(`✅ ${type.toUpperCase()} recorded & Value Updated to ₹${newAmount.toLocaleString('en-IN')}`);
+}
+
+function renderAdjustments() {
+  const el = document.getElementById('adjHistoryList');
+  if (!el) return;
+  if (!manualAdjustments || manualAdjustments.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);">No capital adjustments yet.</div>';
+    return;
+  }
+  const rev = [...manualAdjustments].reverse();
+  el.innerHTML = rev.map(a => `
+    <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+      <span style="color:${a.type==='deposit'?'var(--green)':'var(--red)'};">${a.type==='deposit'?'⬇️ Deposit':'⬆️ Withdraw'}</span>
+      <span>₹${a.amount.toLocaleString('en-IN')}</span>
+      <span style="color:var(--muted);">${fmtDateNice(a.date)}</span>
+    </div>
+  `).join('');
 }
 
 function getAmountOnDate(targetDate) {
