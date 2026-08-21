@@ -2325,7 +2325,7 @@ function renderHold(k, p, buyTarget, overallAvg) {
     if (fillWidth > 100) fillWidth = 100;
     const cardHtml = `<div class="h-card ${isProfit ? 'pc' : 'lc'}">
       <div class="h-card-top">
-        <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share ${badgeHtml}</span>
+        <span class="h-lot-lbl">Lot ${i+1} · ${h.units} Share <span style="opacity:0.75;font-size:0.9em;margin-left:4px;">@ ₹${bp.toFixed(2)}</span> ${badgeHtml}</span>
         <div style="display:flex;align-items:center;gap:6px;">
           <span class="h-pct ${isProfit ? 'up' : 'dn'}">
             <span class="pnl-amt">${isProfit ? '+' : '-'}₹${Math.abs(pnl).toFixed(2)}</span>
