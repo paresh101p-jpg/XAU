@@ -1231,17 +1231,7 @@ body {
         </div>
       </div>
     </div>
-    <div class="right-header">
-      <div class="sound-toggle on" id="soundToggle" onclick="toggleSound()">
-        <span id="soundIcon">🔔</span>
-        <span id="soundTxt">Sound ON</span>
       </div>
-      <div class="market-status">
-        <div class="mkt-dot" id="mktDot"></div>
-        <span class="mkt-label" id="mktLabel">Checking...</span>
-        <span class="mkt-time" id="mktTime"></span>
-      </div>
-      <div class="last-upd" id="lastUpd">—</div>
     </div>
   </div>
 
@@ -1263,6 +1253,18 @@ body {
       <span class="api-source-badge" id="apiSourceBadge">connecting…</span>
     </div>
     <div class="fsb-right">
+      <div class="right-header" style="margin-right: 8px; padding-right: 12px; border-right: 1px solid var(--border);">
+        <div class="sound-toggle on" id="soundToggle" onclick="toggleSound()">
+          <span id="soundIcon">🔔</span>
+          <span id="soundTxt">Sound ON</span>
+        </div>
+        <div class="market-status">
+          <div class="mkt-dot" id="mktDot"></div>
+          <span class="mkt-label" id="mktLabel">Checking...</span>
+          <span class="mkt-time" id="mktTime"></span>
+        </div>
+        <div class="last-upd" id="lastUpd" style="display:none;">—</div>
+      </div>
       <span class="fsb-ago" id="fsb-ago" style="font-size:0.68rem;">—</span>
       <span class="fsb-status-txt" id="fetchStatusText" style="font-size:0.68rem;">Connecting…</span>
       <div style="width:1px;height:20px;background:var(--border);flex-shrink:0;"></div>
