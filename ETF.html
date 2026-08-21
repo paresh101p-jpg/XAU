@@ -1599,6 +1599,7 @@ function loadManualData() {
     document.getElementById('manualLiveDate').value = new Date().toISOString().slice(0,10);
   }
   updateSummaryDisplay();
+  renderAdjustments();
   calcCapital();
 }
 
