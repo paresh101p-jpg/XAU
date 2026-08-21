@@ -1064,6 +1064,89 @@ body {
 }
 .popup-close:hover { border-color: var(--red); color: var(--red); }
 .popup-body { overflow-y: auto; max-height: 80vh; }
+
+/* ===== TOP SUMMARY STRIP ===== */
+.top-summary-strip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+  flex-wrap: nowrap;
+}
+.tss-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.tss-lbl { font-size: 0.5rem; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; white-space: nowrap; }
+.tss-val { font-size: 0.78rem; color: var(--text); white-space: nowrap; }
+.tss-pnl { font-size: 0.78rem; white-space: nowrap; font-weight: bold; }
+.tss-pct { font-size: 0.78rem; white-space: nowrap; font-weight: bold; }
+.tss-pnl.pos { color: var(--green); }
+.tss-pnl.neg { color: var(--red); }
+.tss-pct.pos { color: var(--green); }
+.tss-pct.neg { color: var(--red); }
+.tss-sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; margin: 0 4px; }
+@media(max-width:700px){ .top-summary-strip { display: none !important; } }
+
+/* ===== ANALYTICS ===== */
+.atab {
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--muted); border-radius: 20px; padding: 5px 14px;
+  font-size: 0.7rem; cursor: pointer; transition: 0.15s;
+}
+.atab:hover { border-color: var(--silver); color: var(--text); }
+.atab.active { background: rgba(139,175,196,0.15); border-color: var(--silver); color: var(--silver); }
+.analytics-section { display: none; }
+.analytics-section.active { display: block; }
+.an-chart-wrap {
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 16px; padding: 16px; margin-bottom: 16px; overflow: hidden;
+}
+.an-chart-title { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 12px; }
+.an-chart-svg { width: 100%; height: 180px; display: block; }
+.an-summary-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;
+}
+.an-stat {
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; text-align: center;
+}
+.an-stat-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.an-stat-val { font-size: 1.1rem; margin-top: 4px; }
+.an-stat-val.pos { color: var(--green); }
+.an-stat-val.neg { color: var(--red); }
+.an-stat-val.gold { color: var(--gold); }
+.an-trade-row {
+  display: grid; grid-template-columns: 90px 60px 90px 90px 100px 80px 1fr;
+  align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--bg3);
+  margin-bottom: 8px; font-size: 0.72rem;
+}
+.an-trade-row.head { background: var(--bg4); color: var(--muted); font-size: 0.6rem; letter-spacing: 1px; }
+.an-trade-row.profit { border-color: rgba(76,175,130,0.4); border-left: 4px solid var(--green); }
+.an-trade-row.loss   { border-color: rgba(224,82,82,0.35);  border-left: 4px solid var(--red); }
+.an-pnl.pos { color: var(--green); }
+.an-pnl.neg { color: var(--red); }
+.tax-badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 6px; }
+.tax-badge.stcg { background: rgba(232,164,64,0.2); color: var(--amber); }
+.tax-badge.ltcg { background: rgba(76,175,130,0.15); color: var(--green); }
+.tax-card {
+  background: var(--bg3); border: 2px solid var(--border);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 12px;
+}
+.tax-card.stcg-card { border-color: rgba(232,164,64,0.4); }
+.tax-card.ltcg-card { border-color: rgba(76,175,130,0.35); }
+.tax-card-title { font-size: 0.78rem; margin-bottom: 12px; }
+.tax-row { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 8px; }
+.tax-row .tk { color: var(--muted); }
+.tax-row .tv { color: var(--text); }
+.tax-row .tv.pos { color: var(--green); }
+.tax-row .tv.neg { color: var(--red); }
+.tax-row .tv.big { font-size: 1rem; }
+.tax-note { font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.8; }
+.an-no-data { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.9rem; line-height: 2; }
+.an-no-data span { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+@media(max-width:580px){
+  .an-trade-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .an-summary-grid { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -1103,7 +1186,41 @@ body {
   </div>
 
   <div class="top-header">
-    <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES <span class="save-dot" id="saveDot"></span></div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES <span class="save-dot" id="saveDot"></span></div>
+      <!-- Combined Portfolio Summary Strip -->
+      <div class="top-summary-strip" id="topSummaryStrip" style="display:none;">
+        <div class="tss-item">
+          <span class="tss-lbl">💸 Invested</span>
+          <span class="tss-val" id="tss-invested">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl">📊 Curr. Value</span>
+          <span class="tss-val" id="tss-value">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl">🏷️ Charges (est.)</span>
+          <span class="tss-val" style="color:var(--red);" id="tss-charges">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl">📊 Gross P&L</span>
+          <span class="tss-pnl" id="tss-pnl">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item" style="background:rgba(76,175,130,0.07);border-radius:10px;padding:3px 10px;">
+          <span class="tss-lbl" style="color:var(--green);letter-spacing:1px;">&#x2705; NET P&L (after charges)</span>
+          <span class="tss-pnl" id="tss-netpnl" style="font-size:0.88rem;">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl">% Net Return</span>
+          <span class="tss-pct" id="tss-pct">—</span>
+        </div>
+      </div>
+    </div>
     <div class="right-header">
       <div class="sound-toggle on" id="soundToggle" onclick="toggleSound()">
         <span id="soundIcon">🔔</span>
@@ -1142,6 +1259,7 @@ body {
       <button class="btn-monthly-hist" onclick="showMonthlyHistory()" style="padding:3px 10px;font-size:0.6rem;">📅 History</button>
       <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
       <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
+      <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:3px 10px;font-size:0.6rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics</button>
     </div>
   </div>
 
@@ -1197,6 +1315,27 @@ body {
           🗂 Last 30d ref: <span id="last30dInfo">—</span> &nbsp;·&nbsp; Last 1y ref: <span id="last1yInfo">—</span> &nbsp;·&nbsp; <span id="totalSnapshotsInfo">0 snapshots saved</span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Analytics Modal -->
+  <div class="mhist-overlay" id="analyticsOverlay">
+    <div class="mhist-modal" style="max-width:1000px;border-color:rgba(139,175,196,0.45);">
+      <div class="mhist-head">
+        <div class="mhist-head-left">
+          <div class="mhist-title" style="color:var(--silver);">📈 Analytics</div>
+          <div class="mhist-sub">P&amp;L Chart · Realized Trades · Tax Calculator</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div style="display:flex;gap:6px;">
+            <button onclick="setAnalyticsTab('chart')" id="atab-chart" class="atab active">📈 Chart</button>
+            <button onclick="setAnalyticsTab('realized')" id="atab-realized" class="atab">💰 Realized P&amp;L</button>
+            <button onclick="setAnalyticsTab('tax')" id="atab-tax" class="atab">🏷️ Tax</button>
+          </div>
+          <button class="mhist-close" onclick="closeAnalytics()">✕ Close</button>
+        </div>
+      </div>
+      <div class="mhist-scroll" id="analyticsBody" style="padding:20px 24px;"></div>
     </div>
   </div>
 
@@ -1891,6 +2030,76 @@ function updateCard(k) {
   updateBtnHints(k);
   renderHold(k, p, bt, avg);
   if (document.getElementById('capPanel').classList.contains('open')) calcCapital();
+  updateTopSummary();
+}
+
+function updateTopSummary() {
+  const strip = document.getElementById('topSummaryStrip');
+  if (!strip) return;
+  let totalInvested = 0, totalCurrVal = 0, hasAny = false;
+  // Charge accumulators
+  let totalBuyCharges = 0, totalSellCharges = 0;
+
+  for (const k of ['G', 'S']) {
+    const p = st.price[k];
+    if (!p) continue;
+    for (const h of st.hold[k]) {
+      const bp = h.buyPrice || h.price;
+      const buyAmt  = bp * h.units;
+      const sellAmt = p  * h.units;
+      totalInvested += buyAmt;
+      totalCurrVal  += sellAmt;
+      hasAny = true;
+
+      // ── BUY CHARGES (already paid) ──
+      // Stamp Duty: 0.015% on buy
+      const stamp     = buyAmt * 0.00015;
+      // NSE Exchange charge: 0.00297% on buy turnover
+      const nse_buy   = buyAmt * 0.0000297;
+      // SEBI: 0.0001% on buy
+      const sebi_buy  = buyAmt * 0.000001;
+      // GST 18% on (NSE + SEBI) — not on stamp/STT
+      const gst_buy   = (nse_buy + sebi_buy) * 0.18;
+      totalBuyCharges += stamp + nse_buy + sebi_buy + gst_buy;
+
+      // ── SELL CHARGES (estimated at current price) ──
+      // STT: 0.1% on sell turnover
+      const stt       = sellAmt * 0.001;
+      // NSE Exchange: 0.00297% on sell turnover
+      const nse_sell  = sellAmt * 0.0000297;
+      // SEBI: 0.0001% on sell
+      const sebi_sell = sellAmt * 0.000001;
+      // GST 18% on (NSE + SEBI)
+      const gst_sell  = (nse_sell + sebi_sell) * 0.18;
+      totalSellCharges += stt + nse_sell + sebi_sell + gst_sell;
+    }
+  }
+
+  if (!hasAny) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+
+  const grossPnl    = totalCurrVal - totalInvested;
+  const totalChgs   = totalBuyCharges + totalSellCharges;
+  const netPnl      = grossPnl - totalChgs;
+  const netPct      = totalInvested > 0 ? (netPnl / totalInvested * 100) : 0;
+  const grossIsPos  = grossPnl >= 0;
+  const netIsPos    = netPnl  >= 0;
+
+  document.getElementById('tss-invested').textContent = '₹' + totalInvested.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  document.getElementById('tss-value').textContent    = '₹' + totalCurrVal.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  document.getElementById('tss-charges').textContent  = '-₹' + totalChgs.toLocaleString('en-IN', {maximumFractionDigits: 0});
+
+  const pnlEl = document.getElementById('tss-pnl');
+  pnlEl.textContent = (grossIsPos ? '+' : '-') + '₹' + Math.abs(grossPnl).toLocaleString('en-IN', {maximumFractionDigits: 0});
+  pnlEl.className   = 'tss-pnl ' + (grossIsPos ? 'pos' : 'neg');
+
+  const netEl = document.getElementById('tss-netpnl');
+  netEl.textContent = (netIsPos ? '+' : '-') + '₹' + Math.abs(netPnl).toLocaleString('en-IN', {maximumFractionDigits: 0});
+  netEl.className   = 'tss-pnl ' + (netIsPos ? 'pos' : 'neg');
+
+  const pctEl = document.getElementById('tss-pct');
+  pctEl.textContent = (netIsPos ? '+' : '') + netPct.toFixed(2) + '%';
+  pctEl.className   = 'tss-pct ' + (netIsPos ? 'pos' : 'neg');
 }
 
 function renderHold(k, p, buyTarget, overallAvg) {
@@ -2063,7 +2272,7 @@ function alertDoTrade() { const { k, type } = st.alertPend; dismissAlert(); open
 function dismissAlert() { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend = null; }
 function openModal(k, type, auto = false) { const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; } const ref = getLot1Price(k) || p; const bt = ref * (1 - cfg.buy / 100); const sv = ref * (1 + cfg.sell / 100); const hs = st.hold[k]; const tu = hs.reduce((s, h) => s + h.units, 0); const tc = hs.reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0); const avg = tu > 0 ? tc / tu : 0; const isBuy = type === 'buy'; const buyU = calcBuyUnits(k); const sellU = getLot1Units(k); const un = isBuy ? buyU : sellU; const nextLot = getSortedHoldings(k).length + 1; const tgt = isBuy ? bt : sv; const est = (p * un).toFixed(2); st.pend = { k, type }; document.getElementById('mBox').className = 'modal ' + ETF[k].mc; document.getElementById('mIco').textContent = ETF[k].icon; document.getElementById('mTit').textContent = isBuy ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL — Lot 1'; document.getElementById('mTit').className = isBuy ? 'bh' : 'sh'; document.getElementById('mSub').textContent = auto ? ETF[k].name + ' — Grid signal!' : ETF[k].name + ' — Manual trade'; const mUnitsInput = document.getElementById('mUnits'); const mUnitsLabel = document.getElementById('mUnitsLabel'); mUnitsInput.value = un; if (isBuy) { mUnitsInput.removeAttribute('readonly'); mUnitsInput.style.cursor = ''; mUnitsLabel.textContent = 'Share to Buy'; } else { mUnitsInput.setAttribute('readonly', true); mUnitsLabel.textContent = 'Share to Sell — Lot 1 (fixed)'; } const bpWrap = document.getElementById('mBuyPriceWrap'); const bpInp = document.getElementById('mBuyPrice'); if (isBuy) { bpWrap.style.display = 'block'; bpInp.value = p.toFixed(2); } else bpWrap.style.display = 'none'; let rows = `<div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div><div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div><div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div><div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div><div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`; if (isBuy) { rows += `<div class="mr"><span class="mk">This will be</span><span class="mv profit">Lot ${nextLot}</span></div>`; } else { const sorted = getSortedHoldings(k); const lot1 = sorted[0]; if (lot1) { const lotBp = lot1.buyPrice || lot1.price; const lotPnl = (p - lotBp) * lot1.units; const lotPct = ((p - lotBp) / lotBp * 100).toFixed(2); const isProfit = lotPnl >= 0; rows += `<div class="mr-divider"></div><div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div><div class="mr"><span class="mk">Lot 1 Share</span><span class="mv">${lot1.units} Share</span></div><div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit ? '+' : ''}${lotPct}%)</span></div>`; } rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} Share (all lots)</span></div>`; if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`; } document.getElementById('mRows').innerHTML = rows; const cb = document.getElementById('mCfm'); cb.textContent = isBuy ? `✅ Confirm BUY — Lot ${nextLot}` : '✅ Confirm SELL — Lot 1'; cb.className = isBuy ? 'mcfb' : 'mcfs'; cb.disabled = (!isBuy && tu === 0); cb.style.opacity = (!isBuy && tu === 0) ? '0.35' : '1'; if (!isBuy && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!'; document.getElementById('overlay').classList.add('show'); }
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend = null; }
-function confirmTrade() { const { k, type } = st.pend; const liveP = st.price[k]; const time = currentTimeStr(); const date = todayDateStr(); if (type === 'buy') { const bpRaw = parseFloat(document.getElementById('mBuyPrice').value); const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP; const units = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k); st.hold[k].push({ price: buyPrice, buyPrice, units, time, date }); st.alerted[k].buy = false; st.alerted[k].sell = false; addLog({ type: 'buy', k, price: buyPrice, units, time }); showToast('✅ BOUGHT ' + units + ' Share ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2)); } else { const sorted = getSortedHoldings(k); if (!sorted.length) { showToast('No holdings!'); closeModal(); return; } const lot1 = sorted[0]; const lot1Bp = lot1.buyPrice || lot1.price; const sellU = lot1.units; const pnl = (liveP - lot1Bp) * sellU; st.real += pnl; const idx = st.hold[k].findIndex(h => (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time); if (idx !== -1) st.hold[k].splice(idx, 1); st.alerted[k].sell = false; addLog({ type: 'sell', k, price: liveP, units: sellU, pnl, time }); showToast('✅ SOLD Lot 1 · ' + sellU + ' Share ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl >= 0 ? '+' : '') + '₹' + pnl.toFixed(2)); } closeModal(); updateCard(k); saveSt(); updateTabTitle(); }
+function confirmTrade() { const { k, type } = st.pend; const liveP = st.price[k]; const time = currentTimeStr(); const date = todayDateStr(); if (type === 'buy') { const bpRaw = parseFloat(document.getElementById('mBuyPrice').value); const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP; const units = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k); st.hold[k].push({ price: buyPrice, buyPrice, units, time, date }); st.alerted[k].buy = false; st.alerted[k].sell = false; addLog({ type: 'buy', k, price: buyPrice, units, time }); showToast('✅ BOUGHT ' + units + ' Share ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2)); } else { const sorted = getSortedHoldings(k); if (!sorted.length) { showToast('No holdings!'); closeModal(); return; } const lot1 = sorted[0]; const lot1Bp = lot1.buyPrice || lot1.price; const sellU = lot1.units; const pnl = (liveP - lot1Bp) * sellU; st.real += pnl; const holdDays = lot1.date ? calcDaysSince(lot1.date) : null; const idx = st.hold[k].findIndex(h => (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time); if (idx !== -1) st.hold[k].splice(idx, 1); st.alerted[k].sell = false; addLog({ type: 'sell', k, price: liveP, units: sellU, pnl, time, holdDays, buyDate: lot1.date, buyPrice: lot1Bp }); showToast('✅ SOLD Lot 1 · ' + sellU + ' Share ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl >= 0 ? '+' : '') + '₹' + pnl.toFixed(2)); } closeModal(); updateCard(k); saveSt(); updateTabTitle(); }
 function addLog(e) { st.log.unshift(e); renderLog(); }
 function renderLog() { const el = document.getElementById('logBar'); if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; } el.innerHTML = st.log.slice(0, 25).map(l => `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units} Share @ ₹${l.price.toFixed(2)} ${l.pnl !== undefined ? (l.pnl >= 0 ? '+' : '') + '₹' + l.pnl.toFixed(2) : ''} · ${l.time}</div>`).join(''); }
 
@@ -2326,6 +2535,176 @@ window.dismissAlert = dismissAlert;
 window.calcCapital = calcCapital;
 window.onStartCapitalChange = onStartCapitalChange;
 window.applySettings = applySettings;
+
+// ======================== ANALYTICS ========================
+let currentAnalyticsTab = 'chart';
+
+function openAnalytics() {
+  document.getElementById('analyticsOverlay').classList.add('show');
+  setAnalyticsTab(currentAnalyticsTab);
+}
+function closeAnalytics() {
+  document.getElementById('analyticsOverlay').classList.remove('show');
+}
+function setAnalyticsTab(tab) {
+  currentAnalyticsTab = tab;
+  ['chart','realized','tax'].forEach(t => {
+    document.getElementById('atab-' + t).classList.toggle('active', t === tab);
+  });
+  const body = document.getElementById('analyticsBody');
+  if (tab === 'chart')    body.innerHTML = renderChartTab();
+  if (tab === 'realized') body.innerHTML = renderRealizedTab();
+  if (tab === 'tax')      body.innerHTML = renderTaxTab();
+}
+window.openAnalytics = openAnalytics;
+window.closeAnalytics = closeAnalytics;
+window.setAnalyticsTab = setAnalyticsTab;
+
+// --- P&L CHART ---
+function renderChartTab() {
+  const snaps = [...manualSnapshots].sort((a,b) => a.date.localeCompare(b.date));
+  if (snaps.length < 2) return `<div class="an-no-data"><span>📈</span>Kam se kam 2 portfolio snapshots chahiye.<br>Portfolio section mein "Add Today's Value" karo.</div>`;
+  const amounts = snaps.map(s => s.amount);
+  const minA = Math.min(...amounts), maxA = Math.max(...amounts);
+  const range = maxA - minA || 1;
+  const W = 900, H = 180, padX = 8, padY = 16;
+  const pts = snaps.map((s, i) => {
+    const x = padX + (i / (snaps.length - 1)) * (W - padX * 2);
+    const y = padY + (1 - (s.amount - minA) / range) * (H - padY * 2);
+    return { x, y, s };
+  });
+  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const fillD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
+  const first = snaps[0].amount, last = snaps[snaps.length-1].amount;
+  const totalPnl = last - first, totalPct = first > 0 ? (totalPnl/first*100) : 0;
+  const isUp = totalPnl >= 0;
+  const color = isUp ? '#4CAF82' : '#E05252';
+  const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" stroke="var(--bg3)" stroke-width="2"/>`).join('');
+  const labels = pts.filter((_, i) => i === 0 || i === pts.length - 1 || pts.length <= 6)
+    .map(p => `<text x="${p.x.toFixed(1)}" y="${H - 2}" text-anchor="middle" font-size="9" fill="#787672">${p.s.date.slice(5)}</text>`).join('');
+  const realizedSells = st.log.filter(l => l.type === 'sell' && l.pnl !== undefined);
+  const totalRealized = realizedSells.reduce((s, l) => s + (l.pnl || 0), 0);
+  return `
+    <div class="an-summary-grid">
+      <div class="an-stat"><div class="an-stat-label">📌 Start Value</div><div class="an-stat-val gold">₹${first.toLocaleString('en-IN')}</div></div>
+      <div class="an-stat"><div class="an-stat-label">📈 Current Value</div><div class="an-stat-val">₹${last.toLocaleString('en-IN')}</div></div>
+      <div class="an-stat"><div class="an-stat-label">💰 Total P&L</div><div class="an-stat-val ${isUp?'pos':'neg'}">${isUp?'+':'-'}₹${Math.abs(totalPnl).toLocaleString('en-IN')} (${totalPct.toFixed(2)}%)</div></div>
+    </div>
+    <div class="an-chart-wrap">
+      <div class="an-chart-title">📊 PORTFOLIO VALUE — ${snaps.length} SNAPSHOTS</div>
+      <svg class="an-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <path d="${fillD}" fill="url(#chartGrad)"/>
+        <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+        ${dots}
+        ${labels}
+      </svg>
+    </div>
+    <div class="an-summary-grid">
+      <div class="an-stat"><div class="an-stat-label">💸 Realized P&L</div><div class="an-stat-val ${totalRealized>=0?'pos':'neg'}">${totalRealized>=0?'+':'-'}₹${Math.abs(totalRealized).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div>
+      <div class="an-stat"><div class="an-stat-label">🔢 Sell Trades</div><div class="an-stat-val">${realizedSells.length}</div></div>
+      <div class="an-stat"><div class="an-stat-label">📅 Snapshots</div><div class="an-stat-val">${snaps.length}</div></div>
+    </div>`;
+}
+
+// --- REALIZED P&L TAB ---
+function renderRealizedTab() {
+  const sells = st.log.filter(l => l.type === 'sell' && l.pnl !== undefined);
+  if (!sells.length) return `<div class="an-no-data"><span>💰</span>Koi sold trade nahi hai abhi.<br>SELL karo phir yahan history dikhegi.</div>`;
+  const totalPnl = sells.reduce((s,l)=>s+(l.pnl||0),0);
+  const wins = sells.filter(l=>l.pnl>=0).length;
+  const rows = sells.map((l, i) => {
+    const isProfit = l.pnl >= 0;
+    const etfName = l.k === 'G' ? '🥇 Gold' : '🥈 Silver';
+    const holdDays = l.holdDays !== undefined ? l.holdDays : (l.buyDate ? calcDaysSince(l.buyDate) : null);
+    const taxType = (holdDays !== null && holdDays >= 365) ? 'ltcg' : 'stcg';
+    const taxBadge = taxType === 'ltcg' ? '<span class="tax-badge ltcg">LTCG (365d+)</span>' : '<span class="tax-badge stcg">STCG</span>';
+    const daysStr = holdDays !== null ? `${holdDays}d` : '—';
+    return `<div class="an-trade-row ${isProfit?'profit':'loss'}">
+      <span style="line-height:1.4;">${etfName}<br>${taxBadge}</span>
+      <span>${l.units} Sh</span>
+      <span style="color:var(--muted)">₹${(l.buyPrice||0).toFixed(2)}</span>
+      <span>₹${l.price.toFixed(2)}</span>
+      <span class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'+':'-'}₹${Math.abs(l.pnl).toFixed(2)}</span>
+      <span class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'▲':'▼'}${l.pnl!==0&&l.buyPrice?Math.abs(((l.price-(l.buyPrice||l.price))/(l.buyPrice||l.price))*100).toFixed(2):'0.00'}%</span>
+      <span style="color:var(--muted);font-size:0.6rem;line-height:1.4;">Hold: ${daysStr}<br>${l.time||'—'}</span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="an-summary-grid" style="margin-bottom:16px;">
+      <div class="an-stat"><div class="an-stat-label">💰 Total Realized</div><div class="an-stat-val ${totalPnl>=0?'pos':'neg'}">${totalPnl>=0?'+':'-'}₹${Math.abs(totalPnl).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div>
+      <div class="an-stat"><div class="an-stat-label">✅ Win Rate</div><div class="an-stat-val pos">${sells.length?Math.round(wins/sells.length*100):0}%</div></div>
+      <div class="an-stat"><div class="an-stat-label">🔢 Total Trades</div><div class="an-stat-val">${sells.length}</div></div>
+    </div>
+    <div class="an-trade-row head"><span>ETF</span><span>Units</span><span>Buy @</span><span>Sell @</span><span>P&L</span><span>Return</span><span>Time</span></div>
+    ${rows}`;
+}
+
+// --- TAX CALCULATOR TAB ---
+function renderTaxTab() {
+  const sells = st.log.filter(l => l.type === 'sell' && l.pnl !== undefined);
+  if (!sells.length) return `<div class="an-no-data"><span>🏷️</span>Koi sold trade nahi hai.<br>Tax tab tabhi kaam karega jab koi lot sell karo.</div>`;
+  // Group by STCG (< 365 days) and LTCG (>= 365 days)
+  const stcgSells = sells.filter(l => l.holdDays === undefined || l.holdDays === null || l.holdDays < 365);
+  const ltcgSells = sells.filter(l => l.holdDays !== undefined && l.holdDays !== null && l.holdDays >= 365);
+  
+  const stcgPnl = stcgSells.reduce((s,l)=>s+(l.pnl||0), 0);
+  const stcgProfit = stcgSells.filter(l=>l.pnl>0).reduce((s,l)=>s+l.pnl,0);
+  const stcgLoss = stcgSells.filter(l=>l.pnl<0).reduce((s,l)=>s+l.pnl,0);
+  const STCG_RATE = 20; // 20% flat post July 2024 budget
+  const taxPayableStcg = stcgPnl > 0 ? stcgPnl * STCG_RATE / 100 : 0;
+
+  const ltcgPnl = ltcgSells.reduce((s,l)=>s+(l.pnl||0), 0);
+  const ltcgProfit = ltcgSells.filter(l=>l.pnl>0).reduce((s,l)=>s+l.pnl,0);
+  const ltcgLoss = ltcgSells.filter(l=>l.pnl<0).reduce((s,l)=>s+l.pnl,0);
+  const LTCG_RATE = 12.5; // 12.5%
+  const taxPayableLtcg = ltcgPnl > 125000 ? (ltcgPnl - 125000) * LTCG_RATE / 100 : 0;
+
+  // Open holdings unrealized LTCG estimate
+  let openHoldTotal = 0, openHoldInvested = 0;
+  for (const k of ['G','S']) {
+    const p = st.price[k] || 0;
+    for (const h of st.hold[k]) {
+      const bp = h.buyPrice || h.price;
+      openHoldInvested += bp * h.units;
+      openHoldTotal += p * h.units;
+    }
+  }
+  const unrealizedPnl = openHoldTotal - openHoldInvested;
+  return `
+    <div class="tax-card stcg-card">
+      <div class="tax-card-title">⚡ STCG — Short Term Gain (&lt; 365 Days)</div>
+      <div class="tax-row"><span class="tk">STCG Sell Trades</span><span class="tv">${stcgSells.length}</span></div>
+      <div class="tax-row"><span class="tk">Gross Profit</span><span class="tv pos">+₹${stcgProfit.toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <div class="tax-row"><span class="tk">Gross Loss</span><span class="tv neg">${stcgLoss!==0?'-':''}₹${Math.abs(stcgLoss).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <hr style="border-color:var(--border);margin:8px 0;">
+      <div class="tax-row"><span class="tk">Net Taxable STCG Gain</span><span class="tv big ${stcgPnl>=0?'pos':'neg'}">${stcgPnl>=0?'+':'-'}₹${Math.abs(stcgPnl).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <div class="tax-row"><span class="tk">STCG Tax @ ${STCG_RATE}%</span><span class="tv big ${taxPayableStcg>0?'neg':''}">${taxPayableStcg>0?'≈ ₹'+taxPayableStcg.toLocaleString('en-IN',{maximumFractionDigits:0}):'₹ 0 (No Tax)'}</span></div>
+    </div>
+    <div class="tax-card ltcg-card">
+      <div class="tax-card-title">🛡️ LTCG — Long Term Gain (≥ 365 Days)</div>
+      <div class="tax-row"><span class="tk">LTCG Sell Trades</span><span class="tv">${ltcgSells.length}</span></div>
+      <div class="tax-row"><span class="tk">Net Realized LTCG Gain</span><span class="tv ${ltcgPnl>=0?'pos':'neg'}">${ltcgPnl>=0?'+':'-'}₹${Math.abs(ltcgPnl).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <div class="tax-row"><span class="tk">LTCG Tax @ ${LTCG_RATE}%</span><span class="tv ${taxPayableLtcg>0?'neg':''}">${taxPayableLtcg>0?'≈ ₹'+taxPayableLtcg.toLocaleString('en-IN',{maximumFractionDigits:0}):'₹ 0 (Below ₹1.25L)'}</span></div>
+    </div>
+    <div class="tax-card" style="border-color:rgba(139,175,196,0.3);">
+      <div class="tax-card-title">📦 Open Holdings — Unrealized Position</div>
+      <div class="tax-row"><span class="tk">Total Invested</span><span class="tv">₹${openHoldInvested.toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <div class="tax-row"><span class="tk">Current Value</span><span class="tv">₹${openHoldTotal.toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+      <div class="tax-row"><span class="tk">Unrealized P&L</span><span class="tv ${unrealizedPnl>=0?'pos':'neg'}">${unrealizedPnl>=0?'+':'-'}₹${Math.abs(unrealizedPnl).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>
+    </div>
+    <div class="tax-note">
+      📌 STCG = 20% flat · LTCG = 12.5% (gains above ₹1.25 lakh exempt)<br>
+      ⚠️ Ye sirf estimate hai — tax filing ke liye CA se milein.<br>
+      Gold/Silver ETF = Equity ETF tax slabs applicable (post Jul 2024 budget)
+    </div>`;
+}
+// ======================== END ANALYTICS ========================
 
 // Start Firebase initialization when module loads
 initFirebase();
