@@ -1328,6 +1328,7 @@ body {
               <div class="ps-field"><label>Date</label><input type="date" id="manualLiveDate"></div>
             </div>
             <button class="ps-save-btn" onclick="saveLiveAmount()">💾 Save Value</button>
+            <div id="snapHistoryList" style="margin-top:12px; font-size:0.8rem; max-height:100px; overflow-y:auto;"></div>
           </div>
           <div class="ps-input-group">
             <div class="ps-input-group-title">💸 Capital Adjustments</div>
@@ -1727,6 +1728,33 @@ function saveAdjustment(type) {
   showToast(`✅ ${type.toUpperCase()} recorded & Value Updated to ₹${newAmount.toLocaleString('en-IN')}`);
 }
 
+function deleteSnapshot(idx) {
+  manualSnapshots.splice(idx, 1);
+  saveManualToLocal();
+  updateSummaryDisplay();
+  calcCapital();
+  if (typeof updateAll === 'function') updateAll();
+  showToast('✅ Snapshot deleted');
+}
+
+function renderSnapshots() {
+  const el = document.getElementById('snapHistoryList');
+  if (!el) return;
+  if (!manualSnapshots || manualSnapshots.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);">No snapshots saved yet.</div>';
+    return;
+  }
+  el.innerHTML = manualSnapshots.map((s, idx) => {
+    return `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+      <span style="color:var(--silver); width:80px;">📸 Snap</span>
+      <span style="flex:1; text-align:right; margin-right:10px;">₹${s.amount.toLocaleString('en-IN')}</span>
+      <span style="color:var(--muted); width:90px; text-align:right;">${fmtDateNice(s.date)}</span>
+      <button onclick="deleteSnapshot(${idx})" style="background:none; border:none; color:var(--red); font-size:1.1rem; cursor:pointer; margin-left:8px; padding:0 4px;" title="Delete this entry">×</button>
+    </div>
+  `}).join('');
+}
+
 function deleteAdjustment(idx) {
   manualAdjustments.splice(idx, 1);
   saveManualToLocal();
@@ -1774,6 +1802,9 @@ function updateSummaryDisplay() {
   const latest      = manualSnapshots.length ? manualSnapshots[0] : null;
   const liveAmount  = latest ? latest.amount : null;
   const liveDate    = latest ? latest.date : null;
+
+  renderSnapshots();
+
   document.getElementById('liveAmountDisplay').textContent = liveAmount ? `₹ ${liveAmount.toLocaleString('en-IN')}` : '₹ —';
   document.getElementById('liveDateDisplay').textContent   = liveDate ? `as on ${fmtDateNice(liveDate)}` : '—';
   
