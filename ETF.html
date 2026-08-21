@@ -1268,6 +1268,7 @@ body {
       <span class="fsb-ago" id="fsb-ago" style="font-size:0.68rem;">—</span>
       <span class="fsb-status-txt" id="fetchStatusText" style="font-size:0.68rem;">Connecting…</span>
       <div style="width:1px;height:20px;background:var(--border);flex-shrink:0;"></div>
+      <button class="btn-monthly-hist" onclick="syncDhanTrades()" id="btnSyncDhan" style="padding:5px 14px;font-size:0.72rem;background:rgba(76,175,130,0.1);border-color:rgba(76,175,130,0.5);color:#fff;">🔄 Sync Dhan</button>
       <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:5px 14px;font-size:0.72rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
       <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:5px 14px;font-size:0.72rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics & History</button>
       <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:5px 14px;font-size:0.72rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">⚙️ Start Setting</button>
@@ -1393,6 +1394,17 @@ body {
   <button class="cap-toggle" id="capToggle" onclick="toggleCap()" style="display:none;">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
   <div class="cap-panel" id="capPanel" style="display:none;">
     <div class="cap-inner">
+      <div class="cap-start-section" style="margin-bottom: 12px; border-color: rgba(76,175,130,0.3);">
+        <div class="cap-start-title">🔄 Dhan API Token (For Auto-Sync)</div>
+        <div class="cap-start-fields">
+          <div class="cap-start-field"><label>Client ID</label><input type="text" id="cp-dhan-client" placeholder="e.g. 1102451175"></div>
+          <div class="cap-start-field"><label>Access Token (24h)</label><input type="password" id="cp-dhan-token" placeholder="Paste 24h token here"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:0.6rem; color:var(--muted);">Jis din trade karein us din naya token paste karein.</div>
+          <button class="cap-start-save" onclick="saveDhanCreds()">💾 Save API Keys</button>
+        </div>
+      </div>
       <div class="cap-start-section">
         <div class="cap-start-title">📌 Start Capital</div>
         <div class="cap-start-fields">
@@ -1495,7 +1507,93 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================== TOGGLE HOLDINGS ========================
+// ======================== DHAN API SYNC ========================
+async function syncDhanTrades() {
+  if (!st.dhanClient || !st.dhanToken) {
+    showToast('⚠️ Pehle Settings me Dhan Client ID aur Token save karein!');
+    openCapPopup();
+    return;
+  }
+  const btn = document.getElementById('btnSyncDhan');
+  const ogText = btn.innerHTML;
+  btn.innerHTML = '🔄 Syncing...';
+  btn.disabled = true;
+  try {
+    const url = '/api/sync?clientId=' + encodeURIComponent(st.dhanClient) + '&token=' + encodeURIComponent(st.dhanToken);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API Error ' + res.status);
+    const data = await res.json();
+    if (!data.success) {
+      showToast('❌ Dhan Sync Failed: ' + (data.error || 'Unknown error'));
+      return;
+    }
+    const trades = data.trades || [];
+    let addedCount = 0;
+    for (const t of trades) {
+      const isGold = (t.tradingSymbol||'').toUpperCase().includes('GOLDBEES');
+      const k = isGold ? 'G' : 'S';
+      const type = (t.transactionType||'').toLowerCase();
+      if (type !== 'buy' && type !== 'sell') continue;
+      const price = parseFloat(t.tradedPrice);
+      const units = parseInt(t.tradedQuantity);
+      const txId = t.txId || t.orderId || (t.exchangeOrderId + '-' + type);
+      const exists = st.log.find(l => l.txId === txId || (l.k === k && l.type === type && l.units === units && Math.abs(l.price - price) < 0.05));
+      if (!exists) {
+        let inDate = 'Not set', inTime = '—';
+        if (t.createTime) {
+          const dt = t.createTime.split(' ');
+          if (dt[0]) {
+            const dp = dt[0].split('-');
+            if (dp.length===3) inDate = `${dp[2]}-${dp[1]}-${dp[0]}`;
+          }
+          if (dt[1]) {
+            const tp = dt[1].split(':');
+            let h = parseInt(tp[0]), m = tp[1];
+            const ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12 || 12;
+            inTime = `${String(h).padStart(2,'0')}:${m} ${ampm}`;
+          }
+        }
+        const entry = { id: Date.now()+Math.random(), k, type, price, units, date: inDate, time: inTime, txId };
+        if (type === 'buy') {
+          st.hold[k].push({ price, units, date: inDate, time: inTime, txId });
+          entry.buyPrice = price;
+        } else if (type === 'sell') {
+          st.hold[k].sort((a,b) => (b.buyPrice||b.price) - (a.buyPrice||a.price));
+          let rem = units;
+          let totalBuyCost = 0;
+          for (let i = 0; i < st.hold[k].length && rem > 0; i++) {
+            const h = st.hold[k][i];
+            const use = Math.min(rem, h.units);
+            totalBuyCost += (h.buyPrice||h.price) * use;
+            h.units -= use;
+            rem -= use;
+          }
+          st.hold[k] = st.hold[k].filter(h => h.units > 0);
+          const avgBuy = totalBuyCost / units;
+          entry.buyPrice = avgBuy;
+          entry.pnl = (price - avgBuy) * units;
+        }
+        st.log.unshift(entry);
+        addedCount++;
+      }
+    }
+    if (addedCount > 0) {
+      saveSt();
+      updateAll();
+      showToast(`✅ Successfully synced ${addedCount} new trades from Dhan!`);
+    } else {
+      showToast(`✅ Dhan sync complete. No new trades found.`);
+    }
+  } catch (err) {
+    showToast('❌ Sync Error: ' + err.message);
+  } finally {
+    btn.innerHTML = ogText;
+    btn.disabled = false;
+  }
+}
+
+// ======================== MODALS & ACTIONS ========================
 let holdingsVisibleG = true;
 let holdingsVisibleS = true;
 function toggleHoldings(k) {
@@ -2162,6 +2260,12 @@ window.onload = () => {
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
 function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 300; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
+function saveDhanCreds() {
+  st.dhanClient = document.getElementById('cp-dhan-client').value.trim();
+  st.dhanToken = document.getElementById('cp-dhan-token').value.trim();
+  saveSt();
+  showToast('✅ Dhan API keys saved!');
+}
 function updateCard(k) {
   const p=st.price[k], pv=st.prev[k]; if (!p) return;
   const dir=getPriceDir(k), icon=ETF[k].icon, arrow=dir==='up'?'▲':dir==='down'?'▼':'';
@@ -2461,6 +2565,7 @@ function buildDataObj() {
       sord: document.getElementById('cp-sord').value
     },
     gsheet_url: st.gSheetUrl,
+    dhanClient: st.dhanClient, dhanToken: st.dhanToken,
     manual: { start: manualStart, snapshots: manualSnapshots, adjustments: manualAdjustments }
   };
 }
@@ -2492,6 +2597,8 @@ function loadSt() {
     }
     if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
     if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
+    if (data.dhanClient !== undefined) { st.dhanClient = data.dhanClient; document.getElementById('cp-dhan-client').value = st.dhanClient; }
+    if (data.dhanToken !== undefined) { st.dhanToken = data.dhanToken; document.getElementById('cp-dhan-token').value = st.dhanToken; }
     renderLog();
   } catch (e) { console.warn('load failed:', e); }
 }
