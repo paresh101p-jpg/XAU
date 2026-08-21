@@ -549,7 +549,7 @@ body {
 .tick-badge.flat { display: none; }
 .chg-pill {
   display: inline-flex; align-items: center; gap: 5px;
-  border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; margin-top: 8px;
+  border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; margin-top: 8px;
 }
 .chg-pill.up   { background: var(--green-dim); color: var(--green); }
 .chg-pill.down { background: var(--red-dim); color: var(--red); }
@@ -579,7 +579,7 @@ body {
 .signal-sell-active .btn-buy  { background: var(--yellow); color: #111; }
 @keyframes btnPulseG { to { box-shadow: 0 0 28px rgba(76,175,130,0.9); transform: translateY(-2px); } }
 @keyframes btnPulseR { to { box-shadow: 0 0 28px rgba(224,82,82,0.9);  transform: translateY(-2px); } }
-.btn-units-hint { font-size: 0.6rem; opacity: 0.75; }
+.btn-units-hint { font-size: 0.7rem; opacity: 0.75; }
 .sec-label { 
   font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; 
   margin-bottom: 6px;
@@ -640,7 +640,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .h-lot-lbl {
-  font-size: 0.8rem; color: #fff; font-weight: bold;
+  font-size: 0.95rem; color: #fff; font-weight: bold;
   display: flex; align-items: center; gap: 8px;
 }
 .h-pct {
@@ -829,8 +829,8 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   background: rgba(0,0,0,0.1);
 }
-.h-date-txt { font-size: 0.6rem; color: var(--muted); }
-.h-days-badge { font-size: 0.58rem; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--text); }
+.h-date-txt { font-size: 0.7rem; color: var(--muted); }
+.h-days-badge { font-size: 0.68rem; padding: 3px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--text); }
 
 .btn-h-edit, .btn-h-del {
   border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.62rem; cursor: pointer; transition: 0.15s;
@@ -1218,6 +1218,16 @@ body {
         <div class="tss-item">
           <span class="tss-lbl">% Net Return</span>
           <span class="tss-pct" id="tss-pct">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl" style="color:var(--muted);">🏦 Demat Total</span>
+          <span class="tss-val" id="tss-demat" style="font-size:0.88rem; font-weight:bold;">—</span>
+        </div>
+        <div class="tss-sep"></div>
+        <div class="tss-item">
+          <span class="tss-lbl" style="color:var(--green);">💵 Wallet Cash</span>
+          <span class="tss-val" id="tss-wallet" style="color:var(--green); font-size:0.88rem; font-weight:bold;">—</span>
         </div>
       </div>
     </div>
@@ -2245,6 +2255,19 @@ function updateTopSummary() {
   const pctEl = document.getElementById('tss-pct');
   pctEl.textContent = (netIsPos ? '+' : '') + netPct.toFixed(2) + '%';
   pctEl.className   = 'tss-pct ' + (netIsPos ? 'pos' : 'neg');
+
+  const latestSnap = manualSnapshots.length ? manualSnapshots[0] : null;
+  const liveAmount = latestSnap ? latestSnap.amount : 0;
+  
+  if (document.getElementById('tss-demat')) {
+    document.getElementById('tss-demat').textContent = liveAmount ? '₹' + liveAmount.toLocaleString('en-IN', {maximumFractionDigits:0}) : '—';
+    if (liveAmount) {
+      const freeCash = liveAmount - totalCurrVal;
+      document.getElementById('tss-wallet').textContent = '₹' + freeCash.toLocaleString('en-IN', {maximumFractionDigits:0});
+    } else {
+      document.getElementById('tss-wallet').textContent = '—';
+    }
+  }
 }
 
 function renderHold(k, p, buyTarget, overallAvg) {
