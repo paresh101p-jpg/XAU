@@ -1030,14 +1030,20 @@ body {
 @media(max-width:700px){
   .ps-stats-row { grid-template-columns: repeat(2,1fr); }
   .cap-start-fields { grid-template-columns: 1fr; }
-  .holdings-summary { grid-template-columns: 1fr; gap: 6px; }
-}
-@media(max-width:580px){
+  .holdings-summary { grid-template-columns: 1fr; gap: 8px; }
   .split { grid-template-columns: 1fr; }
-  .gold-col { border-right: none; border-bottom: 2px solid var(--border); }
-  .price-big { font-size: 1.6rem; }
+  .gold-col { border-right: none; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+  .mhist-summary-row { grid-template-columns: 1fr; gap: 10px; }
+  .mhist-row { font-size: 0.75rem; padding: 10px; }
   .cap-cards { grid-template-columns: 1fr; }
-  .mhist-summary-row { grid-template-columns: 1fr 1fr; }
+  .fetch-status-bar { padding: 10px 12px; gap: 10px; flex-direction: column; align-items: flex-start; }
+  .top-header { padding: 12px 12px; flex-direction: column; align-items: flex-start; }
+  .fsb-right { width: 100%; display: flex; flex-wrap: wrap; justify-content: flex-start; margin-left: 0; }
+  .btn-monthly-hist { flex: 1; min-width: 120px; text-align: center; }
+}
+@media(max-width:480px){
+  .price-big { font-size: 1.4rem; }
+  .ps-stats-row { grid-template-columns: 1fr; }
 }
   .popup-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.88);
@@ -1143,9 +1149,22 @@ body {
 .tax-note { font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.8; }
 .an-no-data { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.9rem; line-height: 2; }
 .an-no-data span { font-size: 2.5rem; display: block; margin-bottom: 12px; }
-@media(max-width:580px){
-  .an-trade-row { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .an-summary-grid { grid-template-columns: 1fr 1fr; }
+
+/* Mobile Analytics Specifics */
+@media(max-width:700px){
+  .an-trade-row { 
+    display: flex; flex-direction: column; align-items: flex-start; 
+    padding: 12px; gap: 8px; position: relative;
+  }
+  .an-trade-row.head { display: none; } /* Hide table headers on mobile */
+  .an-trade-row > span { display: flex; justify-content: space-between; width: 100%; text-align: right; }
+  .an-trade-row > span::before { content: attr(data-label); color: var(--muted); font-size: 0.65rem; text-transform: uppercase; float: left; text-align: left; }
+  
+  .an-summary-grid { grid-template-columns: 1fr; gap: 8px; }
+  .tax-card { padding: 12px; }
+  .tax-row { font-size: 0.8rem; }
+  
+  #analyticsBody { overflow-x: hidden; padding-bottom: 20px; }
 }
 </style>
 </head>
@@ -2805,13 +2824,13 @@ function renderRealizedTab() {
     const taxBadge = taxType === 'ltcg' ? '<span class="tax-badge ltcg">LTCG (365d+)</span>' : '<span class="tax-badge stcg">STCG</span>';
     const daysStr = holdDays !== null ? `${holdDays}d` : '—';
     return `<div class="an-trade-row ${isProfit?'profit':'loss'}">
-      <span style="line-height:1.4;">${etfName}<br>${taxBadge}</span>
-      <span>${l.units} Sh</span>
-      <span style="color:var(--muted)">₹${(l.buyPrice||0).toFixed(2)}</span>
-      <span>₹${l.price.toFixed(2)}</span>
-      <span class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'+':'-'}₹${Math.abs(l.pnl).toFixed(2)}</span>
-      <span class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'▲':'▼'}${l.pnl!==0&&l.buyPrice?Math.abs(((l.price-(l.buyPrice||l.price))/(l.buyPrice||l.price))*100).toFixed(2):'0.00'}%</span>
-      <span style="color:var(--muted);font-size:0.6rem;line-height:1.4;">Hold: ${daysStr}<br>${l.time||'—'}</span>
+      <span data-label="ETF" style="line-height:1.4;">${etfName}<br>${taxBadge}</span>
+      <span data-label="Units">${l.units} Sh</span>
+      <span data-label="Buy @" style="color:var(--muted)">₹${(l.buyPrice||0).toFixed(2)}</span>
+      <span data-label="Sell @">₹${l.price.toFixed(2)}</span>
+      <span data-label="P&L" class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'+':'-'}₹${Math.abs(l.pnl).toFixed(2)}</span>
+      <span data-label="Return" class="an-pnl ${isProfit?'pos':'neg'}">${isProfit?'▲':'▼'}${l.pnl!==0&&l.buyPrice?Math.abs(((l.price-(l.buyPrice||l.price))/(l.buyPrice||l.price))*100).toFixed(2):'0.00'}%</span>
+      <span data-label="Time" style="color:var(--muted);font-size:0.6rem;line-height:1.4;">Hold: ${daysStr}<br>${l.time||'—'}</span>
       <div style="display:flex; align-items:center; width:100%;"><div style="width:100%; height:8px; background:var(--bg2); border-radius:4px; overflow:hidden;"><div style="width:${(Math.abs(l.pnl)/maxAbsPnl)*100}%; height:100%; background:${isProfit?'var(--green)':'var(--red)'}; border-radius:4px; box-shadow: 0 0 8px ${isProfit?'var(--green)':'var(--red)'}; opacity:0.8;"></div></div></div>
     </div>`;
   }).join('');
