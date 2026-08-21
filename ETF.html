@@ -595,7 +595,7 @@ body {
 
 .holdings-summary {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -1287,6 +1287,7 @@ body {
       <div class="holdings-summary">
         <div class="holdings-stat"><div class="holdings-stat-label">Holdings</div><div class="holdings-stat-value gold" id="u-G">0 Share</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-G">—</div></div>
+        <div class="holdings-stat"><div class="holdings-stat-label">💸 Invested</div><div class="holdings-stat-value" id="inv-G">—</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Live P&L</div><div class="holdings-stat-value" id="pnl-G">—</div></div>
       </div>
       <div class="h-list-wrapper" id="hlw-G">
@@ -1314,6 +1315,7 @@ body {
       <div class="holdings-summary">
         <div class="holdings-stat"><div class="holdings-stat-label">Holdings</div><div class="holdings-stat-value silver" id="u-S">0 Share</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Avg Buy</div><div class="holdings-stat-value" id="avg-S">—</div></div>
+        <div class="holdings-stat"><div class="holdings-stat-label">💸 Invested</div><div class="holdings-stat-value" id="inv-S">—</div></div>
         <div class="holdings-stat"><div class="holdings-stat-label">Live P&L</div><div class="holdings-stat-value" id="pnl-S">—</div></div>
       </div>
       <div class="h-list-wrapper" id="hlw-S">
@@ -1850,6 +1852,8 @@ function updateCard(k) {
   const avg=tu>0?tc/tu:0, pnl=tu>0?(p-avg)*tu:0, pp=avg>0?(p-avg)/avg*100:0;
   document.getElementById('u-'+k).textContent=tu+' Share';
   document.getElementById('avg-'+k).textContent=avg>0?'₹ '+avg.toFixed(2):'—';
+  const iel=document.getElementById('inv-'+k);
+  if (tu>0) { iel.textContent='₹ '+tc.toLocaleString('en-IN',{maximumFractionDigits:0}); iel.className='holdings-stat-value'; } else { iel.textContent='—'; iel.className='holdings-stat-value'; }
   const pel=document.getElementById('pnl-'+k);
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='holdings-stat-value '+(pnl>=0?'profit':'loss'); } else { pel.textContent='—'; pel.className='holdings-stat-value'; }
   const lot1Price=getLot1Price(k), ref=lot1Price||p;
