@@ -1256,10 +1256,9 @@ body {
       <span class="fsb-ago" id="fsb-ago">—</span>
       <span class="fsb-status-txt" id="fetchStatusText">Connecting…</span>
       <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;"></div>
-      <button class="btn-monthly-hist" onclick="showMonthlyHistory()" style="padding:3px 10px;font-size:0.6rem;">📅 History</button>
       <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
       <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
-      <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:3px 10px;font-size:0.6rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics</button>
+      <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:3px 10px;font-size:0.6rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics & History</button>
     </div>
   </div>
 
@@ -1271,7 +1270,7 @@ body {
         <span class="ps-header-title">Portfolio Summary &nbsp;<span>₹</span></span>
       </div>
       <div class="ps-header-right" onclick="event.stopPropagation()">
-        <button class="btn-monthly-hist" onclick="showMonthlyHistory()">📅 Monthly History</button>
+        <button class="btn-monthly-hist" onclick="openAnalytics()">📈 Analytics</button>
         <button class="btn-monthly-hist" onclick="openPsPopup()" style="background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
         <button class="btn-monthly-hist" onclick="openCapPopup()" style="background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
       </div>
@@ -1323,12 +1322,13 @@ body {
     <div class="mhist-modal" style="max-width:1000px;border-color:rgba(139,175,196,0.45);">
       <div class="mhist-head">
         <div class="mhist-head-left">
-          <div class="mhist-title" style="color:var(--silver);">📈 Analytics</div>
-          <div class="mhist-sub">P&amp;L Chart · Realized Trades · Tax Calculator</div>
+          <div class="mhist-title" style="color:var(--silver);">📈 Analytics & History</div>
+          <div class="mhist-sub">P&amp;L Chart · Realized Trades · Tax Calculator · Monthly History</div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <div style="display:flex;gap:6px;">
             <button onclick="setAnalyticsTab('chart')" id="atab-chart" class="atab active">📈 Chart</button>
+            <button onclick="setAnalyticsTab('history')" id="atab-history" class="atab">📅 History</button>
             <button onclick="setAnalyticsTab('realized')" id="atab-realized" class="atab">💰 Realized P&amp;L</button>
             <button onclick="setAnalyticsTab('tax')" id="atab-tax" class="atab">🏷️ Tax</button>
           </div>
@@ -1336,15 +1336,6 @@ body {
         </div>
       </div>
       <div class="mhist-scroll" id="analyticsBody" style="padding:20px 24px;"></div>
-    </div>
-  </div>
-
-  <!-- Monthly History Modal -->
-  <div class="mhist-overlay" id="mhistOverlay">
-    <div class="mhist-modal">
-      <div class="mhist-head"><div class="mhist-head-left"><div class="mhist-title">📅 Monthly History</div><div class="mhist-sub" id="mhistSubtitle">Month-wise portfolio performance</div></div><button class="mhist-close" onclick="closeMonthlyHistory()">✕ Close</button></div>
-      <div class="mhist-summary-row" id="mhistSummaryRow"></div>
-      <div class="mhist-scroll" id="mhistScroll"><div class="mhist-no-data" id="mhistNoData"><span>📊</span>Abhi koi data nahi hai.<br>Pehle "Add Today's Value" se<br>kuch snapshots save karo.</div></div>
     </div>
   </div>
 
@@ -1706,10 +1697,8 @@ function formatInLakhCrore(amt) {
   if (amt >= 100000) return (amt / 100000).toFixed(2) + " Lakh";
   return "₹" + amt.toLocaleString('en-IN');
 }
-function showMonthlyHistory() {
+function renderHistoryTab() {
   const rows = buildMonthlyData();
-  const scroll = document.getElementById('mhistScroll');
-  if (!scroll) return;
   const latest = manualSnapshots.length ? manualSnapshots[0] : null;
   const startAmt = manualStart.amount;
   const totalPnlVal = (latest && startAmt) ? latest.amount - startAmt : null;
@@ -1717,21 +1706,22 @@ function showMonthlyHistory() {
   const roundedStart = startAmt ? formatInLakhCrore(startAmt) : "";
   const roundedLatest = latest ? formatInLakhCrore(latest.amount) : "";
   const roundedPnl = totalPnlVal !== null ? (totalPnlVal >=0 ? "+" : "-") + formatInLakhCrore(Math.abs(totalPnlVal)) : "";
-  const summaryRow = document.getElementById('mhistSummaryRow');
-  summaryRow.innerHTML = `
-    <div class="mhs-card"><div class="mhs-label">📌 Start Capital</div><div class="mhs-value gold">${startAmt ? '₹' + startAmt.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${manualStart.date ? fmtDateNice(manualStart.date) : '—'}</div>${roundedStart ? `<div class="mhs-rounded">${roundedStart}</div>` : ''}</div>
-    <div class="mhs-card"><div class="mhs-label">📈 Latest Value</div><div class="mhs-value">${latest ? '₹' + latest.amount.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${latest ? 'as on ' + fmtDateNice(latest.date) : '—'}</div>${roundedLatest ? `<div class="mhs-rounded">${roundedLatest}</div>` : ''}</div>
-    <div class="mhs-card"><div class="mhs-label">💰 Total P&amp;L</div><div class="mhs-value ${totalPnlVal !== null ? (totalPnlVal >=0 ? 'positive' : 'negative') : ''}">${totalPnlVal !== null ? (totalPnlVal >=0 ? '+' : '-') + '₹' + Math.abs(totalPnlVal).toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${totalPnlPct !== null ? (totalPnlPct >=0 ? '+' : '') + totalPnlPct.toFixed(2) + '% overall' : '—'}</div>${roundedPnl ? `<div class="mhs-rounded">${roundedPnl}</div>` : ''}</div>
+  
+  let out = `
+    <div class="mhist-summary-row" style="margin-bottom:20px;">
+      <div class="mhs-card"><div class="mhs-label">📌 Start Capital</div><div class="mhs-value gold">${startAmt ? '₹' + startAmt.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${manualStart.date ? fmtDateNice(manualStart.date) : '—'}</div>${roundedStart ? `<div class="mhs-rounded">${roundedStart}</div>` : ''}</div>
+      <div class="mhs-card"><div class="mhs-label">📈 Latest Value</div><div class="mhs-value">${latest ? '₹' + latest.amount.toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${latest ? 'as on ' + fmtDateNice(latest.date) : '—'}</div>${roundedLatest ? `<div class="mhs-rounded">${roundedLatest}</div>` : ''}</div>
+      <div class="mhs-card"><div class="mhs-label">💰 Total P&amp;L</div><div class="mhs-value ${totalPnlVal !== null ? (totalPnlVal >=0 ? 'positive' : 'negative') : ''}">${totalPnlVal !== null ? (totalPnlVal >=0 ? '+' : '-') + '₹' + Math.abs(totalPnlVal).toLocaleString('en-IN') : '—'}</div><div class="mhs-sub">${totalPnlPct !== null ? (totalPnlPct >=0 ? '+' : '') + totalPnlPct.toFixed(2) + '% overall' : '—'}</div>${roundedPnl ? `<div class="mhs-rounded">${roundedPnl}</div>` : ''}</div>
+    </div>
   `;
+
   if (!rows.length) { 
-    scroll.innerHTML = `<div class="mhist-no-data" id="mhistNoData"><span>📊</span>Abhi koi data nahi hai.<br>Pehle "Add Today's Value" se<br>kuch snapshots save karo.</div>`;
-    document.getElementById('mhistSubtitle').textContent = 'Koi data nahi'; 
-    document.getElementById('mhistOverlay').classList.add('show'); 
-    return; 
+    return out + `<div class="an-no-data"><span>📊</span>Abhi koi data nahi hai.<br>Pehle "Add Today's Value" se<br>kuch snapshots save karo.</div>`;
   }
+  
   const years = [...new Set(rows.map(r => r.monthKey.slice(0,4)))];
   const yearMap = {}; for (const r of rows) { const yr = r.monthKey.slice(0,4); if (!yearMap[yr]) yearMap[yr] = []; yearMap[yr].push(r); }
-  document.getElementById('mhistSubtitle').textContent = `${manualSnapshots.length} snapshot${manualSnapshots.length !== 1 ? 's' : ''} · ${years.length} year${years.length !== 1 ? 's' : ''}`;
+  
   let html = '';
   for (const yr of years) {
     const yrows = yearMap[yr];
@@ -1759,8 +1749,8 @@ function showMonthlyHistory() {
             pnlHtml = `<span class="mhist-entry-pnl ${diff >= 0 ? 'pos' : 'neg'}">${diff >= 0 ? '+' : ''}₹${Math.abs(diff).toLocaleString('en-IN')}</span>`;
           }
           const pnlPct = prevEntry ? ((e.amount - prevEntry.amount) / prevEntry.amount * 100).toFixed(2) : null;
-const pctHtml = pnlPct !== null ? `<span class="mhist-entry-pnl ${parseFloat(pnlPct)>=0?'pos':'neg'}">(${parseFloat(pnlPct)>=0?'+':''}${pnlPct}%)</span>` : '';
-return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>${pnlHtml}${pctHtml}<span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`;
+          const pctHtml = pnlPct !== null ? `<span class="mhist-entry-pnl ${parseFloat(pnlPct)>=0?'pos':'neg'}">(${parseFloat(pnlPct)>=0?'+':''}${pnlPct}%)</span>` : '';
+          return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDateNice(e.date)}</span>${pnlHtml}${pctHtml}<span class="mhist-entry-amount">₹ ${e.amount.toLocaleString('en-IN')}</span></div>`;
         }).join('');
         entriesHtml = `<div class="mhist-entries-panel" id="ep-${r.monthKey}">${entriesItems}</div>`;
       }
@@ -1769,12 +1759,9 @@ return `<div class="mhist-entry-row"><span class="mhist-entry-date">📅 ${fmtDa
     }).join('');
     html += `<div class="mhist-year-group"><div class="mhist-year-label">📅 ${yr} ${ybadge}</div>${rowsHtml}</div>`;
   }
-  scroll.innerHTML = html;
-  
-  document.getElementById('mhistOverlay').classList.add('show');
+  return out + html;
 }
 function toggleMonthEntries(monthKey) { const rowEl = document.getElementById('mr-' + monthKey); const panelEl = document.getElementById('ep-' + monthKey); if (!panelEl) return; const isOpen = panelEl.classList.contains('open'); panelEl.classList.toggle('open', !isOpen); rowEl.classList.toggle('expanded', !isOpen); }
-function closeMonthlyHistory() { document.getElementById('mhistOverlay').classList.remove('show'); }
 
 // ======================== MAIN APP CODE ========================
 let apiEnabled = true;
@@ -2517,8 +2504,6 @@ window.togglePsSection = togglePsSection;
 window.saveGSheetUrl = saveGSheetUrl;
 window.saveStartAmount = saveStartAmount;
 window.saveLiveAmount = saveLiveAmount;
-window.showMonthlyHistory = showMonthlyHistory;
-window.closeMonthlyHistory = closeMonthlyHistory;
 window.toggleMonthEntries = toggleMonthEntries;
 window.toggleCap = toggleCap;
 window.openModal = openModal;
@@ -2548,11 +2533,12 @@ function closeAnalytics() {
 }
 function setAnalyticsTab(tab) {
   currentAnalyticsTab = tab;
-  ['chart','realized','tax'].forEach(t => {
+  ['chart','history','realized','tax'].forEach(t => {
     document.getElementById('atab-' + t).classList.toggle('active', t === tab);
   });
   const body = document.getElementById('analyticsBody');
   if (tab === 'chart')    body.innerHTML = renderChartTab();
+  if (tab === 'history')  body.innerHTML = renderHistoryTab();
   if (tab === 'realized') body.innerHTML = renderRealizedTab();
   if (tab === 'tax')      body.innerHTML = renderTaxTab();
 }
