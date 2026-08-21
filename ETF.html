@@ -1689,8 +1689,19 @@ function saveAdjustment(type) {
   updateTopSummary();
   renderAdjustments();
   calcCapital();
-  updateAll();
+  if (typeof updateAll === 'function') updateAll();
   showToast(`✅ ${type.toUpperCase()} recorded & Value Updated to ₹${newAmount.toLocaleString('en-IN')}`);
+}
+
+function deleteAdjustment(idx) {
+  manualAdjustments.splice(idx, 1);
+  saveManualToLocal();
+  updateSummaryDisplay();
+  updateTopSummary();
+  renderAdjustments();
+  calcCapital();
+  if (typeof updateAll === 'function') updateAll();
+  showToast('✅ Adjustment deleted');
 }
 
 function renderAdjustments() {
@@ -1701,13 +1712,16 @@ function renderAdjustments() {
     return;
   }
   const rev = [...manualAdjustments].reverse();
-  el.innerHTML = rev.map(a => `
-    <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-      <span style="color:${a.type==='deposit'?'var(--green)':'var(--red)'};">${a.type==='deposit'?'⬇️ Deposit':'⬆️ Withdraw'}</span>
-      <span>₹${a.amount.toLocaleString('en-IN')}</span>
-      <span style="color:var(--muted);">${fmtDateNice(a.date)}</span>
+  el.innerHTML = rev.map((a, i) => {
+    const realIdx = manualAdjustments.length - 1 - i;
+    return `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+      <span style="color:${a.type==='deposit'?'var(--green)':'var(--red)'}; width:80px;">${a.type==='deposit'?'⬇️ Deposit':'⬆️ Withdraw'}</span>
+      <span style="flex:1; text-align:right; margin-right:10px;">₹${a.amount.toLocaleString('en-IN')}</span>
+      <span style="color:var(--muted); width:90px; text-align:right;">${fmtDateNice(a.date)}</span>
+      <button onclick="deleteAdjustment(${realIdx})" style="background:none; border:none; color:var(--red); font-size:1.1rem; cursor:pointer; margin-left:8px; padding:0 4px;" title="Delete this entry">×</button>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function getAmountOnDate(targetDate) {
