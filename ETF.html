@@ -119,46 +119,46 @@ body {
 
 .top-header {
   background: var(--bg2); border-bottom: 2px solid var(--border);
-  padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
 }
-.app-title { font-size: 1rem; letter-spacing: -0.3px; display: flex; align-items: center; gap: 6px; }
+.app-title { font-size: 1.25rem; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
 .app-title .g { color: var(--gold); }
 .app-title .s { color: var(--silver); }
-.right-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.right-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .market-status {
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 8px;
   background: var(--bg3); border: 2px solid var(--border);
-  border-radius: 20px; padding: 5px 13px; font-size: 0.68rem;
+  border-radius: 20px; padding: 7px 16px; font-size: 0.78rem;
 }
-.mkt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.mkt-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .mkt-dot.open   { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 1.4s infinite; }
 .mkt-dot.closed { background: var(--red); }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 .mkt-label.open  { color: var(--green); }
 .mkt-label.closed { color: var(--red); }
-.mkt-time { color: var(--muted); font-size: 0.62rem; }
-.last-upd { font-size: 0.62rem; color: var(--muted); }
+.mkt-time { color: var(--muted); font-size: 0.7rem; }
+.last-upd { font-size: 0.7rem; color: var(--muted); }
 
 .fetch-status-bar {
   background: var(--bg3); border-bottom: 2px solid var(--border);
-  padding: 7px 20px; display: flex; align-items: center; gap: 10px; min-height: 36px; flex-wrap: wrap;
+  padding: 10px 24px; display: flex; align-items: center; gap: 14px; min-height: 48px; flex-wrap: wrap;
 }
 .fetch-status-bar.fail    { background: rgba(224,82,82,0.05); border-color: rgba(224,82,82,0.35); }
 .fetch-status-bar.loading { background: rgba(232,164,64,0.04); }
-#fetchStatusDot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+#fetchStatusDot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
 .fetch-status-bar.fail    #fetchStatusDot { background: var(--red); }
 .fetch-status-bar.loading #fetchStatusDot { background: var(--amber); animation: blink 0.9s infinite; }
-.fsb-prices { display: flex; align-items: center; gap: 14px; flex: 1; }
-.fsb-etf { display: flex; align-items: center; gap: 6px; }
-.fsb-etf .fsb-lbl { font-size: 0.6rem; color: var(--muted); letter-spacing: 1.5px; }
-.fsb-etf .fsb-val { font-size: 0.85rem; transition: color 0.3s; }
+.fsb-prices { display: flex; align-items: center; gap: 16px; flex: 1; }
+.fsb-etf { display: flex; align-items: center; gap: 8px; }
+.fsb-etf .fsb-lbl { font-size: 0.68rem; color: var(--muted); letter-spacing: 1.5px; }
+.fsb-etf .fsb-val { font-size: 1.05rem; transition: color 0.3s; font-weight: bold; }
 .fsb-etf.gold   .fsb-val.price-up   { color: var(--green); }
 .fsb-etf.gold   .fsb-val.price-down { color: var(--red); }
 .fsb-etf.gold   .fsb-val.price-flat { color: var(--gold); }
 .fsb-etf.silver .fsb-val.price-up   { color: var(--green); }
 .fsb-etf.silver .fsb-val.price-down { color: var(--red); }
 .fsb-etf.silver .fsb-val.price-flat { color: var(--silver); }
-.fsb-etf .fsb-chg { font-size: 0.58rem; padding: 2px 6px; border-radius: 6px; }
+.fsb-etf .fsb-chg { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; }
 .fsb-etf .fsb-chg.up   { background: var(--green-dim); color: var(--green); }
 .fsb-etf .fsb-chg.down { background: var(--red-dim); color: var(--red); }
 .fsb-div { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; }
@@ -1010,9 +1010,9 @@ body {
 @keyframes savePop { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
 
 .sound-toggle {
-  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
   background: var(--bg3); border: 2px solid var(--border);
-  border-radius: 20px; padding: 4px 12px; font-size: 0.65rem; color: var(--muted); transition: 0.15s; user-select: none;
+  border-radius: 20px; padding: 6px 16px; font-size: 0.75rem; color: var(--muted); transition: 0.15s; user-select: none;
 }
 .sound-toggle:hover { border-color: var(--gold); color: var(--text); }
 .sound-toggle.on  { border-color: rgba(76,175,130,0.5); color: var(--green); }
@@ -1263,12 +1263,12 @@ body {
       <span class="api-source-badge" id="apiSourceBadge">connecting…</span>
     </div>
     <div class="fsb-right">
-      <span class="fsb-ago" id="fsb-ago">—</span>
-      <span class="fsb-status-txt" id="fetchStatusText">Connecting…</span>
-      <div style="width:1px;height:16px;background:var(--border);flex-shrink:0;"></div>
-      <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
-      <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:3px 10px;font-size:0.6rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
-      <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:3px 10px;font-size:0.6rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics & History</button>
+      <span class="fsb-ago" id="fsb-ago" style="font-size:0.68rem;">—</span>
+      <span class="fsb-status-txt" id="fetchStatusText" style="font-size:0.68rem;">Connecting…</span>
+      <div style="width:1px;height:20px;background:var(--border);flex-shrink:0;"></div>
+      <button class="btn-monthly-hist" onclick="openPsPopup()" style="padding:5px 14px;font-size:0.72rem;background:rgba(212,168,67,0.08);border-color:rgba(212,168,67,0.4);color:var(--gold);">📊 Portfolio</button>
+      <button class="btn-monthly-hist" onclick="openCapPopup()" style="padding:5px 14px;font-size:0.72rem;background:rgba(76,175,130,0.08);border-color:rgba(76,175,130,0.4);color:var(--green);">💰 Capital</button>
+      <button class="btn-monthly-hist" onclick="openAnalytics()" style="padding:5px 14px;font-size:0.72rem;background:rgba(139,175,196,0.08);border-color:rgba(139,175,196,0.4);color:var(--silver);">📈 Analytics & History</button>
     </div>
   </div>
 
