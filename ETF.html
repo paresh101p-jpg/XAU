@@ -2742,8 +2742,12 @@ function renderChartTab() {
     const y = padY + (1 - (s.amount - minA) / range) * (H - padY * 2);
     return { x, y, s };
   });
-  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  const fillD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
+  const pathD = pts.length > 0 ? `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}` + pts.slice(1).map((p, i) => {
+    const pPrev = pts[i];
+    const cpX = (pPrev.x + p.x) / 2;
+    return ` C${cpX.toFixed(1)},${pPrev.y.toFixed(1)} ${cpX.toFixed(1)},${p.y.toFixed(1)} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+  }).join('') : '';
+  const fillD = pts.length > 0 ? pathD + ` L${pts[pts.length-1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z` : '';
   const netInv = getNetInvested();
   const last = snaps[snaps.length-1].amount;
   const totalPnl = last - netInv, totalPct = netInv > 0 ? (totalPnl/netInv*100) : 0;
