@@ -1680,30 +1680,52 @@ function updateBtnHints(k) { const p = st.price[k]; const buyU = calcBuyUnits(k)
 function updateColSignal(k, signalType) { const tradeBtnsEl = document.getElementById('tradeBtns-' + k); tradeBtnsEl.classList.remove('signal-buy-active','signal-sell-active'); if (signalType === 'buy') tradeBtnsEl.classList.add('signal-buy-active'); if (signalType === 'sell') tradeBtnsEl.classList.add('signal-sell-active'); }
 
 // ======================== GOOGLE SHEET PRICE FETCH ========================
-async function tryFetch(k) {
+async function fetchBoth() {
   if (!st.gSheetUrl) {
     setFetchStatus('fail', '⚠️ Google Sheet URL set karein (Settings mein)');
     return null;
   }
-
   try {
-    const r = await fetch(st.gSheetUrl, { signal: AbortSignal.timeout(10000), cache: 'no-store' });
+    const r = await fetch(st.gSheetUrl, { signal: AbortSignal.timeout(12000), cache: 'no-store' });
     if (r.ok) {
       const j = await r.json();
-      const d = j[k]; // Format: {G: {price, prev}, S: {price, prev}}
-      if (d && d.price > 0) {
+      const g = j['G'], s = j['S'];
+      if (g && g.price > 0 && s && s.price > 0) {
         st.fetchFailCount = 0;
-        return { price: d.price, prev: d.prev || d.price, src: 'G-Sheet' };
+        return {
+          G: { price: g.price, prev: g.prev || g.price },
+          S: { price: s.price, prev: s.prev || s.price },
+          src: 'G-Sheet'
+        };
       }
+      // Partial: ek bhi mila toh use karo
+      if (g && g.price > 0) return { G: { price: g.price, prev: g.prev || g.price }, src: 'G-Sheet' };
+      if (s && s.price > 0) return { S: { price: s.price, prev: s.prev || s.price }, src: 'G-Sheet' };
     }
-  } catch (e) { 
-    console.warn('G-Sheet fetch fail:', e); 
+  } catch (e) {
+    console.warn('G-Sheet fetch fail:', e);
   }
-
   st.fetchFailCount = (st.fetchFailCount || 0) + 1;
   const delay = Math.min(60000, 5000 * Math.pow(2, Math.min(st.fetchFailCount - 1, 3)));
   setFetchStatus('fail', `❌ G-Sheet Fail · Check URL · ${Math.round(delay/1000)}s mein retry`);
   return null;
+}
+
+function applyPriceData(d) {
+  if (!d) return false;
+  let updated = false;
+  for (const k of ['G', 'S']) {
+    if (!d[k]) continue;
+    const old = st.price[k];
+    st.price[k] = d[k].price;
+    st.prev[k]  = d[k].prev;
+    showTick(k, old, d[k].price);
+    updatePriceColor(k);
+    updateCard(k);
+    alertCheck(k);
+    updated = true;
+  }
+  return updated;
 }
 
 function updateApiSourceBadge(src, proxyIdx) {}
@@ -1761,21 +1783,13 @@ function setFetchStatus(state, statusTxt) {
 }
 
 async function fetchOne(k) {
+  // Legacy wrapper - fetchAll use karo
   if (!apiEnabled) return;
-  const d = await tryFetch(k);
-  if (!d) {
-    st.fetchFailCount++;
-    return;
-  }
+  const d = await fetchBoth();
+  if (!d) { st.fetchFailCount++; return; }
   st.lastSrc = d.src;
   st.fetchFailCount = 0;
-  const old = st.price[k];
-  st.price[k] = d.price;
-  st.prev[k] = d.prev;
-  showTick(k, old, d.price);
-  updatePriceColor(k);
-  updateCard(k);
-  alertCheck(k);
+  applyPriceData(d);
   saveSt();
   const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('lastUpd').textContent = 'Updated ' + t;
@@ -1785,25 +1799,19 @@ async function fetchOne(k) {
 
 async function tickOne(k) {
   if (!apiEnabled) return;
-  const d = await tryFetch(k);
+  // tick bhi ek fetch mein dono update karo
+  const d = await fetchBoth();
   if (!d) {
     tickFailCount[k] = (tickFailCount[k] || 0) + 1;
-    if (tickFailCount[k] >= 3) {
-      console.warn(`${k} tick fails, forcing full fetch`);
-      fetchOne(k);
-      tickFailCount[k] = 0;
+    if (tickFailCount['G'] >= 3 || tickFailCount['S'] >= 3) {
+      fetchAll();
+      tickFailCount = { G: 0, S: 0 };
     }
     return;
   }
   st.lastSrc = d.src;
-  tickFailCount[k] = 0;
-  const old = st.price[k];
-  st.price[k] = d.price;
-  st.prev[k] = d.prev;
-  if (d.price !== old) showTick(k, old, d.price);
-  updatePriceColor(k);
-  updateCard(k);
-  alertCheck(k);
+  tickFailCount = { G: 0, S: 0 };
+  applyPriceData(d);
   saveSt();
   if (!lastFetchTs || Date.now() - lastFetchTs > 5000) {
     lastFetchTs = Date.now();
@@ -1818,8 +1826,26 @@ async function tickOne(k) {
 
 function showTick(k, oldP, newP) { if (!oldP||oldP===newP) return; const pb=document.getElementById('pb-'+k), badge=document.getElementById('tick-'+k); if (newP>oldP) { pb.classList.add('price-flash-up'); badge.className='tick-badge up'; badge.textContent='▲ LIVE'; } else { pb.classList.add('price-flash-down'); badge.className='tick-badge down'; badge.textContent='▼ LIVE'; } setTimeout(()=>{ pb.classList.remove('price-flash-up','price-flash-down'); },600); }
 function startLoop() { if (st.timer) clearInterval(st.timer); st.timer=setInterval(fetchAll,cfg.ref*1000); }
-function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); setTimeout(()=>tickOne('S'),7000); },15000); }
-async function fetchAll() { if (!apiEnabled) return; setFetchStatus('loading','Fetching live prices…'); await fetchOne('G'); await fetchOne('S'); }
+function startTickLoop() { if (st.tickTimer) clearInterval(st.tickTimer); st.tickTimer=setInterval(()=>{ if(!apiEnabled) return; tickOne('G'); },15000); }
+async function fetchAll() {
+  if (!apiEnabled) return;
+  setFetchStatus('loading', 'Fetching live prices…');
+  const d = await fetchBoth();
+  if (!d) return;
+  st.lastSrc = d.src;
+  st.fetchFailCount = 0;
+  const anyUpdated = applyPriceData(d);
+  if (anyUpdated) {
+    saveSt();
+    const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('lastUpd').textContent = 'Updated ' + t;
+    setFetchStatus('', '✓ Live · ' + t);
+    lastFetchTs = Date.now();
+    if (!agoTimer) agoTimer = setInterval(updateAgo, 1000);
+    updateAgo();
+    updateTabTitle();
+  }
+}
 
 window.onload = () => {
   try {
