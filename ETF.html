@@ -364,7 +364,7 @@ body {
 }
 .mhist-row:hover { border-color: rgba(245,200,66,0.5); background: var(--bg4); transform: translateX(4px); }
 .mhist-row.profit-row { border-color: rgba(76,175,130,0.4); border-left: 5px solid var(--green); }
-.mhist-row.loss-row   { border-color: rgba(224,82,82,0.35); border-left: 5px solid var(--red); }
+.mhist-row.loss   { border-color: rgba(224,82,82,0.35); border-left: 5px solid var(--red); }
 .mhist-row.expanded { border-radius: 20px 20px 0 0; border-bottom: none; }
 .mhist-month { font-size: 0.95rem; color: var(--text); display: flex; align-items: center; gap: 8px; font-weight: bold; }
 .mhist-expand-arrow { font-size: 0.7rem; color: var(--gold); transition: transform 0.25s; }
@@ -457,6 +457,7 @@ body {
 }
 .cap-start-display .csd-val { color: var(--gold); font-size: 0.82rem; }
 .cap-start-display .csd-date { color: var(--muted); }
+
 .cap-row1 {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
@@ -474,6 +475,18 @@ body {
 .cap-ig.sell-inp input:focus { border-color: var(--red); }
 .cap-ig.mult-inp input       { border-color: rgba(245,200,66,0.5); background: rgba(245,200,66,0.06); }
 .cap-ig.mult-inp input:focus { border-color: var(--yellow); }
+
+.cap-pct-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(0,0,0,0.2);
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.cap-pct-row .cap-ig { min-width: unset; }
+
 .cap-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .cap-card { border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 .cap-card.gc { background: var(--bg3); border: 3px solid rgba(212,168,67,0.78); }
@@ -1018,7 +1031,6 @@ body {
 .sound-toggle.on  { border-color: rgba(76,175,130,0.5); color: var(--green); }
 .sound-toggle.off { border-color: rgba(224,82,82,0.4); color: var(--red); }
 
-/* API Source Badge */
 .api-source-badge {
   display: none;
   font-size: 0.55rem; padding: 1px 7px; border-radius: 6px;
@@ -1045,7 +1057,7 @@ body {
   .price-big { font-size: 1.4rem; }
   .ps-stats-row { grid-template-columns: 1fr; }
 }
-  .popup-overlay {
+.popup-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.88);
   backdrop-filter: blur(10px); z-index: 180;
   display: none; align-items: flex-start; justify-content: center;
@@ -1071,7 +1083,6 @@ body {
 .popup-close:hover { border-color: var(--red); color: var(--red); }
 .popup-body { overflow-y: auto; max-height: 80vh; }
 
-/* ===== TOP SUMMARY STRIP ===== */
 .top-summary-strip {
   display: flex; align-items: center; gap: 6px;
   background: var(--bg3); border: 2px solid var(--border);
@@ -1090,7 +1101,6 @@ body {
 .tss-sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; margin: 0 4px; }
 @media(max-width:700px){ .top-summary-strip { display: none !important; } }
 
-/* ===== ANALYTICS ===== */
 .atab {
   background: var(--bg3); border: 2px solid var(--border);
   color: var(--muted); border-radius: 20px; padding: 5px 14px;
@@ -1150,20 +1160,17 @@ body {
 .an-no-data { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.9rem; line-height: 2; }
 .an-no-data span { font-size: 2.5rem; display: block; margin-bottom: 12px; }
 
-/* Mobile Analytics Specifics */
 @media(max-width:700px){
   .an-trade-row { 
     display: flex; flex-direction: column; align-items: flex-start; 
     padding: 12px; gap: 8px; position: relative;
   }
-  .an-trade-row.head { display: none; } /* Hide table headers on mobile */
+  .an-trade-row.head { display: none; }
   .an-trade-row > span { display: flex; justify-content: space-between; width: 100%; text-align: right; }
   .an-trade-row > span::before { content: attr(data-label); color: var(--muted); font-size: 0.65rem; text-transform: uppercase; float: left; text-align: left; }
-  
   .an-summary-grid { grid-template-columns: 1fr; gap: 8px; }
   .tax-card { padding: 12px; }
   .tax-row { font-size: 0.8rem; }
-  
   #analyticsBody { overflow-x: hidden; padding-bottom: 20px; }
 }
 </style>
@@ -1207,7 +1214,6 @@ body {
   <div class="top-header">
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;">
       <div class="app-title">⚜️ <span class="g">Gold</span> & <span class="s">Silver</span> BeES <span class="save-dot" id="saveDot"></span></div>
-      <!-- Combined Portfolio Summary Strip -->
       <div class="top-summary-strip" id="topSummaryStrip" style="display:none; flex:1; justify-content:space-evenly; padding: 8px 18px;">
         <div class="tss-item">
           <span class="tss-lbl" style="color:var(--muted);">🏦 Demat Total</span>
@@ -1396,18 +1402,19 @@ body {
       <div class="popup-body" id="psPopupBody"></div>
     </div>
   </div>
+  
   <!-- Capital Planner Popup -->
   <div class="popup-overlay" id="capPopupOverlay" onclick="if(event.target.id==='capPopupOverlay')closeCapPopup()">
     <div class="popup-inner-wrap" style="border-color:rgba(76,175,130,0.35);">
       <div class="popup-header" style="border-color:rgba(76,175,130,0.2);">
-        <div class="popup-title" style="color:var(--green);">💰 Capital Planner</div>
+        <div class="popup-title" style="color:var(--green);">💰 Capital Planner & Settings</div>
         <button class="popup-close" onclick="closeCapPopup()">✕ Close</button>
       </div>
       <div class="popup-body" id="capPopupBody"></div>
     </div>
   </div>
 
-  <!-- Capital Planner -->
+  <!-- Capital Planner Panel -->
   <button class="cap-toggle" id="capToggle" onclick="toggleCap()" style="display:none;">💰 Capital Planner &nbsp;<span class="cta">▼</span></button>
   <div class="cap-panel" id="capPanel" style="display:none;">
     <div class="cap-inner">
@@ -1419,27 +1426,56 @@ body {
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div class="cap-start-display" id="capStartDisplay"><span>Not set</span></div><button class="cap-start-save" onclick="saveStartAmount()">💾 Save Start Capital</button></div>
       </div>
+      
+      <!-- Common Global Settings (Split & Multiplier) -->
       <div class="cap-row1">
         <div class="cap-ig"><label>ETF Split (Parts)</label><input type="number" id="cp-parts" value="2" min="1" max="10" oninput="calcCapital()"></div>
-        <div class="cap-ig buy-inp"><label>Buy %</label><input type="number" id="c-buy" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
-        <div class="cap-ig sell-inp"><label>Sell %</label><input type="number" id="c-sell" value="3" min="0.5" max="20" step="0.5" oninput="applySettings()"></div>
         <div class="cap-ig mult-inp"><label>DCA Mult ×</label><input type="number" id="c-mult" value="1.25" min="1.0" max="3.0" step="0.05" oninput="applySettings()"></div>
       </div>
+
+      <!-- Individual ETF Cards with Independent Buy % and Sell % -->
       <div class="cap-cards">
+        <!-- GOLD SETTINGS -->
         <div class="cap-card gc">
-          <div class="cap-ctitle">Gold</div>
+          <div class="cap-ctitle">🥇 Gold (GOLDBEES)</div>
+          
+          <div class="cap-pct-row">
+            <div class="cap-ig buy-inp">
+              <label style="color:var(--gold);">Buy %</label>
+              <input type="number" id="c-buy-g" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()">
+            </div>
+            <div class="cap-ig sell-inp">
+              <label style="color:var(--gold);">Sell %</label>
+              <input type="number" id="c-sell-g" value="3" min="0.5" max="20" step="0.5" oninput="applySettings()">
+            </div>
+          </div>
+
           <div class="cap-allot"><span class="al">ALLOCATED</span><span class="av" id="cp-gallot">₹ —</span></div>
           <div class="cap-dca"><label>DCA Orders</label><input type="number" id="cp-gord" value="20" min="1" max="500" oninput="calcCapital()"></div>
           <div class="cap-res" id="cp-gres"><div class="cap-rr"><span class="ck">Per Order</span><span class="cv">—</span></div><div class="cap-rr"><span class="ck">Share/Order</span><span class="cv hi">—</span></div><div class="cap-rr"><span class="ck">₹ Used</span><span class="cv gr">—</span></div><div class="cap-rr"><span class="ck">Leftover</span><span class="cv dm">—</span></div></div>
         </div>
+
+        <!-- SILVER SETTINGS -->
         <div class="cap-card sc">
-          <div class="cap-ctitle">Silver</div>
+          <div class="cap-ctitle">🥈 Silver (SILVERBEES)</div>
+          
+          <div class="cap-pct-row">
+            <div class="cap-ig buy-inp">
+              <label style="color:var(--silver);">Buy %</label>
+              <input type="number" id="c-buy-s" value="2" min="0.5" max="20" step="0.5" oninput="applySettings()">
+            </div>
+            <div class="cap-ig sell-inp">
+              <label style="color:var(--silver);">Sell %</label>
+              <input type="number" id="c-sell-s" value="3" min="0.5" max="20" step="0.5" oninput="applySettings()">
+            </div>
+          </div>
+
           <div class="cap-allot"><span class="al">ALLOCATED</span><span class="av" id="cp-sallot">₹ —</span></div>
           <div class="cap-dca"><label>DCA Orders</label><input type="number" id="cp-sord" value="20" min="1" max="500" oninput="calcCapital()"></div>
           <div class="cap-res" id="cp-sres"><div class="cap-rr"><span class="ck">Per Order</span><span class="cv">—</span></div><div class="cap-rr"><span class="ck">Share/Order</span><span class="cv hi">—</span></div><div class="cap-rr"><span class="ck">₹ Used</span><span class="cv gr">—</span></div><div class="cap-rr"><span class="ck">Leftover</span><span class="cv dm">—</span></div></div>
         </div>
       </div>
-      <div class="cap-note">📌 Total capital = Latest Portfolio Value (from today's snapshot).<br>Share = floor(Per Order ÷ Live Price) · Updates automatically.</div>
+      <div class="cap-note">📌 Gold aur Silver dono ke Buy % aur Sell % ab puri tarah alag-alag set kiye ja sakte hain!<br>Total capital = Latest Portfolio Value · Share count updates automatically.</div>
     </div>
   </div>
 
@@ -1583,7 +1619,6 @@ function saveGSheetUrl() {
 }
 
 function loadManualData() {
-  // 1. Try to load from the main LS_KEY first (most recent)
   try {
     const mainRaw = localStorage.getItem(LS_KEY);
     if (mainRaw) {
@@ -1597,7 +1632,6 @@ function loadManualData() {
     }
   } catch(e) {}
 
-  // 2. If still empty, try the old dedicated key
   if (manualSnapshots.length === 0) {
     try {
       const oldRaw = localStorage.getItem('manual_portfolio_v1');
@@ -1613,7 +1647,6 @@ function loadManualData() {
 
   manualSnapshots.sort((a,b) => new Date(b.date) - new Date(a.date));
   
-  // Load GSheet URL
   const gsUrl = localStorage.getItem('gsheet_url') || '';
   st.gSheetUrl = gsUrl;
   if (document.getElementById('gsheet-url-input')) {
@@ -1693,10 +1726,8 @@ function saveAdjustment(type) {
   if (!date) date = new Date().toISOString().slice(0,10);
   
   manualAdjustments.push({ type, amount, date });
-  // sort adjustments
   manualAdjustments.sort((a,b) => new Date(a.date) - new Date(b.date));
   
-  // Auto-adjust latest portfolio value
   const latestSnap = manualSnapshots.length ? manualSnapshots[0] : null;
   let newAmount = 0;
   if (latestSnap) {
@@ -1998,7 +2029,14 @@ function playTone(ctx, freq, startDelay, dur, wave, vol) { const osc = ctx.creat
 function toggleSound() { soundEnabled = !soundEnabled; const btn = document.getElementById('soundToggle'), icon = document.getElementById('soundIcon'), txt = document.getElementById('soundTxt'); if (soundEnabled) { btn.className='sound-toggle on'; icon.textContent='🔔'; txt.textContent='Sound ON'; playBeep('buy'); } else { btn.className='sound-toggle off'; icon.textContent='🔕'; txt.textContent='Sound OFF'; } showToast(soundEnabled ? '🔔 Sound notifications ON' : '🔕 Sound notifications OFF'); }
 const ETF = { G:{sym:'GOLDBEES.NS', nseSym:'GOLDBEES', name:'Gold BeES', icon:'🥇', mc:'gm', cls:'gd'}, S:{sym:'SILVERBEES.NS', nseSym:'SILVERBEES', name:'Silver BeES', icon:'🥈', mc:'sm', cls:'sv'} };
 const LS_KEY = 'etf_bees_v2';
-let cfg = { buy: 2, sell: 3, ref: 300 };
+
+// Independent configurations for Gold and Silver
+let cfg = { 
+  G: { buy: 2, sell: 3 },
+  S: { buy: 2, sell: 3 },
+  ref: 300 
+};
+
 let st = { price:{G:null,S:null}, prev:{G:null,S:null}, hold:{G:[],S:[]}, log:[], real:0, pend:null, timer:null, tickTimer:null, alertPend:null, alerted:{G:{buy:false,sell:false},S:{buy:false,sell:false}}, workingProxy:null, workingApi:null, fetchFailCount:0, gSheetUrl: localStorage.getItem('gsheet_url') || '', lastSrc: '' };
 let editState = { k: null, idx: null };
 
@@ -2045,7 +2083,6 @@ async function fetchBoth() {
           src: 'G-Sheet'
         };
       }
-      // Partial: ek bhi mila toh use karo
       if (g && g.price > 0) return { G: { price: g.price, prev: g.prev || g.price }, src: 'G-Sheet' };
       if (s && s.price > 0) return { S: { price: s.price, prev: s.prev || s.price }, src: 'G-Sheet' };
     }
@@ -2075,12 +2112,27 @@ function applyPriceData(d) {
   return updated;
 }
 
-function updateApiSourceBadge(src, proxyIdx) {}
-// ======================== END FETCH ========================
-
 function getPriceDir(k) { const cur=st.price[k],pv=st.prev[k]; if (!cur||!pv) return 'flat'; const chg=cur-pv; if(chg>0.001) return 'up'; if(chg<-0.001) return 'down'; return 'flat'; }
 function updatePriceColor(k) { const dir=getPriceDir(k); document.getElementById('pr-'+k).className = 'price-big price-'+dir; document.getElementById('pb-'+k).className = 'price-block price-'+dir; const sbEl = document.getElementById(k==='G'?'fsb-gPrice':'fsb-sPrice'); if (sbEl) sbEl.className = 'fsb-val price-'+dir; }
-function updateTabTitle() { let bestSignal=null, bestDist=Infinity; for (const k of ['G','S']) { const p=st.price[k]; if (!p) continue; const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100); const tu=st.hold[k].reduce((s,h)=>s+h.units,0); const buyDist=((p-bt)/p*100), sellDist=tu>0?((sv-p)/p*100):Infinity; if (buyDist<=0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; } if (sellDist<=0&&tu>0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`; return; } if (buyDist<bestDist) { bestDist=buyDist; bestSignal={k,type:'BUY',dist:buyDist.toFixed(2)}; } if (tu>0&&sellDist<bestDist) { bestDist=sellDist; bestSignal={k,type:'SELL',dist:sellDist.toFixed(2)}; } } if (bestSignal) { const name=bestSignal.k==='G'?'GOLD':'SILVER', dir=bestSignal.type==='BUY'?'↓':'↑'; document.title=`${ETF[bestSignal.k].icon} ${name} ${bestSignal.type} ${dir}${bestSignal.dist}% · BeES`; } else document.title='⚜️ Gold & Silver BeES'; }
+function updateTabTitle() { 
+  let bestSignal=null, bestDist=Infinity; 
+  for (const k of ['G','S']) { 
+    const p=st.price[k]; if (!p) continue; 
+    const kBuy = cfg[k]?.buy || 2;
+    const kSell = cfg[k]?.sell || 3;
+    const ref=getLot1Price(k)||p, bt=ref*(1-kBuy/100), sv=ref*(1+kSell/100); 
+    const tu=st.hold[k].reduce((s,h)=>s+h.units,0); 
+    const buyDist=((p-bt)/p*100), sellDist=tu>0?((sv-p)/p*100):Infinity; 
+    if (buyDist<=0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} BUY NOW! 🎯`; return; } 
+    if (sellDist<=0&&tu>0) { document.title=`${ETF[k].icon} ${k==='G'?'GOLD':'SILVER'} SELL NOW! 💰`; return; } 
+    if (buyDist<bestDist) { bestDist=buyDist; bestSignal={k,type:'BUY',dist:buyDist.toFixed(2)}; } 
+    if (tu>0&&sellDist<bestDist) { bestDist=sellDist; bestSignal={k,type:'SELL',dist:sellDist.toFixed(2)}; } 
+  } 
+  if (bestSignal) { 
+    const name=bestSignal.k==='G'?'GOLD':'SILVER', dir=bestSignal.type==='BUY'?'↓':'↑'; 
+    document.title=`${ETF[bestSignal.k].icon} ${name} ${bestSignal.type} ${dir}${bestSignal.dist}% · BeES`; 
+  } else document.title='⚜️ Gold & Silver BeES'; 
+}
 
 let lastFetchTs=null, agoTimer=null;
 let lastTickTs = null;
@@ -2130,7 +2182,6 @@ function setFetchStatus(state, statusTxt) {
 }
 
 async function fetchOne(k) {
-  // Legacy wrapper - fetchAll use karo
   if (!apiEnabled) return;
   const d = await fetchBoth();
   if (!d) { st.fetchFailCount++; return; }
@@ -2146,7 +2197,6 @@ async function fetchOne(k) {
 
 async function tickOne(k) {
   if (!apiEnabled) return;
-  // tick bhi ek fetch mein dono update karo
   const d = await fetchBoth();
   if (!d) {
     tickFailCount[k] = (tickFailCount[k] || 0) + 1;
@@ -2209,7 +2259,19 @@ window.onload = () => {
 };
 function startApp() { if (!apiEnabled) { setFetchStatus('fail', '⏸ API OFF — Enable karo prices ke liye'); return; } setFetchStatus('loading','Connecting to price feed…'); fetchAll(); startLoop(); startTickLoop(); if (Notification&&Notification.permission==='default') setTimeout(()=>Notification.requestPermission(),2000); }
 function mktCheck() { const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})), d=ist.getDay(), mins=ist.getHours()*60+ist.getMinutes(); const isOpen=d>=1&&d<=5&&mins>=555&&mins<=930; document.getElementById('mktDot').className='mkt-dot '+(isOpen?'open':'closed'); document.getElementById('mktLabel').className='mkt-label '+(isOpen?'open':'closed'); document.getElementById('mktLabel').textContent=isOpen?'Market OPEN':'Market CLOSED'; document.getElementById('mktTime').textContent=ist.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' IST'; }
-function applySettings() { cfg.buy = parseFloat(document.getElementById('c-buy').value) || 2; cfg.sell = parseFloat(document.getElementById('c-sell').value) || 3; cfg.ref = 300; st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; saveSt(); updateAll(); updateTabTitle(); }
+
+function applySettings() { 
+  cfg.G.buy = parseFloat(document.getElementById('c-buy-g')?.value) || 2; 
+  cfg.G.sell = parseFloat(document.getElementById('c-sell-g')?.value) || 3; 
+  cfg.S.buy = parseFloat(document.getElementById('c-buy-s')?.value) || 2; 
+  cfg.S.sell = parseFloat(document.getElementById('c-sell-s')?.value) || 3; 
+  cfg.ref = 300; 
+  st.alerted = {G:{buy:false,sell:false},S:{buy:false,sell:false}}; 
+  saveSt(); 
+  updateAll(); 
+  updateTabTitle(); 
+}
+
 function updateCard(k) {
   const p=st.price[k], pv=st.prev[k]; if (!p) return;
   const dir=getPriceDir(k), icon=ETF[k].icon, arrow=dir==='up'?'▲':dir==='down'?'▼':'';
@@ -2231,7 +2293,10 @@ function updateCard(k) {
   if (cel) { if (tu>0) { cel.textContent='₹ '+(p*tu).toLocaleString('en-IN',{maximumFractionDigits:0}); cel.className='holdings-stat-value'; } else { cel.textContent='—'; cel.className='holdings-stat-value'; } }
   const pel=document.getElementById('pnl-'+k);
   if (tu>0) { pel.textContent=(pnl>=0?'+':'')+' ₹'+Math.abs(pnl).toFixed(2)+'  ('+(pp>=0?'+':'')+pp.toFixed(2)+'%)'; pel.className='holdings-stat-value '+(pnl>=0?'profit':'loss'); } else { pel.textContent='—'; pel.className='holdings-stat-value'; }
-  const ref=getLot1Price(k)||p, bt=ref*(1-cfg.buy/100), sv=ref*(1+cfg.sell/100);
+  
+  const kBuy = cfg[k]?.buy || 2;
+  const kSell = cfg[k]?.sell || 3;
+  const ref=getLot1Price(k)||p, bt=ref*(1-kBuy/100), sv=ref*(1+kSell/100);
   const buyU=calcBuyUnits(k), sellU=getLot1Units(k);
   let signalType = null;
   if (p<=bt) { signalType = 'buy'; } else if (p>=sv&&tu>0) { signalType = 'sell'; } else { signalType = null; }
@@ -2246,7 +2311,6 @@ function updateTopSummary() {
   const strip = document.getElementById('topSummaryStrip');
   if (!strip) return;
   let totalInvested = 0, totalCurrVal = 0, hasAny = false;
-  // Charge accumulators
   let totalBuyCharges = 0, totalSellCharges = 0;
 
   for (const k of ['G', 'S']) {
@@ -2260,25 +2324,15 @@ function updateTopSummary() {
       totalCurrVal  += sellAmt;
       hasAny = true;
 
-      // ── BUY CHARGES (already paid) ──
-      // Stamp Duty: 0.015% on buy
       const stamp     = buyAmt * 0.00015;
-      // NSE Exchange charge: 0.00297% on buy turnover
       const nse_buy   = buyAmt * 0.0000297;
-      // SEBI: 0.0001% on buy
       const sebi_buy  = buyAmt * 0.000001;
-      // GST 18% on (NSE + SEBI) — not on stamp/STT
       const gst_buy   = (nse_buy + sebi_buy) * 0.18;
       totalBuyCharges += stamp + nse_buy + sebi_buy + gst_buy;
 
-      // ── SELL CHARGES (estimated at current price) ──
-      // STT: 0.1% on sell turnover
       const stt       = sellAmt * 0.001;
-      // NSE Exchange: 0.00297% on sell turnover
       const nse_sell  = sellAmt * 0.0000297;
-      // SEBI: 0.0001% on sell
       const sebi_sell = sellAmt * 0.000001;
-      // GST 18% on (NSE + SEBI)
       const gst_sell  = (nse_sell + sebi_sell) * 0.18;
       totalSellCharges += stt + nse_sell + sebi_sell + gst_sell;
     }
@@ -2338,6 +2392,9 @@ function renderHold(k, p, buyTarget, overallAvg) {
   const hasMore = lotCount > 1;
 
   const cardHtmls = [];
+  const kBuy = cfg[k]?.buy || 2;
+  const kSell = cfg[k]?.sell || 3;
+
   for (let i = 0; i < sorted.length; i++) {
     if (!showAll && i >= 1) break;
     const h = sorted[i];
@@ -2356,11 +2413,9 @@ function renderHold(k, p, buyTarget, overallAvg) {
     let badgeHtml = '';
     if (isLot1) badgeHtml = (p && buyTarget && p <= buyTarget) ? `<span class="lifo-badge buy-now">🟢 BUY NOW</span>` : ``;
     const origIdx = st.hold[k].findIndex(oh => (oh.buyPrice || oh.price) === bp && oh.time === h.time && oh.units === h.units);
-    const buyTargetLot = bp * (1 - cfg.buy / 100);
-    const sellTargetLot = bp * (1 + cfg.sell / 100);
+    const buyTargetLot = bp * (1 - kBuy / 100);
+    const sellTargetLot = bp * (1 + kSell / 100);
     
-    // Strict "Hit!" logic for UI: only show if price is VERY close to target
-    const tolerance = bp * 0.0015; // 0.15% tolerance
     const buyHit = p !== null && p <= buyTargetLot;
     const sellHit = p !== null && p >= sellTargetLot;
 
@@ -2458,11 +2513,14 @@ function closeEditModal() { document.getElementById('editOverlay').classList.rem
 function saveEditHolding() { const { k, idx } = editState; if (k === null || idx === null) return; const newPrice = parseFloat(document.getElementById('editPrice').value); const newUnits = parseInt(document.getElementById('editUnits').value); let newDate = document.getElementById('editDate').value.trim(); let newTime = document.getElementById('editTime').value.trim(); if (!newPrice || newPrice <= 0 || !newUnits || newUnits < 1) { showToast('⚠️ Valid price aur units daalo'); return; } if (!newDate) newDate = todayDateStr(); if (!newTime) newTime = currentTimeStr(); st.hold[k][idx].buyPrice = newPrice; st.hold[k][idx].price = newPrice; st.hold[k][idx].units = newUnits; st.hold[k][idx].date = newDate; st.hold[k][idx].time = newTime; closeEditModal(); saveSt(); updateCard(k); showToast('✅ Holding updated!'); }
 function deleteHolding(k, idx) { const h = st.hold[k][idx]; if (!h) return; if (!confirm(`Lot delete karna chahte ho? Qty: ${h.units} Share @ ₹${(h.buyPrice || h.price).toFixed(2)}`)) return; st.hold[k].splice(idx, 1); saveSt(); updateCard(k); showToast('🗑 Holding deleted'); }
 function updateAll() { ['G', 'S'].forEach(k => updateCard(k)); }
+
 function alertCheck(k) {
   const p = st.price[k]; if (!p) return;
+  const kBuy = cfg[k]?.buy || 2;
+  const kSell = cfg[k]?.sell || 3;
   const ref = getLot1Price(k) || p;
-  const bt = ref * (1 - cfg.buy / 100);
-  const sv = ref * (1 + cfg.sell / 100);
+  const bt = ref * (1 - kBuy / 100);
+  const sv = ref * (1 + kSell / 100);
   const tu = st.hold[k].reduce((s, h) => s + h.units, 0);
 
   const isBuyHit = p <= bt;
@@ -2484,24 +2542,158 @@ function alertCheck(k) {
     if (st.alerted[k].buy || st.alerted[k].sell) {
       st.alerted[k].buy = false;
       st.alerted[k].sell = false;
-      dismissAlert(); // Hide popup
+      dismissAlert();
       saveSt();
     }
   }
 }
-function showAlertPopup(k, type, bt, sv, tu) { const isBuy = type === 'buy'; const p = st.price[k]; const avg = tu > 0 ? st.hold[k].reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0) / tu : 0; const lot1P = getLot1Price(k); const buyU = calcBuyUnits(k); const sellU = getLot1Units(k); const nextLot = getSortedHoldings(k).length + 1; const amt = isBuy ? (buyU * p).toFixed(2) : null; const profit = !isBuy && avg > 0 ? ((sv - avg) * tu).toFixed(2) : null; if (Notification && Notification.permission === 'granted') { const title = `${ETF[k].icon} ${ETF[k].name} — ${isBuy ? 'BUY' : 'SELL'} Signal!`; const body = isBuy ? `Lot ${nextLot} · Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${buyU} Share · ₹${Number(amt).toLocaleString('en-IN')}` : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · Lot 1 · ${sellU} Share · Profit: +₹${profit}`; new Notification(title, { body }); } st.alertPend = { k, type }; const box = document.getElementById('alertBox'); box.className = 'alert-box ' + (isBuy ? 'ab' : 'as'); document.getElementById('apIcon').textContent = ETF[k].icon; document.getElementById('apType').textContent = isBuy ? '🟢 BUY SIGNAL' : '🔴 SELL SIGNAL'; document.getElementById('apTitle').textContent = isBuy ? 'Buy Target Hit! 🎯' : 'Sell Target Hit! 💰'; let rows = `<div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div><div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div><div class="alert-row"><span class="ark">${isBuy ? 'Buy' : 'Sell'} Target</span><span class="arv">₹ ${isBuy ? bt.toFixed(2) : sv.toFixed(2)}</span></div>`; if (lot1P) rows += `<div class="alert-row"><span class="ark">Lot 1 Ref Price</span><span class="arv">₹ ${lot1P.toFixed(2)}</span></div>`; if (isBuy) rows += `<div class="alert-row"><span class="ark">New Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`; rows += `<div class="alert-divider"></div><div class="alert-row"><span class="ark">Share to ${isBuy ? 'Buy' : 'Sell'}</span><span class="arv big">${isBuy ? buyU : sellU} Share</span></div>`; if (isBuy) rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`; else { if (avg > 0) rows += `<div class="alert-row"><span class="ark">Overall Avg Buy</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`; if (profit) rows += `<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`; } document.getElementById('alertRows').innerHTML = rows; document.getElementById('alertTradeBtn').textContent = isBuy ? '🛒 BUY Now' : '💰 SELL Now'; document.getElementById('alertOverlay').classList.add('show'); }
+function showAlertPopup(k, type, bt, sv, tu) { 
+  const isBuy = type === 'buy'; 
+  const p = st.price[k]; 
+  const avg = tu > 0 ? st.hold[k].reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0) / tu : 0; 
+  const lot1P = getLot1Price(k); 
+  const buyU = calcBuyUnits(k); 
+  const sellU = getLot1Units(k); 
+  const nextLot = getSortedHoldings(k).length + 1; 
+  const amt = isBuy ? (buyU * p).toFixed(2) : null; 
+  const profit = !isBuy && avg > 0 ? ((sv - avg) * tu).toFixed(2) : null; 
+  if (Notification && Notification.permission === 'granted') { 
+    const title = `${ETF[k].icon} ${ETF[k].name} — ${isBuy ? 'BUY' : 'SELL'} Signal!`; 
+    const body = isBuy ? `Lot ${nextLot} · Price ₹${p.toFixed(2)} ≤ Buy Target ₹${bt.toFixed(2)} · ${buyU} Share · ₹${Number(amt).toLocaleString('en-IN')}` : `Price ₹${p.toFixed(2)} ≥ Sell Target ₹${sv.toFixed(2)} · Lot 1 · ${sellU} Share · Profit: +₹${profit}`; 
+    new Notification(title, { body }); 
+  } 
+  st.alertPend = { k, type }; 
+  const box = document.getElementById('alertBox'); 
+  box.className = 'alert-box ' + (isBuy ? 'ab' : 'as'); 
+  document.getElementById('apIcon').textContent = ETF[k].icon; 
+  document.getElementById('apType').textContent = isBuy ? '🟢 BUY SIGNAL' : '🔴 SELL SIGNAL'; 
+  document.getElementById('apTitle').textContent = isBuy ? 'Buy Target Hit! 🎯' : 'Sell Target Hit! 💰'; 
+  let rows = `<div class="alert-row"><span class="ark">ETF</span><span class="arv ${ETF[k].cls}">${ETF[k].name}</span></div><div class="alert-row"><span class="ark">Live Price</span><span class="arv big">₹ ${p.toFixed(2)}</span></div><div class="alert-row"><span class="ark">${isBuy ? 'Buy' : 'Sell'} Target</span><span class="arv">₹ ${isBuy ? bt.toFixed(2) : sv.toFixed(2)}</span></div>`; 
+  if (lot1P) rows += `<div class="alert-row"><span class="ark">Lot 1 Ref Price</span><span class="arv">₹ ${lot1P.toFixed(2)}</span></div>`; 
+  if (isBuy) rows += `<div class="alert-row"><span class="ark">New Lot Number</span><span class="arv profit">Lot ${nextLot}</span></div>`; 
+  rows += `<div class="alert-divider"></div><div class="alert-row"><span class="ark">Share to ${isBuy ? 'Buy' : 'Sell'}</span><span class="arv big">${isBuy ? buyU : sellU} Share</span></div>`; 
+  if (isBuy) rows += `<div class="alert-row"><span class="ark">Amount Needed</span><span class="arv profit">₹ ${Number(amt).toLocaleString('en-IN')}</span></div>`; 
+  else { 
+    if (avg > 0) rows += `<div class="alert-row"><span class="ark">Overall Avg Buy</span><span class="arv">₹ ${avg.toFixed(2)}</span></div>`; 
+    if (profit) rows += `<div class="alert-row"><span class="ark">Est. Profit</span><span class="arv profit">+ ₹ ${Number(profit).toLocaleString('en-IN')}</span></div>`; 
+  } 
+  document.getElementById('alertRows').innerHTML = rows; 
+  document.getElementById('alertTradeBtn').textContent = isBuy ? '🛒 BUY Now' : '💰 SELL Now'; 
+  document.getElementById('alertOverlay').classList.add('show'); 
+}
 function alertDoTrade() { const { k, type } = st.alertPend; dismissAlert(); openModal(k, type, true); }
 function dismissAlert() { document.getElementById('alertOverlay').classList.remove('show'); st.alertPend = null; }
-function openModal(k, type, auto = false) { const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; } const ref = getLot1Price(k) || p; const bt = ref * (1 - cfg.buy / 100); const sv = ref * (1 + cfg.sell / 100); const hs = st.hold[k]; const tu = hs.reduce((s, h) => s + h.units, 0); const tc = hs.reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0); const avg = tu > 0 ? tc / tu : 0; const isBuy = type === 'buy'; const buyU = calcBuyUnits(k); const sellU = getLot1Units(k); const un = isBuy ? buyU : sellU; const nextLot = getSortedHoldings(k).length + 1; const tgt = isBuy ? bt : sv; const est = (p * un).toFixed(2); st.pend = { k, type }; document.getElementById('mBox').className = 'modal ' + ETF[k].mc; document.getElementById('mIco').textContent = ETF[k].icon; document.getElementById('mTit').textContent = isBuy ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL — Lot 1'; document.getElementById('mTit').className = isBuy ? 'bh' : 'sh'; document.getElementById('mSub').textContent = auto ? ETF[k].name + ' — Grid signal!' : ETF[k].name + ' — Manual trade'; const mUnitsInput = document.getElementById('mUnits'); const mUnitsLabel = document.getElementById('mUnitsLabel'); mUnitsInput.value = un; if (isBuy) { mUnitsInput.removeAttribute('readonly'); mUnitsInput.style.cursor = ''; mUnitsLabel.textContent = 'Share to Buy'; } else { mUnitsInput.setAttribute('readonly', true); mUnitsLabel.textContent = 'Share to Sell — Lot 1 (fixed)'; } const bpWrap = document.getElementById('mBuyPriceWrap'); const bpInp = document.getElementById('mBuyPrice'); if (isBuy) { bpWrap.style.display = 'block'; bpInp.value = p.toFixed(2); } else bpWrap.style.display = 'none'; let rows = `<div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div><div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div><div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div><div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div><div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`; if (isBuy) { rows += `<div class="mr"><span class="mk">This will be</span><span class="mv profit">Lot ${nextLot}</span></div>`; } else { const sorted = getSortedHoldings(k); const lot1 = sorted[0]; if (lot1) { const lotBp = lot1.buyPrice || lot1.price; const lotPnl = (p - lotBp) * lot1.units; const lotPct = ((p - lotBp) / lotBp * 100).toFixed(2); const isProfit = lotPnl >= 0; rows += `<div class="mr-divider"></div><div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div><div class="mr"><span class="mk">Lot 1 Share</span><span class="mv">${lot1.units} Share</span></div><div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit ? '+' : ''}${lotPct}%)</span></div>`; } rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} Share (all lots)</span></div>`; if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`; } document.getElementById('mRows').innerHTML = rows; const cb = document.getElementById('mCfm'); cb.textContent = isBuy ? `✅ Confirm BUY — Lot ${nextLot}` : '✅ Confirm SELL — Lot 1'; cb.className = isBuy ? 'mcfb' : 'mcfs'; cb.disabled = (!isBuy && tu === 0); cb.style.opacity = (!isBuy && tu === 0) ? '0.35' : '1'; if (!isBuy && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!'; document.getElementById('overlay').classList.add('show'); }
+function openModal(k, type, auto = false) { 
+  const p = st.price[k]; if (!p) { showToast('Price not loaded!'); return; } 
+  const kBuy = cfg[k]?.buy || 2;
+  const kSell = cfg[k]?.sell || 3;
+  const ref = getLot1Price(k) || p; 
+  const bt = ref * (1 - kBuy / 100); 
+  const sv = ref * (1 + kSell / 100); 
+  const hs = st.hold[k]; 
+  const tu = hs.reduce((s, h) => s + h.units, 0); 
+  const tc = hs.reduce((s, h) => s + (h.buyPrice || h.price) * h.units, 0); 
+  const avg = tu > 0 ? tc / tu : 0; 
+  const isBuy = type === 'buy'; 
+  const buyU = calcBuyUnits(k); 
+  const sellU = getLot1Units(k); 
+  const un = isBuy ? buyU : sellU; 
+  const nextLot = getSortedHoldings(k).length + 1; 
+  const tgt = isBuy ? bt : sv; 
+  const est = (p * un).toFixed(2); 
+  st.pend = { k, type }; 
+  document.getElementById('mBox').className = 'modal ' + ETF[k].mc; 
+  document.getElementById('mIco').textContent = ETF[k].icon; 
+  document.getElementById('mTit').textContent = isBuy ? `Confirm BUY — Lot ${nextLot}` : 'Confirm SELL — Lot 1'; 
+  document.getElementById('mTit').className = isBuy ? 'bh' : 'sh'; 
+  document.getElementById('mSub').textContent = auto ? ETF[k].name + ' — Grid signal!' : ETF[k].name + ' — Manual trade'; 
+  const mUnitsInput = document.getElementById('mUnits'); 
+  const mUnitsLabel = document.getElementById('mUnitsLabel'); 
+  mUnitsInput.value = un; 
+  if (isBuy) { 
+    mUnitsInput.removeAttribute('readonly'); 
+    mUnitsInput.style.cursor = ''; 
+    mUnitsLabel.textContent = 'Share to Buy'; 
+  } else { 
+    mUnitsInput.setAttribute('readonly', true); 
+    mUnitsLabel.textContent = 'Share to Sell — Lot 1 (fixed)'; 
+  } 
+  const bpWrap = document.getElementById('mBuyPriceWrap'); 
+  const bpInp = document.getElementById('mBuyPrice'); 
+  if (isBuy) { 
+    bpWrap.style.display = 'block'; 
+    bpInp.value = p.toFixed(2); 
+  } else bpWrap.style.display = 'none'; 
+  let rows = `<div class="mr"><span class="mk">ETF</span><span class="mv">${ETF[k].name}</span></div><div class="mr"><span class="mk">Live Price</span><span class="mv">₹ ${p.toFixed(2)}</span></div><div class="mr"><span class="mk">Ref Price (Lot 1)</span><span class="mv">₹ ${ref.toFixed(2)}</span></div><div class="mr"><span class="mk">Target</span><span class="mv">₹ ${tgt.toFixed(2)}</span></div><div class="mr"><span class="mk">Est. Amount</span><span class="mv">₹ ${Number(est).toLocaleString('en-IN')}</span></div>`; 
+  if (isBuy) { 
+    rows += `<div class="mr"><span class="mk">This will be</span><span class="mv profit">Lot ${nextLot}</span></div>`; 
+  } else { 
+    const sorted = getSortedHoldings(k); 
+    const lot1 = sorted[0]; 
+    if (lot1) { 
+      const lotBp = lot1.buyPrice || lot1.price; 
+      const lotPnl = (p - lotBp) * lot1.units; 
+      const lotPct = ((p - lotBp) / lotBp * 100).toFixed(2); 
+      const isProfit = lotPnl >= 0; 
+      rows += `<div class="mr-divider"></div><div class="mr"><span class="mk">Lot 1 Buy Price</span><span class="mv">₹ ${lotBp.toFixed(2)}</span></div><div class="mr"><span class="mk">Lot 1 Share</span><span class="mv">${lot1.units} Share</span></div><div class="mr"><span class="mk">This Trade P&L</span><span class="mv ${isProfit ? 'profit' : 'loss'}">${isProfit ? '+' : '-'}₹ ${Math.abs(lotPnl).toFixed(2)} (${isProfit ? '+' : ''}${lotPct}%)</span></div>`; 
+    } 
+    rows += `<div class="mr"><span class="mk">Total Holdings</span><span class="mv">${tu} Share (all lots)</span></div>`; 
+    if (avg > 0) rows += `<div class="mr"><span class="mk">Overall Avg Buy</span><span class="mv">₹ ${avg.toFixed(2)}</span></div>`; 
+  } 
+  document.getElementById('mRows').innerHTML = rows; 
+  const cb = document.getElementById('mCfm'); 
+  cb.textContent = isBuy ? `✅ Confirm BUY — Lot ${nextLot}` : '✅ Confirm SELL — Lot 1'; 
+  cb.className = isBuy ? 'mcfb' : 'mcfs'; 
+  cb.disabled = (!isBuy && tu === 0); 
+  cb.style.opacity = (!isBuy && tu === 0) ? '0.35' : '1'; 
+  if (!isBuy && tu === 0) document.getElementById('mSub').textContent = '⚠️ No holdings to sell!'; 
+  document.getElementById('overlay').classList.add('show'); 
+}
 function closeModal() { document.getElementById('overlay').classList.remove('show'); st.pend = null; }
-function confirmTrade() { const { k, type } = st.pend; const liveP = st.price[k]; const time = currentTimeStr(); const date = todayDateStr(); if (type === 'buy') { const bpRaw = parseFloat(document.getElementById('mBuyPrice').value); const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP; const units = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k); st.hold[k].push({ price: buyPrice, buyPrice, units, time, date }); st.alerted[k].buy = false; st.alerted[k].sell = false; addLog({ type: 'buy', k, price: buyPrice, units, time }); showToast('✅ BOUGHT ' + units + ' Share ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2)); } else { const sorted = getSortedHoldings(k); if (!sorted.length) { showToast('No holdings!'); closeModal(); return; } const lot1 = sorted[0]; const lot1Bp = lot1.buyPrice || lot1.price; const sellU = lot1.units; const pnl = (liveP - lot1Bp) * sellU; st.real += pnl; const holdDays = lot1.date ? calcDaysSince(lot1.date) : null; const idx = st.hold[k].findIndex(h => (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time); if (idx !== -1) st.hold[k].splice(idx, 1); st.alerted[k].sell = false; addLog({ type: 'sell', k, price: liveP, units: sellU, pnl, time, holdDays, buyDate: lot1.date, buyPrice: lot1Bp }); showToast('✅ SOLD Lot 1 · ' + sellU + ' Share ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl >= 0 ? '+' : '') + '₹' + pnl.toFixed(2)); } closeModal(); updateCard(k); saveSt(); updateTabTitle(); }
+function confirmTrade() { 
+  const { k, type } = st.pend; 
+  const liveP = st.price[k]; 
+  const time = currentTimeStr(); 
+  const date = todayDateStr(); 
+  if (type === 'buy') { 
+    const bpRaw = parseFloat(document.getElementById('mBuyPrice').value); 
+    const buyPrice = (bpRaw && bpRaw > 0) ? bpRaw : liveP; 
+    const units = parseInt(document.getElementById('mUnits').value) || calcBuyUnits(k); 
+    st.hold[k].push({ price: buyPrice, buyPrice, units, time, date }); 
+    st.alerted[k].buy = false; 
+    st.alerted[k].sell = false; 
+    addLog({ type: 'buy', k, price: buyPrice, units, time }); 
+    showToast('✅ BOUGHT ' + units + ' Share ' + ETF[k].name + ' @ ₹' + buyPrice.toFixed(2)); 
+  } else { 
+    const sorted = getSortedHoldings(k); 
+    if (!sorted.length) { showToast('No holdings!'); closeModal(); return; } 
+    const lot1 = sorted[0]; 
+    const lot1Bp = lot1.buyPrice || lot1.price; 
+    const sellU = lot1.units; 
+    const pnl = (liveP - lot1Bp) * sellU; 
+    st.real += pnl; 
+    const holdDays = lot1.date ? calcDaysSince(lot1.date) : null; 
+    const idx = st.hold[k].findIndex(h => (h.buyPrice || h.price) === lot1Bp && h.time === lot1.time); 
+    if (idx !== -1) st.hold[k].splice(idx, 1); 
+    st.alerted[k].sell = false; 
+    addLog({ type: 'sell', k, price: liveP, units: sellU, pnl, time, holdDays, buyDate: lot1.date, buyPrice: lot1Bp }); 
+    showToast('✅ SOLD Lot 1 · ' + sellU + ' Share ' + ETF[k].name + ' @ ₹' + liveP.toFixed(2) + ' | P&L: ' + (pnl >= 0 ? '+' : '') + '₹' + pnl.toFixed(2)); 
+  } 
+  closeModal(); 
+  updateCard(k); 
+  saveSt(); 
+  updateTabTitle(); 
+}
 function addLog(e) { st.log.unshift(e); renderLog(); }
 function renderLog() { const el = document.getElementById('logBar'); if (!st.log.length) { el.innerHTML = '<span class="log-empty-txt">Trades will appear here…</span>'; return; } el.innerHTML = st.log.slice(0, 25).map(l => `<div class="lchip ${l.type}">${ETF[l.k].icon} ${l.type.toUpperCase()} ${l.units} Share @ ₹${l.price.toFixed(2)} ${l.pnl !== undefined ? (l.pnl >= 0 ? '+' : '') + '₹' + l.pnl.toFixed(2) : ''} · ${l.time}</div>`).join(''); }
 
 function buildDataObj() {
   return {
     hold: st.hold, log: st.log, real: st.real, alerted: st.alerted,
-    cfg: { buy: cfg.buy, sell: cfg.sell },
+    cfg: {
+      G: { buy: cfg.G.buy, sell: cfg.G.sell },
+      S: { buy: cfg.S.buy, sell: cfg.S.sell }
+    },
     apiEnabled: apiEnabled,
     cap: {
       parts: document.getElementById('cp-parts').value,
@@ -2532,14 +2724,46 @@ function loadSt() {
     if (data.log) st.log = data.log;
     if (data.real !== undefined) st.real = data.real;
     if (data.alerted) st.alerted = data.alerted;
-    if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
+    
+    // Load independent or legacy configs
+    if (data.cfg) {
+      if (data.cfg.G) {
+        cfg.G.buy = data.cfg.G.buy || 2;
+        cfg.G.sell = data.cfg.G.sell || 3;
+      } else if (data.cfg.buy !== undefined) {
+        cfg.G.buy = data.cfg.buy;
+        cfg.G.sell = data.cfg.sell;
+      }
+      if (data.cfg.S) {
+        cfg.S.buy = data.cfg.S.buy || 2;
+        cfg.S.sell = data.cfg.S.sell || 3;
+      } else if (data.cfg.buy !== undefined) {
+        cfg.S.buy = data.cfg.buy;
+        cfg.S.sell = data.cfg.sell;
+      }
+      if (document.getElementById('c-buy-g')) document.getElementById('c-buy-g').value = cfg.G.buy;
+      if (document.getElementById('c-sell-g')) document.getElementById('c-sell-g').value = cfg.G.sell;
+      if (document.getElementById('c-buy-s')) document.getElementById('c-buy-s').value = cfg.S.buy;
+      if (document.getElementById('c-sell-s')) document.getElementById('c-sell-s').value = cfg.S.sell;
+    }
+    
     if (data.apiEnabled !== undefined) {
       apiEnabled = data.apiEnabled;
       localStorage.setItem('apiEnabled', String(apiEnabled));
       applyApiState();
     }
-    if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
-    if (data.manual) { manualStart = data.manual.start || { amount: null, date: null }; manualSnapshots = data.manual.snapshots || []; manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); updateSummaryDisplay(); updateCapStartDisplay(); }
+    if (data.cap) { 
+      if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; 
+      if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; 
+      if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; 
+    }
+    if (data.manual) { 
+      manualStart = data.manual.start || { amount: null, date: null }; 
+      manualSnapshots = data.manual.snapshots || []; 
+      manualSnapshots.sort((a, b) => new Date(b.date) - new Date(a.date)); 
+      updateSummaryDisplay(); 
+      updateCapStartDisplay(); 
+    }
     renderLog();
   } catch (e) { console.warn('load failed:', e); }
 }
@@ -2716,8 +2940,33 @@ function applyData(data) {
   if (data.log) st.log = data.log;
   if (data.real !== undefined) st.real = data.real;
   if (data.alerted) st.alerted = data.alerted;
-  if (data.cfg) { cfg.buy = data.cfg.buy || 2; cfg.sell = data.cfg.sell || 3; document.getElementById('c-buy').value = cfg.buy; document.getElementById('c-sell').value = cfg.sell; }
-  if (data.cap) { if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; }
+  
+  if (data.cfg) {
+    if (data.cfg.G) {
+      cfg.G.buy = data.cfg.G.buy || 2;
+      cfg.G.sell = data.cfg.G.sell || 3;
+    } else if (data.cfg.buy !== undefined) {
+      cfg.G.buy = data.cfg.buy;
+      cfg.G.sell = data.cfg.sell;
+    }
+    if (data.cfg.S) {
+      cfg.S.buy = data.cfg.S.buy || 2;
+      cfg.S.sell = data.cfg.S.sell || 3;
+    } else if (data.cfg.buy !== undefined) {
+      cfg.S.buy = data.cfg.buy;
+      cfg.S.sell = data.cfg.sell;
+    }
+    if (document.getElementById('c-buy-g')) document.getElementById('c-buy-g').value = cfg.G.buy;
+    if (document.getElementById('c-sell-g')) document.getElementById('c-sell-g').value = cfg.G.sell;
+    if (document.getElementById('c-buy-s')) document.getElementById('c-buy-s').value = cfg.S.buy;
+    if (document.getElementById('c-sell-s')) document.getElementById('c-sell-s').value = cfg.S.sell;
+  }
+  
+  if (data.cap) { 
+    if (data.cap.parts) document.getElementById('cp-parts').value = data.cap.parts; 
+    if (data.cap.gord) document.getElementById('cp-gord').value = data.cap.gord; 
+    if (data.cap.sord) document.getElementById('cp-sord').value = data.cap.sord; 
+  }
   if (data.gsheet_url !== undefined) {
     st.gSheetUrl = data.gsheet_url;
     localStorage.setItem('gsheet_url', data.gsheet_url);
@@ -2732,7 +2981,6 @@ function applyData(data) {
 }
 function setSyncStatus(state, txt) { const dot = document.getElementById('syncDot'), stxt = document.getElementById('syncTxt'); if (!dot) return; dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'offline' ? ' offline' : ''); stxt.textContent = txt; }
 
-// Attach functions to window for HTML onclick handlers
 window.toggleHoldings = toggleHoldings;
 window.toggleShowAllLots = toggleShowAllLots;
 window.togglePsSection = togglePsSection;
@@ -2756,7 +3004,6 @@ window.calcCapital = calcCapital;
 window.onStartCapitalChange = onStartCapitalChange;
 window.applySettings = applySettings;
 
-// ======================== ANALYTICS ========================
 let currentAnalyticsTab = 'chart';
 
 function openAnalytics() {
@@ -2781,7 +3028,6 @@ window.openAnalytics = openAnalytics;
 window.closeAnalytics = closeAnalytics;
 window.setAnalyticsTab = setAnalyticsTab;
 
-// --- P&L CHART ---
 function renderChartTab() {
   const snaps = [...manualSnapshots].sort((a,b) => a.date.localeCompare(b.date));
   if (snaps.length < 2) return `<div class="an-no-data"><span>📈</span>Kam se kam 2 portfolio snapshots chahiye.<br>Portfolio section mein "Add Today's Value" karo.</div>`;
@@ -2838,7 +3084,6 @@ function renderChartTab() {
     </div>`;
 }
 
-// --- REALIZED P&L TAB ---
 function renderRealizedTab() {
   const sells = st.log.filter(l => l.type === 'sell' && l.pnl !== undefined);
   if (!sells.length) return `<div class="an-no-data"><span>💰</span>Koi sold trade nahi hai abhi.<br>SELL karo phir yahan history dikhegi.</div>`;
@@ -2873,27 +3118,24 @@ function renderRealizedTab() {
     ${rows}`;
 }
 
-// --- TAX CALCULATOR TAB ---
 function renderTaxTab() {
   const sells = st.log.filter(l => l.type === 'sell' && l.pnl !== undefined);
   if (!sells.length) return `<div class="an-no-data"><span>🏷️</span>Koi sold trade nahi hai.<br>Tax tab tabhi kaam karega jab koi lot sell karo.</div>`;
-  // Group by STCG (< 365 days) and LTCG (>= 365 days)
   const stcgSells = sells.filter(l => l.holdDays === undefined || l.holdDays === null || l.holdDays < 365);
   const ltcgSells = sells.filter(l => l.holdDays !== undefined && l.holdDays !== null && l.holdDays >= 365);
   
   const stcgPnl = stcgSells.reduce((s,l)=>s+(l.pnl||0), 0);
   const stcgProfit = stcgSells.filter(l=>l.pnl>0).reduce((s,l)=>s+l.pnl,0);
   const stcgLoss = stcgSells.filter(l=>l.pnl<0).reduce((s,l)=>s+l.pnl,0);
-  const STCG_RATE = 20; // 20% flat post July 2024 budget
+  const STCG_RATE = 20;
   const taxPayableStcg = stcgPnl > 0 ? stcgPnl * STCG_RATE / 100 : 0;
 
   const ltcgPnl = ltcgSells.reduce((s,l)=>s+(l.pnl||0), 0);
   const ltcgProfit = ltcgSells.filter(l=>l.pnl>0).reduce((s,l)=>s+l.pnl,0);
   const ltcgLoss = ltcgSells.filter(l=>l.pnl<0).reduce((s,l)=>s+l.pnl,0);
-  const LTCG_RATE = 12.5; // 12.5%
+  const LTCG_RATE = 12.5;
   const taxPayableLtcg = ltcgPnl > 125000 ? (ltcgPnl - 125000) * LTCG_RATE / 100 : 0;
 
-  // Open holdings unrealized LTCG estimate
   let openHoldTotal = 0, openHoldInvested = 0;
   for (const k of ['G','S']) {
     const p = st.price[k] || 0;
@@ -2932,9 +3174,7 @@ function renderTaxTab() {
       Gold/Silver ETF = Equity ETF tax slabs applicable (post Jul 2024 budget)
     </div>`;
 }
-// ======================== END ANALYTICS ========================
 
-// Start Firebase initialization when module loads
 initFirebase();
 </script>
 </body>
